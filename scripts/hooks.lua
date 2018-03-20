@@ -48,12 +48,12 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				if diff < 0 then
 					-- took damage
 					for i, hook in ipairs(modApiExt.pawnDamagedHooks) do
-						hook(mission,id,-diff)
+						hook(mission, id, -diff)
 					end
 				elseif diff > 0 then
 					-- healed
 					for i, hook in ipairs(modApiExt.pawnHealedHooks) do
-						hook(mission,id,diff)
+						hook(mission, id, diff)
 					end
 				end
 
@@ -108,60 +108,44 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 	end
 end
 
---[[
-	Scans the game board and checks every tile to see if there's a building
-	on that tile. If there is, store data about that tile/building in a global
-	table, and create an invisible dummy pawn on top of the building to try to
-	track damage.
-]]--
-function modApiExtHooks:getBuildings()
-	local boardSize = Board:GetSize()
-	local buildings = {}
+function modApiExtHooks:trackAndUpdateBuildings(mission)
+	if Board and not self.TrackedBuildings then
+		self.TrackedBuildings = {}
+	end
 
-	for x = 0, boardSize.x do
-		for y = 0, boardSize.y do
-			if Board:IsBuilding(x, y) then
-				local b = {
-					loc = Point(x, y),
+	if Board and self.TrackedBuildings then
+		local tbl = extract_table(Board:GetBuildings())
+
+		local w = Board:GetSize().x
+		for i, point in pairs(tbl) do
+			local idx = point.y * w + point.x
+			if not self.TrackedBuildings[idx] then
+				-- Building not tracked yet
+				self.TrackedBuildings[idx] = {
+					loc = point,
 					destroyed = false,
 					--maxHealth = -1, -- NO WAY TO FIND OUT
 					--curHealth = -1, -- NO WAY TO FIND OUT
 					--dummy = nil,
 					--lastHealth = -1
 				}
-
-				table.insert(buildings, b)
+				--[[
+				local id = Board:AddPawn("ModApi_Ext_Dummy", b.loc)
+				b.dummy = Board:GetPawn(id)
+				b.lastHealth = b.dummy:GetHealth()
+				b.dummy:SetInvisible(true)
+				]]--
+				LOG("  Tracking building: " .. p2s(point))
+			else
+				-- Already tracked, update its data...
+				-- ...if there were any
 			end
 		end
-	end
 
-	return buildings
-end
-
-function modApiExtHooks:trackBuildings(mission)
-	if Board and not self.TrackedBuildings then
-		LOG("ModApiExt: Finding buildings on the game board...")
-		self.TrackedBuildings = self:getBuildings()
-		for i, b in ipairs(self.TrackedBuildings) do
-			--[[
-			local id = Board:AddPawn("ModApi_Ext_Dummy", b.loc)
-			b.dummy = Board:GetPawn(id)
-			b.lastHealth = b.dummy:GetHealth()
-			b.dummy:SetInvisible(true)
-			]]--
-			LOG("  Tracking building: " .. p2s(b.loc))
-		end
-	end
-end
-
-function modApiExtHooks:updateBuildings(mission)
-	self:trackBuildings(mission)
-
-	if Board and self.TrackedBuildings then
-		for i, b in pairs(self.TrackedBuildings) do
-			if not b.destroyed then
+		for idx, bld in pairs(self.TrackedBuildings) do
+			if not bld.destroyed then
 				--[[
-				local pawnId = b.dummy:GetId()
+				local pawnId = bld.dummy:GetId()
 				local pawn = Board:GetPawn(pawnId)
 
 				-- Putting shield on a building with an invisible dummy
@@ -175,28 +159,29 @@ function modApiExtHooks:updateBuildings(mission)
 				-- detect when the building's shield goes down...
 				pawn:SetInvisible(not pawn:IsShield())
 
-				local diff = pawn:GetHealth() - b.lastHealth
+				local diff = pawn:GetHealth() - bld.lastHealth
 				if diff < 0 then
-					b.lastHealth = pawn:GetHealth()
+					bld.lastHealth = pawn:GetHealth()
 
 					-- Grid resist *groan*					
-					if Board:IsDamaged(b.loc) then
+					if Board:IsDamaged(bld.loc) then
 						for i, hook in ipairs(modApiExt.buildingDamagedHooks) do
-							hook(mission,b,-diff)
+							hook(mission, bld, -diff)
 						end
 					end
 				end
 				]]--
 
-				if not Board:IsBuilding(b.loc) then
-					b.destroyed = true
-					--b.dummy:Kill(true)
+				if not Board:IsBuilding(bld.loc) then
+					bld.destroyed = true
+					--bld.dummy:Kill(true)
+					--Board:RemovePawn(bld.dummy)
 
 					for i, hook in ipairs(modApiExt.buildingDestroyedHooks) do
-						hook(mission,b)
+						hook(mission, bld)
 					end
 
-					b.dummy = nil
+					bld.dummy = nil
 				end
 			end
 		end

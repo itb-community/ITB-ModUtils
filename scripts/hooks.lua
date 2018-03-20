@@ -196,19 +196,19 @@ end
 
 ---------------------------------------------
 
-function modApiExtHooks:preMissionStart(mission)
+modApiExtHooks.preMissionStart = function(mission)
 end
 
-function modApiExtHooks:missionStart(mission)
+modApiExtHooks.missionStart = function(mission)
 	modApiExtHooks:resetTrackingTables(mission)
 end
 
-function modApiExtHooks:missionEnd(mission, ret)
+modApiExtHooks.missionEnd = function(mission, ret)
 	modApiExtHooks:resetTrackingTables(mission)
 end
 
-function modApiExtHooks:missionUpdate(mission)
-	modApiExtHooks:updateBuildings(mission)
+modApiExtHooks.missionUpdate = function(mission)
+	modApiExtHooks:trackAndUpdateBuildings(mission)
 	modApiExtHooks:trackAndUpdatePawns(mission)
 end
 

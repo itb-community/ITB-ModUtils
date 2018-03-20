@@ -15,7 +15,11 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 		-- If any of the tracked pawns were removed from the board, reinsert
 		-- them into the table, to process them correctly.
 		for id, pd in pairs(self.TrackedPawns) do
-			if not list_contains(tbl, id) then
+			-- Sometimes pawns are removed via Board:RemovePawn(), in which
+			-- case we have no way to obtain their data anymore. Don't attempt
+			-- to reinsert those.
+			local pawn = Board:GetPawn(id)
+			if not list_contains(tbl, id) and pawn then
 				onBoard[id] = false
 				table.insert(tbl, id)
 			end

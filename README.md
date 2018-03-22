@@ -5,7 +5,18 @@ This is a collection of various Lua modules useful for creators of mods for the 
 
 ## Usage
 
-Download the mod from the [Releases page](https://github.com/kartoFlane/ITB-ModUtils/releases/latest), and drop it into `mods` folder in Into the Breach's directory. Then in your mod's `init.lua` file, add `"ModUtils"` to the `requirements` table.
+Download the mod from the [Releases page](https://github.com/kartoFlane/ITB-ModUtils/releases/latest), and drop it into `mods` folder in Into the Breach's directory. Then in your mod's `init.lua` file, add `"ModUtils"` to the `requirements` table, like so:
+
+```lua
+return {
+	id = "MyModId",
+	name = "My Mod",
+	version = "1.0.0",
+	requirements = { "ModUtils" }, -- <-- Here
+	init = init,
+	load = load,
+}
+```
 
 
 ## Features

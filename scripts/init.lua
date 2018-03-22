@@ -12,6 +12,7 @@ local function load(self,options,version)
 	
 	require(self.scriptPath.."global")
 	require(self.scriptPath.."vectors")
+	require(self.scriptPath.."strings")
 	require(self.scriptPath.."board")
 	require(self.scriptPath.."pawns")
 	

@@ -1,23 +1,17 @@
 local function init(self)
-end
-
-local function load(self,options,version)
-	if modApiExt then
-		modApiExt:clear()
-	else
-		-- could replace with dofile() instead, since we
-		-- actually WANT to overwrite the old table?
-		modApiExt = require(self.scriptPath.."modApiExt")
-	end
+	modApiExt = require(self.scriptPath.."modApiExt")
 	
 	require(self.scriptPath.."global")
 	require(self.scriptPath.."vectors")
 	require(self.scriptPath.."strings")
 	require(self.scriptPath.."board")
+	require(self.scriptPath.."weapons")
 	require(self.scriptPath.."pawns")
-	
+end
+
+local function load(self,options,version)
 	local hooks = require(self.scriptPath.."hooks")
-	modApi:addPreMissionEndHook(hooks.preMissionStart)
+	modApi:addPreMissionStartHook(hooks.preMissionStart)
 	modApi:addMissionStartHook(hooks.missionStart)
 	modApi:addMissionEndHook(hooks.missionEnd)
 	modApi:addMissionUpdateHook(hooks.missionUpdate)
@@ -25,13 +19,13 @@ local function load(self,options,version)
 	if modApi.removeMissionUpdateHook == nil then
 		function modApi:removeMissionUpdateHook(fn)
 			assert(type(fn) == "function")
-			remove_element(fn,modApi.missionUpdateHooks)
+			remove_element(fn, modApi.missionUpdateHooks)
 		end
 	end
 end
 
 return {
-	id = "ModUtils",
+	id = "kf_ModUtils",
 	name = "Modding Utilities",
 	version = "1.0.0",
 	requirements = {},

@@ -18,13 +18,15 @@ AddPawn("ModUtils_Dummy")
 
 --------------------------------------------------------------------------
 
+if not modApiExt.pawn then modApiExt.pawn = {} end
+
 --[[
 	Sets the pawn on fire if true, or removes the Fire status from it if false.
 ]]--
-function SetFire(pawn, fire)
+function modApiExt.pawn:setFire(pawn, fire)
 	local d = SpaceDamage()
 	if fire then d.iFire = EFFECT_CREATE else d.iFire = EFFECT_REMOVE end
-	DamagePawn(pawn, d)
+	self:damagePawn(pawn, d)
 end
 
 --[[
@@ -39,13 +41,13 @@ end
 	spaceDamage
 		SpaceDamage instance to deal to the pawn.
 ]]--
-function DamagePawn(pawn, spaceDamage)
-	local wasOnBoard = IsPawnOnBoard(pawn)
+function modApiExt.pawn:damagePawn(pawn, spaceDamage)
+	local wasOnBoard = modApiExt.board:isPawnOnBoard(pawn)
 
 	local pawnSpace = pawn:GetSpace()
-	local safeSpace = GetUnoccupiedRestorableSpace()
+	local safeSpace = modApiExt.board:getUnoccupiedRestorableSpace()
 
-	local terrainData = GetRestorableTerrainData(safeSpace)
+	local terrainData = modApiExt.board:getRestorableTerrainData(safeSpace)
 
 	if not wasOnBoard then
 		Board:AddPawn(pawn, safeSpace)
@@ -56,7 +58,7 @@ function DamagePawn(pawn, spaceDamage)
 	Board:DamageSpace(spaceDamage)
 
 	pawn:SetSpace(pawnSpace)
-	RestoreTerrain(safeSpace, terrainData)
+	modApiExt.board:RestoreTerrain(safeSpace, terrainData)
 
 	if not wasOnBoard then Board:RemovePawn(pawn) end
 end
@@ -64,13 +66,15 @@ end
 --[[
 	Attempts to copy state from source pawn to the target pawn.
 ]]--
-function CopyPawnState(sourcePawn, targetPawn)
-	local spaceDamage = SpaceDamage()
-	spaceDamage.iDamage = targetPawn:GetHealth() - sourcePawn:GetHealth()
+function modApiExt.pawn:copyPawnState(sourcePawn, targetPawn)
+	if sourcePawn:GetHealth() < targetPawn:GetHealth() then
+		local spaceDamage = SpaceDamage()
+		spaceDamage.iDamage = targetPawn:GetHealth() - sourcePawn:GetHealth()
 
-	DamagePawn(targetPawn, spaceDamage)
+		self:damagePawn(targetPawn, spaceDamage)
+	end
 
-	if sourcePawn:IsFire() then SetFire(targetPawn, true) end
+	if sourcePawn:IsFire() then self:setFire(targetPawn, true) end
 	if sourcePawn:IsFrozen() then targetPawn:SetFrozen(true) end
 	if sourcePawn:IsAcid() then targetPawn:SetAcid(true) end
 	if sourcePawn:IsShield() then targetPawn:SetShield(true) end

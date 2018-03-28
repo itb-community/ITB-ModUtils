@@ -1,6 +1,9 @@
 
+--[[
+	Shorthand for point:GetLuaString(), cause I'm lazy
+]]--
 function p2s(point)
-	return "[" .. point.x .. ", " .. point.y .. "]"
+	return point:GetLuaString()
 end
 
 --[[
@@ -17,7 +20,7 @@ end
 --[[
 	Executes the function on the game's next update step.
 ]]--
-function RunLater(f)
+function modApiExt.runLater(f)
 	local hook = nil
 	hook = function(mission)
 		f()

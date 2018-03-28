@@ -1,3 +1,4 @@
+if not modApiExt.board then modApiExt.board = {} end
 
 --[[
 	Returns the first point on the board that matches the specified predicate.
@@ -6,7 +7,7 @@
 	predicate
 		A function taking a Point as argument, and returning a boolean value.
 ]]--
-function GetSpace(predicate)
+function modApiExt.board:getSpace(predicate)
 	assert(type(predicate) == "function")
 
 	local size = Board:GetSize()
@@ -25,15 +26,15 @@ end
 --[[
 	Returns the first point on the board that is not blocked.
 ]]--
-function GetUnoccupiedSpace()
-	return GetSpace(function(point)
+function modApiExt.board:getUnoccupiedSpace()
+	return self:getSpace(function(point)
 		return not Board:IsBlocked(point, PATH_GROUND)
 	end)
 end
 
-function GetUnoccupiedRestorableSpace()
-	return GetSpace(function(point)
-		return not Board:IsBlocked(point, PATH_GROUND) and IsRestorableTerrain(point)
+function modApiExt.board:getUnoccupiedRestorableSpace()
+	return self:getSpace(function(point)
+		return not Board:IsBlocked(point, PATH_GROUND) and self:isRestorableTerrain(point)
 	end)
 end
 
@@ -41,7 +42,7 @@ end
 	Returns true if the point is terrain that can be restored to its previous
 	state without any issues.
 ]]--
-function IsRestorableTerrain(point)
+function modApiExt.board:isRestorableTerrain(point)
 	local terrain = Board:GetTerrain(point)
 
 	-- Mountains and ice can be broken
@@ -50,7 +51,7 @@ function IsRestorableTerrain(point)
 		and terrain ~= TERRAIN_BUILDING
 end
 
-function GetRestorableTerrainData(point)
+function modApiExt.board:getRestorableTerrainData(point)
 	local data = {}
 	data.type = Board:GetTerrain(point)
 	data.smoke = Board:IsSmoke(point)
@@ -59,7 +60,7 @@ function GetRestorableTerrainData(point)
 	return data
 end
 
-function RestoreTerrain(point, terrainData)
+function modApiExt.board:restoreTerrain(point, terrainData)
 	Board:ClearSpace(point)
 	Board:SetTerrain(point, terrainData.type)
 	-- No idea what the second boolean argument does here
@@ -67,6 +68,6 @@ function RestoreTerrain(point, terrainData)
 	Board:SetAcid(point,terrainData.acid)
 end
 
-function IsPawnOnBoard(pawn)
+function modApiExt.board:isPawnOnBoard(pawn)
 	return list_contains(extract_table(Board:GetPawns(TEAM_ANY)), pawn:GetId())
 end

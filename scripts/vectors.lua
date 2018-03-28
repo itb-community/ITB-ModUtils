@@ -1,30 +1,32 @@
-VEC_DOWN_RIGHT	= Point( 1,  1)
-VEC_DOWN_LEFT	= Point(-1,  1)
-VEC_UP_RIGHT	= Point( 1, -1)
-VEC_UP_LEFT		= Point(-1, -1)
+if not modApiExt.vector then modApiExt.vector = {} end
+
+modApiExt.vector.VEC_DOWN_RIGHT = Point( 1,  1)
+modApiExt.vector.VEC_DOWN_LEFT  = Point(-1,  1)
+modApiExt.vector.VEC_UP_RIGHT   = Point( 1, -1)
+modApiExt.vector.VEC_UP_LEFT    = Point(-1, -1)
 
 -- shorthands
-VEC_DR = VEC_DOWN_RIGHT
-VEC_DL = VEC_DOWN_LEFT
-VEC_UR = VEC_UP_RIGHT
-VEC_UL = VEC_UP_LEFT
+modApiExt.vector.VEC_DR = modApiExt.vector.VEC_DOWN_RIGHT
+modApiExt.vector.VEC_DL = modApiExt.vector.VEC_DOWN_LEFT
+modApiExt.vector.VEC_UR = modApiExt.vector.VEC_UP_RIGHT
+modApiExt.vector.VEC_UL = modApiExt.vector.VEC_UP_LEFT
 
-DIR_VECTORS_8 =
+modApiExt.vector.DIR_VECTORS_8 =
 {
-	VEC_RIGHT,
-	VEC_DOWN,
-	VEC_LEFT,
-	VEC_UP,
+	modApiExt.vector.VEC_RIGHT,
+	modApiExt.vector.VEC_DOWN,
+	modApiExt.vector.VEC_LEFT,
+	modApiExt.vector.VEC_UP,
 	
-	VEC_DOWN_RIGHT,
-	VEC_DOWN_LEFT,
-	VEC_UP_RIGHT,
-	VEC_UP_LEFT
+	modApiExt.vector.VEC_DOWN_RIGHT,
+	modApiExt.vector.VEC_DOWN_LEFT,
+	modApiExt.vector.VEC_UP_RIGHT,
+	modApiExt.vector.VEC_UP_LEFT
 }
 
-AXIS_X		= 0
-AXIS_Y		= 1
-AXIS_ANY	= 2
+modApiExt.vector.AXIS_X   = 0
+modApiExt.vector.AXIS_Y   = 1
+modApiExt.vector.AXIS_ANY = 2
 
 --------------------------------------------------------------------------
 
@@ -35,76 +37,62 @@ function assert_point(o)
 end
 
 --[[
-	Tests whether two points are colinear along the specified axis
+	Tests whether two points form a line colinear to the specified axis
 	(ie. have the same value for that axis' coordinate)
 ]]--
-function IsColinear(refPoint, testPoint, axis)
+function modApiExt.vector:isColinear(refPoint, testPoint, axis)
 	assert_point(refPoint)
 	assert_point(testPoint)
+	axis = axis or self.AXIS_ANY
 
-	if axis == 0 then
+	if axis == self.AXIS_X then
 		return refPoint.x == testPoint.x
-	elseif axis == 1 then
+	elseif axis == self.AXIS_Y then
 		return refPoint.y == testPoint.y
-	elseif axis == 2 then
+	elseif axis == self.AXIS_ANY then
 		return refPoint.x == testPoint.x or refPoint.y == testPoint.y
 	end
 
 	return nil
 end
 
-function Point:IsColinear(testPoint, axis)
-	return IsColinear(self, testPoint, axis)
-end
-
 --[[
 	Returns a vector normal to the one provided in argument.
 	Normal in this context means perpendicular.
 ]]--
-function NormalVector(vec)
+function modApiExt.vector:normal(vec)
 	return Point(vec.y, vec.x)
-end
-
-function Point:NormalVector()
-	return NormalVector(self)
 end
 
 --[[
 	Returns length of the vector.
 ]]--
-function Length(vec)
-	return math.sqrt( vec.x * vec.x + vec.y * vec.y )
-end
-
-function Point:Length()
-	return Length(self)
+function modApiExt.vector:length(vec)
+	return math.sqrt(vec.x * vec.x + vec.y * vec.y)
 end
 
 --[[
 	Returns a unit vector constructed from the vector provided in argument.
 	Unit vector is a vector with length of 1.
 	HOWEVER in ItB, the Point class can only hold integers, and by default
-	round fractional values to nearest integers.
+	rounds fractional values to nearest integers. 0.5 is rounded to 1, -0.5
+	is rounded to -1.
 
 	For fractional values, use UnitVectorF(), which returns a custom table
 	with x and y fields.
 ]]--
-function UnitVectorI(vec)
-	local l = Length(vec)
+function modApiExt.vector:unitVectorI(vec)
+	local l = self.length(vec)
 	if l == 0 then return Point(0, 0) end
 	return Point(vec.x / l, vec.y / l)
-end
-
-function Point:UnitVectorI()
-	return UnitVector(self)
 end
 
 --[[
 	Returns a unit vector constructed from the vector provided in argument.
 	Unit vector is a vector with length of 1.
 ]]--
-function UnitVectorF(vec)
-	local l = Length(vec)
+function modApiExt.vector:unitVectorF(vec)
+	local l = self.length(vec)
 
 	local t = {}
 	if l == 0 then t.x = 0 else t.x = vec.x / l end
@@ -112,43 +100,31 @@ function UnitVectorF(vec)
 	return t
 end
 
-function Point:UnitVectorF()
-	return UnitVectorF(self)
-end
-
 --[[
 	Returns axis represented by this vector.
 
-	Returns nil if Point(0,0) is provided.
-	Returns AXIS_X if this vector has no Y component.
-	Returns AXIS_Y if this vector has no X component.
+	Returns nil if Point(0, 0) is provided.
+	Returns AXIS_X if this vector has Y = 0.
+	Returns AXIS_Y if this vector has X = 0.
 	Returns nil otherwise.
 ]]--
-function ToAxis(vec)
+function modApiExt.vector:toAxis(vec)
 	if vec == Point(0, 0) then return nil end
 
-	if vec.y == 0 and vec:IsColinear(VEC_LEFT, AXIS_X) then
-		return AXIS_X
-	elseif vec.x == 0 and vec:IsColinear(VEC_UP, AXIS_Y) then
-		return AXIS_Y
+	if vec.y == 0 then
+		return self.AXIS_X
+	elseif vec.x == 0 then
+		return self.AXIS_Y
 	end
 
 	return nil
-end
-
-function Point:ToAxis()
-	return ToAxis(self)
 end
 
 --[[
 	Returns index of the direction vector built from the specified 
 	vector in the DIR_VECTORS_8 table
 ]]--
-function GetDirection8(vec)
-	return list_indexof(DIR_VECTORS_8, UnitVectorI(vec))
-end
-
-function Point:GetDirection8()
-	return GetDirection8(self)
+function modApiExt.vector:getDirection8(vec)
+	return list_indexof(self.DIR_VECTORS_8, self:unitVectorI(vec))
 end
 

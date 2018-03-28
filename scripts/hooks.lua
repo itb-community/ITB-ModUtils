@@ -41,6 +41,15 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 			else
 				-- Already tracked, update its data
 				local pd = GAME.trackedPawns[id]
+
+				local p = pawn:GetSpace()
+				if pd.loc ~= p then
+					for i, hook in ipairs(modApiExt.pawnPositionChangedHooks) do
+						hook(mission,id,pd.loc)
+					end
+					pd.loc = p
+				end
+
 				local oldHealth = pd.curHealth
 				pd.curHealth = pawn:GetHealth()
 				local diff = pd.curHealth - oldHealth

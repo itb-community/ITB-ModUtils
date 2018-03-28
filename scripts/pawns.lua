@@ -79,3 +79,34 @@ function modApiExt.pawn:copyPawnState(sourcePawn, targetPawn)
 	if sourcePawn:IsAcid() then targetPawn:SetAcid(true) end
 	if sourcePawn:IsShield() then targetPawn:SetShield(true) end
 end
+
+--[[
+	Replaces the pawn with another one of the specified type.
+
+	targetPawn
+		The Pawn instance to replace.
+	newPawnType
+		Name of the pawn class to create the pawn from.
+]]--
+function modApiExt.pawn:replacePawn(targetPawn, newPawnType)
+	local newPawn = PAWN_FACTORY:CreatePawn(newPawnType)
+
+	newPawn:SetInvisible(true)
+	newPawn:SetActive(targetPawn:IsActive())
+
+	Board:AddPawn(newPawn, targetPawn:GetSpace())
+	self:copyPawnState(targetPawn, newPawn)
+	Board:RemovePawn(targetPawn)
+
+	modApiExt:runLater(function() newPawn:SetInvisible(false) end)
+end
+
+function modApiExt.pawn:isPawnDead(pawn)
+	if pawn:IsPlayer() and pawn:IsMech() then
+		return pawn:GetHealth() == 0 or pawn:IsDead()
+	elseif pawn:GetHealth() == 0 or not modApiExt.board:isPawnOnBoard(pawn) then
+		return true
+	end
+
+	return false
+end

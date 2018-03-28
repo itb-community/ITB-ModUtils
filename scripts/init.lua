@@ -7,6 +7,10 @@ local function init(self)
 	require(self.scriptPath.."board")
 	require(self.scriptPath.."weapons")
 	require(self.scriptPath.."pawns")
+
+	kf_ModUtils_DrawHook = sdl.drawHook(function(screen)
+		modApiExt:updateScheduledHooks()
+	end)
 end
 
 local function load(self,options,version)

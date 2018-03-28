@@ -68,6 +68,11 @@ function modApiExt.board:restoreTerrain(point, terrainData)
 	Board:SetAcid(point,terrainData.acid)
 end
 
+function modApiExt.board:isWaterTerrain(point)
+	local t = Board:GetTerrain(point)
+	return t == TERRAIN_WATER or t == TERRAIN_LAVA or t == TERRAIN_ACID
+end
+
 function modApiExt.board:isPawnOnBoard(pawn)
 	return list_contains(extract_table(Board:GetPawns(TEAM_ANY)), pawn:GetId())
 end

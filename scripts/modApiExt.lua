@@ -1,5 +1,17 @@
 local modApiExt = {}
 
+modApiExt.pawnTrackedHooks = {}
+function modApiExt:addPawnTrackedHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.pawnTrackedHooks,fn)
+end
+
+modApiExt.pawnUntrackedHooks = {}
+function modApiExt:addPawnUntrackedHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.pawnUntrackedHooks,fn)
+end
+
 modApiExt.pawnPositionChangedHooks = {}
 function modApiExt:addPawnPositionChangedHook(fn)
 	assert(type(fn) == "function")

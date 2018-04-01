@@ -43,6 +43,10 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					dead = (pawn:GetHealth() == 0),
 					selected = false
 				}
+
+				for i, hook in ipairs(modApiExt.pawnTrackedHooks) do
+					hook(mission, pawn)
+				end
 			elseif pd then
 				-- Already tracked, update its data
 
@@ -95,23 +99,25 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 			end
 
 			if not pd.dead and pd.curHealth == 0 then
-				-- Dead non-player pawns are removed from the board, so we can just
-				-- remove them from tracking since they're not going to come back
-				-- to life. However, player pawns (mechs) stay on the board when
-				-- dead. Don't remove them from the tracking table, since if we do
-				-- that, they're going to get reinserted.
-
-				-- Treat pawns not registered in the onBoard table as on board.
-				if onBoard[id] or onBoard[id] == nil then
-					pd.dead = true
-				else
-					-- if this pawn doesn't stay on the board when dead (eg. player mechs,
-					-- and maybe some others?), then remove it from tracking table.
-					GAME.trackedPawns[id] = nil
-					modApiExt.pawnUserdata[id] = nil
-				end
-
+				pd.dead = true
 				for i, hook in ipairs(modApiExt.pawnKilledHooks) do
+					hook(mission, pawn)
+				end
+			end
+
+			-- Treat pawns not registered in the onBoard table as on board.
+			local wasOnBoard = onBoard[id] or onBoard[id] == nil
+			if not wasOnBoard then
+				-- Dead non-player pawns are removed from the board, so we can
+				-- just remove them from tracking since they're not going to
+				-- come back to life.
+				-- However, player pawns (mechs) stay on the board when
+				-- dead. Don't remove them from the tracking table, since if we
+				-- do that, they're going to get reinserted.
+				GAME.trackedPawns[id] = nil
+				modApiExt.pawnUserdata[id] = nil
+
+				for i, hook in ipairs(modApiExt.pawnUntrackedHooks) do
 					hook(mission, pawn)
 				end
 			end

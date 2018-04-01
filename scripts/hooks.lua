@@ -38,7 +38,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				-- Create a pawnData table for it
 				GAME.trackedPawns[id] = {
 					loc = pawn:GetSpace(),
-					maxHealth = pawn:GetHealth(),
+					maxHealth = _G[pawn:GetType()].Health,
 					curHealth = pawn:GetHealth(),
 					dead = (pawn:GetHealth() == 0),
 					player = pawn:IsPlayer() and pawn:IsMech(),

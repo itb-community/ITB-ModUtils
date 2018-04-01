@@ -5,14 +5,16 @@ This is a collection of various Lua modules useful for creators of mods for the 
 
 ## Usage
 
-Download the mod from the [Releases page](https://github.com/kartoFlane/ITB-ModUtils/releases/latest), and drop it into `mods` folder in Into the Breach's directory. Then in your mod's `init.lua` file, add `"ModUtils"` to the `requirements` table, like so:
+You can either pick-and-choose parts you want by manually gutting the code I posted, or just include this mod as a dependency in your mod (players will have to download both).
+
+To include as dependency, download the mod from the [Releases page](https://github.com/kartoFlane/ITB-ModUtils/releases/latest), and drop it into `mods` folder in Into the Breach's directory. Then in your mod's `init.lua` file, add `"kf_ModUtils"` to the `requirements` table, like so:
 
 ```lua
 return {
 	id = "MyModId",
 	name = "My Mod",
 	version = "1.0.0",
-	requirements = { "ModUtils" }, -- <-- Here
+	requirements = { "kf_ModUtils" }, -- <-- Here
 	init = init,
 	load = load,
 }
@@ -28,35 +30,36 @@ Default `modApi` object is extended with a new function, `removeMissionUpdateHoo
 At the moment, the library consists of the following modules:
 
 - [Global](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/global.lua) - various assorted functions which didn't fit anywhere else
-- [Vectors](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/vectors.lua) - functions useful for vector/point manipulation
-- [Pawns](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/pawns.lua) - functions useful when manipulating pawns
-- [Board](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/board.lua) - functions useful when dealing with the game board
-- [Strings](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/strings.lua) - some basic string-related operations
-- [ModApiExt](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/modApiExt.lua) - extended modApi with additional hooks
+- [Vectors](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/vectors.lua) - functions useful for vector/point manipulation, accessible via `modApiExt.vector`.
+- [Pawns](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/pawns.lua) - functions useful when manipulating pawns, accessible via `modApiExt.pawn`.
+- [Board](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/board.lua) - functions useful when dealing with the game board, accessible via `modApiExt.board`.
+- [Strings](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/strings.lua) - some basic string-related operations, accessible via `modApiExt.string`.
+- [Weapons](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/weapons.lua) - functions useful for weapons and targeting, accessible via `modApiExt.weapon`.
+- [ModApiExt](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/modApiExt.lua) - extended modApi with additional hooks, accessible via `modApiExt`.
 
 ### Hooks
 
 New hooks are added via a new global variable, `modApiExt`:
 
-* `pawnSelectedHook( mission, pawnId )`
+* `pawnSelectedHook( mission, pawn )`
 
 	Fired when a pawn is selected by the player.
 
-* `pawnDeselectedHook( mission, pawnId )`
+* `pawnDeselectedHook( mission, pawn )`
 
 	Fired when a pawn is deselected by the player.
 	Always fired before pawnSelectedHook
 
-* `pawnDamagedHook( mission, pawnId, damageTaken )`
+* `pawnDamagedHook( mission, pawn, damageTaken )`
 
 	Fired when a pawn's health is reduced (won't fire on shielded
 	or completely blocked damage)
 
-* `pawnHealedHook( mission, pawnId, healingTaken )`
+* `pawnHealedHook( mission, pawn, healingTaken )`
 
 	Fired when a pawn's health is increased.
 
-* `pawnKilledHook( mission, pawnId )`
+* `pawnKilledHook( mission, pawn )`
 
 	Fired when a pawn's health is reduced to 0, or it is removed
 	from the game board.

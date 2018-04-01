@@ -49,7 +49,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				local p = pawn:GetSpace()
 				if pd.loc ~= p then
 					for i, hook in ipairs(modApiExt.pawnPositionChangedHooks) do
-						hook(mission,id,pd.loc)
+						hook(mission, pawn, pd.loc)
 					end
 					pd.loc = p
 				end
@@ -61,12 +61,12 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				if diff < 0 then
 					-- took damage
 					for i, hook in ipairs(modApiExt.pawnDamagedHooks) do
-						hook(mission, id, -diff)
+						hook(mission, pawn, -diff)
 					end
 				elseif diff > 0 then
 					-- healed
 					for i, hook in ipairs(modApiExt.pawnHealedHooks) do
-						hook(mission, id, diff)
+						hook(mission, pawn, diff)
 					end
 				end
 
@@ -74,7 +74,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				if pd.selected and not pawn:IsSelected() then
 					pd.selected = false
 					for i, hook in ipairs(modApiExt.pawnDeselectedHooks) do
-						hook(mission,id)
+						hook(mission, pawn)
 					end
 				end
 			else
@@ -90,7 +90,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 			if pawn and pawn:IsSelected() and not pd.selected then
 				pd.selected = true
 				for i, hook in ipairs(modApiExt.pawnSelectedHooks) do
-					hook(mission,id)
+					hook(mission, pawn)
 				end
 			end
 
@@ -112,7 +112,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				end
 
 				for i, hook in ipairs(modApiExt.pawnKilledHooks) do
-					hook(mission,id)
+					hook(mission, pawn)
 				end
 			end
 		end

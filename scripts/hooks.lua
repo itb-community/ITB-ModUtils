@@ -41,7 +41,6 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					maxHealth = _G[pawn:GetType()].Health,
 					curHealth = pawn:GetHealth(),
 					dead = (pawn:GetHealth() == 0),
-					player = pawn:IsPlayer() and pawn:IsMech(),
 					selected = false
 				}
 			elseif pd then

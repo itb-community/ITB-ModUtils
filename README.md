@@ -49,7 +49,7 @@ List of available hooks:
 
 * `pawnTrackedHook( mission, pawn )`
 
-	Fired when `modApiExt` becomes aware of the pawn and beings tracking it.
+	Fired when `modApiExt` becomes aware of the pawn and beings tracking it. This is usually at the very start of the mission (for pre-existing pawns), or as soon as the pawn is spawned on the board.
 
 * `pawnUntrackedHook( mission, pawn )`
 
@@ -84,8 +84,7 @@ List of available hooks:
 
 * `pawnKilledHook( mission, pawn )`
 
-	Fired when a pawn's health is reduced to 0, or it is removed
-	from the game board.
+	Fired when a pawn's health is reduced to 0.
 
 * `buildingDestroyedHook( mission, buildingData )`
 

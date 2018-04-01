@@ -30,6 +30,18 @@ function modApiExt:addPawnDeselectedHook(fn)
 	table.insert(self.pawnDeselectedHooks,fn)
 end
 
+modApiExt.pawnHighlightedHooks = {}
+function modApiExt:addPawnHighlightedHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.pawnHighlightedHooks,fn)
+end
+
+modApiExt.pawnUnhighlightedHooks = {}
+function modApiExt:addPawnUnhighlightedHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.pawnUnhighlightedHooks,fn)
+end
+
 modApiExt.pawnDamagedHooks = {}
 function modApiExt:addPawnDamagedHook(fn)
 	assert(type(fn) == "function")

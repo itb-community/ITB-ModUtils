@@ -9,6 +9,11 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 
 		local tbl = extract_table(Board:GetPawns(TEAM_ANY))
 
+		local mpoint = nil
+		if mouseTile then
+			mpoint = mouseTile()
+		end
+
 		-- Store information about pawns which should remain on the board,
 		-- we can use this data later.
 		local onBoard = {}
@@ -41,7 +46,8 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					maxHealth = _G[pawn:GetType()].Health,
 					curHealth = pawn:GetHealth(),
 					dead = (pawn:GetHealth() == 0),
-					selected = false
+					selected = false,
+					highlighted = false
 				}
 
 				for i, hook in ipairs(modApiExt.pawnTrackedHooks) do
@@ -49,7 +55,6 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				end
 			elseif pd then
 				-- Already tracked, update its data
-
 				local p = pawn:GetSpace()
 				if pd.loc ~= p then
 					for i, hook in ipairs(modApiExt.pawnPositionChangedHooks) do
@@ -81,6 +86,14 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 						hook(mission, pawn)
 					end
 				end
+
+				-- Unhighlighted
+				if pd.highlighted and mpoint ~= p then
+					pd.highlighted = false
+					for i, hook in ipairs(modApiExt.pawnUnhighlightedHooks) do
+						hook(mission, pawn)
+					end
+				end
 			else
 				-- Not tracked yet, but pawn was nil? Some bizarre edge case.
 				-- Can't do anything with this, ignore.
@@ -91,10 +104,19 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 			-- Process selection in separate loop, so that callbacks always go
 			-- Deselection -> Selection, instead of relying on pawn order in table
 			local pawn = Board:GetPawn(id) or modApiExt.pawnUserdata[id]
-			if pawn and pawn:IsSelected() and not pd.selected then
-				pd.selected = true
-				for i, hook in ipairs(modApiExt.pawnSelectedHooks) do
-					hook(mission, pawn)
+			if pawn then
+				if pawn:IsSelected() and not pd.selected then
+					pd.selected = true
+					for i, hook in ipairs(modApiExt.pawnSelectedHooks) do
+						hook(mission, pawn)
+					end
+				end
+
+				if not pd.highlighted and mpoint == pawn:GetSpace() then
+					pd.highlighted = true
+					for i, hook in ipairs(modApiExt.pawnHighlightedHooks) do
+						hook(mission, pawn)
+					end
 				end
 			end
 

@@ -88,8 +88,23 @@ function modApiExt:updateScheduledHooks()
 	end
 end
 
+--[[
+	Returns the pawn with the specified id. Works for pawns which
+	may have been removed from the board.
+]]--
 function modApiExt:getPawnById(pawnId)
 	return Board:GetPawn(pawnId) or self.pawnUserdata[pawnId]
+end
+
+--[[
+	Returns the currently selected pawn, or nil if none is selected.
+]]--
+function modApiExt:getSelectedPawn()
+	for id, pawn in pairs(modApiExt.pawnUserdata) do
+		if pawn:IsSelected() then return pawn end
+	end
+
+	return nil
 end
 
 --[[

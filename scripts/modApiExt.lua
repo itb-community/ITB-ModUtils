@@ -80,6 +80,18 @@ function modApiExt:getPawnById(pawnId)
 	return Board:GetPawn(pawnId) or self.pawnUserdata[pawnId]
 end
 
+--[[
+	Executes the function on the game's next update step.
+]]--
+function modApiExt:runLater(f)
+	local hook = nil
+	hook = function(mission)
+		f()
+		modApi:removeMissionUpdateHook(hook)
+	end
+	modApi:addMissionUpdateHook(hook)
+end
+
 function modApiExt:clearHooks()
 	local endswith = function(str, suffix)
 		return suffix == "" or string.sub(str,-string.len(suffix)) == suffix

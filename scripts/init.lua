@@ -31,7 +31,6 @@ local function load(self, options, version)
 	modApi:addMissionStartHook(hooks.missionStart)
 	modApi:addMissionEndHook(hooks.missionEnd)
 	modApi:addMissionUpdateHook(hooks.missionUpdate)
-	modApi:addMissionUpdateHook(function() modApiExt:updateScheduledHooks() end)
 end
 
 return {

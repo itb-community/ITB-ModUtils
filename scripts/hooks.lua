@@ -3,6 +3,9 @@ local modApiExtHooks = {}
 function modApiExtHooks:trackAndUpdatePawns(mission)
 	if Board then
 		if not GAME.trackedPawns then GAME.trackedPawns = {} end
+		-- pawn userdata cannot be serialized, so store them in a separate
+		-- table that is rebuilt at runtime.
+		if not modApiExt.pawnUserdata then modApiExt.pawnUserdata = {} end
 
 		local tbl = extract_table(Board:GetPawns(TEAM_ANY))
 
@@ -13,24 +16,27 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 		-- If any of the tracked pawns were removed from the board, reinsert
 		-- them into the table, to process them correctly.
 		for id, pd in pairs(GAME.trackedPawns) do
-			-- Sometimes pawns are removed via Board:RemovePawn(), in which
-			-- case we have no way to obtain their data anymore. Don't attempt
-			-- to reinsert those.
-			local pawn = Board:GetPawn(id)
-			if not list_contains(tbl, id) and pawn then
+			if not list_contains(tbl, id) then
 				onBoard[id] = false
 				table.insert(tbl, id)
 			end
 		end
 
 		for i, id in pairs(tbl) do
+			local pd = GAME.trackedPawns[id]
 			local pawn = Board:GetPawn(id)
 
-			if not GAME.trackedPawns[id] then
+			if pawn and not modApiExt.pawnUserdata[id] then
+				-- regenerate pawn userdata table
+				modApiExt.pawnUserdata[id] = pawn
+			elseif not pawn and modApiExt.pawnUserdata[id] then
+				pawn = modApiExt.pawnUserdata[id]
+			end
+
+			if not pd and pawn then
 				-- Pawn is not tracked yet
 				-- Create a pawnData table for it
 				GAME.trackedPawns[id] = {
-					userdata = pawn,
 					loc = pawn:GetSpace(),
 					maxHealth = pawn:GetHealth(),
 					curHealth = pawn:GetHealth(),
@@ -38,9 +44,8 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					player = pawn:IsPlayer() and pawn:IsMech(),
 					selected = false
 				}
-			else
+			elseif pd then
 				-- Already tracked, update its data
-				local pd = GAME.trackedPawns[id]
 
 				local p = pawn:GetSpace()
 				if pd.loc ~= p then
@@ -73,40 +78,38 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 						hook(mission,id)
 					end
 				end
+			else
+				-- Not tracked yet, but pawn was nil? Some bizarre edge case.
+				-- Can't do anything with this, ignore.
 			end
 		end
 
-		-- Process selection in another loop, so that callbacks always
-		-- go Deselection -> Selection, instead of relying on pawn order in table
-		for i, id in pairs(tbl) do
-			local pd = GAME.trackedPawns[id]
-			local pawn = Board:GetPawn(id)
-
-			if pawn:IsSelected() and not pd.selected then
+		for id, pd in pairs(GAME.trackedPawns) do
+			-- Process selection in separate loop, so that callbacks always go
+			-- Deselection -> Selection, instead of relying on pawn order in table
+			local pawn = Board:GetPawn(id) or modApiExt.pawnUserdata[id]
+			if pawn and pawn:IsSelected() and not pd.selected then
 				pd.selected = true
 				for i, hook in ipairs(modApiExt.pawnSelectedHooks) do
 					hook(mission,id)
 				end
 			end
-		end
 
-		for id, pd in pairs(GAME.trackedPawns) do
 			if not pd.dead and pd.curHealth == 0 then
 				-- Dead non-player pawns are removed from the board, so we can just
 				-- remove them from tracking since they're not going to come back
 				-- to life. However, player pawns (mechs) stay on the board when
 				-- dead. Don't remove them from the tracking table, since if we do
 				-- that, they're going to get reinserted.
-				-- Treat pawns not registered in the onBoard table as on board
-				-- (they could've been placed on the board during this update,
-				-- so they weren't tracked when that table was being built).
-				local staysOnBoard = onBoard[id] or onBoard[id] == nil
-				if staysOnBoard then
+
+				-- Treat pawns not registered in the onBoard table as on board.
+				if onBoard[id] or onBoard[id] == nil then
 					pd.dead = true
 				else
 					-- if this pawn doesn't stay on the board when dead (eg. player mechs,
 					-- and maybe some others?), then remove it from tracking table.
 					GAME.trackedPawns[id] = nil
+					modApiExt.pawnUserdata[id] = nil
 				end
 
 				for i, hook in ipairs(modApiExt.pawnKilledHooks) do
@@ -187,7 +190,7 @@ function modApiExtHooks:trackAndUpdateBuildings(mission)
 						hook(mission, bld)
 					end
 
-					bld.dummy = nil
+					--bld.dummy = nil
 				end
 			end
 		end
@@ -197,6 +200,7 @@ end
 function modApiExtHooks:resetTrackingTables()
 	GAME.trackedBuildings = nil
 	GAME.trackedPawns = nil
+	modApiExt.pawnUserdata = nil
 end
 
 ---------------------------------------------

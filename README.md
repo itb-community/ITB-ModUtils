@@ -23,7 +23,7 @@ return {
 
 ## Features
 
-Default `modApi` object is extended with a new function, `removeMissionUpdateHook`, which in turn allows for callbacks scheduled to execute during the game's next update step (see [`Global#RunLater()`](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/global.lua))
+Default `modApi` object is extended with a new function, `removeMissionUpdateHook`, which in turn allows for callbacks scheduled to execute during the game's next update step (see [`ModApiExt#RunLater()`](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/modApiExt.lua))
 
 ### Modules
 
@@ -40,6 +40,14 @@ At the moment, the library consists of the following modules:
 ### Hooks
 
 New hooks are added via a new global variable, `modApiExt`:
+
+* `pawnTrackedHook( mission, pawn)`
+
+	Fired when `modApiExt` becomes aware of the pawn and beings tracking it.
+
+* `pawnUntrackedHook( mission, pawn)`
+
+	Fired when `modApiExt` stops tracking a pawn (due to it being killed, or removed from the game board via `Board:RemovePawn()`)
 
 * `pawnSelectedHook( mission, pawn )`
 

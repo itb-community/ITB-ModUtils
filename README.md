@@ -39,13 +39,19 @@ At the moment, the library consists of the following modules:
 
 ### Hooks
 
-New hooks are added via a new global variable, `modApiExt`:
+New hooks are added exactly the same way as in the base mod loader's `modApi`, except you have to reference the extended API object (`modApiExt`) instead. For example:
 
-* `pawnTrackedHook( mission, pawn)`
+```lua
+modApiExt:addPawnDamagedHook(myHookFunction)
+```
+
+List of available hooks:
+
+* `pawnTrackedHook( mission, pawn )`
 
 	Fired when `modApiExt` becomes aware of the pawn and beings tracking it.
 
-* `pawnUntrackedHook( mission, pawn)`
+* `pawnUntrackedHook( mission, pawn )`
 
 	Fired when `modApiExt` stops tracking a pawn (due to it being killed, or removed from the game board via `Board:RemovePawn()`)
 
@@ -57,6 +63,15 @@ New hooks are added via a new global variable, `modApiExt`:
 
 	Fired when a pawn is deselected by the player.
 	Always fired before pawnSelectedHook
+
+* `pawnHighlightedHook( mission, pawn )`
+
+	Fired when the player moves their cursor over the tile the pawn is standing on.
+
+* `pawnUnhighlightedHook( mission, pawn )`
+
+	Fired when the tile the pawn is standing on is no longer being hovered over by the player.
+	Always fired before pawnHighlightedHook
 
 * `pawnDamagedHook( mission, pawn, damageTaken )`
 

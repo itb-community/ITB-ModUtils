@@ -11,14 +11,7 @@ local function init(self)
 	kf_ModUtils_DrawHook = sdl.drawHook(function(screen)
 		modApiExt:updateScheduledHooks()
 	end)
-end
 
-local function load(self,options,version)
-	local hooks = require(self.scriptPath.."hooks")
-	modApi:addPreMissionStartHook(hooks.preMissionStart)
-	modApi:addMissionStartHook(hooks.missionStart)
-	modApi:addMissionEndHook(hooks.missionEnd)
-	modApi:addMissionUpdateHook(hooks.missionUpdate)
 
 	if modApi.removeMissionUpdateHook == nil then
 		function modApi:removeMissionUpdateHook(fn)
@@ -26,6 +19,18 @@ local function load(self,options,version)
 			remove_element(fn, modApi.missionUpdateHooks)
 		end
 	end
+end
+
+local function load(self, options, version)
+	-- clear out previously registered hooks, since we're relaoding.
+	modApiExt:clearHooks()
+
+	local hooks = require(self.scriptPath.."hooks")
+
+	modApi:addPreMissionStartHook(hooks.preMissionStart)
+	modApi:addMissionStartHook(hooks.missionStart)
+	modApi:addMissionEndHook(hooks.missionEnd)
+	modApi:addMissionUpdateHook(hooks.missionUpdate)
 end
 
 return {

@@ -76,9 +76,17 @@ function modApiExt:updateScheduledHooks()
 	end
 end
 
-function modApiExt:clear()
-	for k,v in pairs(self) do
-		if type(v) == "table" then
+function modApiExt:getPawnById(pawnId)
+	return Board:GetPawn(pawnId) or self.pawnUserdata[pawnId]
+end
+
+function modApiExt:clearHooks()
+	local endswith = function(str, suffix)
+		return suffix == "" or string.sub(str,-string.len(suffix)) == suffix
+	end
+
+	for k, v in pairs(self) do
+		if type(v) == "table" and endswith(k, "Hooks") then
 			self[k] = {}
 		end
 	end

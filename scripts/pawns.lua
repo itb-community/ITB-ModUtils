@@ -4,6 +4,7 @@ ModUtils_Dummy = {
 	Health = 100,
 	MoveSpeed = 0,
 	Pushable = false,
+	ScoreDanger = 0, -- don't modify the tile's score.
 	Corpse = false,
 	IgnoreFire = true,
 	IgnoreSmoke = true,
@@ -11,6 +12,7 @@ ModUtils_Dummy = {
 	Neutral = true,
 	Corporate = false,
 	IsPortrait = false,
+	SpaceColor = false,
 	DefaultTeam = TEAM_PLAYER,
 	GetDangerScore = function() return 0 end
 }

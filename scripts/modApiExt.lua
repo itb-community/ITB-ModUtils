@@ -30,16 +30,16 @@ function modApiExt:addPawnDeselectedHook(fn)
 	table.insert(self.pawnDeselectedHooks,fn)
 end
 
-modApiExt.pawnHighlightedHooks = {}
-function modApiExt:addPawnHighlightedHook(fn)
+modApiExt.tileHighlightedHooks = {}
+function modApiExt:addTileHighlightedHook(fn)
 	assert(type(fn) == "function")
-	table.insert(self.pawnHighlightedHooks,fn)
+	table.insert(self.tileHighlightedHooks,fn)
 end
 
-modApiExt.pawnUnhighlightedHooks = {}
-function modApiExt:addPawnUnhighlightedHook(fn)
+modApiExt.tileUnhighlightedHooks = {}
+function modApiExt:addTileUnhighlightedHook(fn)
 	assert(type(fn) == "function")
-	table.insert(self.pawnUnhighlightedHooks,fn)
+	table.insert(self.tileUnhighlightedHooks,fn)
 end
 
 modApiExt.pawnDamagedHooks = {}
@@ -121,12 +121,20 @@ function modApiExt:getSelectedPawn()
 end
 
 --[[
+	Returns the currently highlighted pawn (the one the player is hovering his
+	mouse cursor over).
+--]]
+function modApiExt:getHighlightedPawn()
+	return Board:GetPawn(mouseTile())
+end
+
+--[[
 	Executes the function on the game's next update step.
 --]]
 function modApiExt:runLater(f)
 	local hook = nil
 	hook = function(mission)
-		f()
+		f(mission)
 		modApi:removeMissionUpdateHook(hook)
 	end
 	modApi:addMissionUpdateHook(hook)

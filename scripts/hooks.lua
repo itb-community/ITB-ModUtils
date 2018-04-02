@@ -9,11 +9,6 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 
 		local tbl = extract_table(Board:GetPawns(TEAM_ANY))
 
-		local mpoint = nil
-		if mouseTile then
-			mpoint = mouseTile()
-		end
-
 		-- Store information about pawns which should remain on the board,
 		-- we can use this data later.
 		local onBoard = {}
@@ -46,8 +41,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					maxHealth = _G[pawn:GetType()].Health,
 					curHealth = pawn:GetHealth(),
 					dead = (pawn:GetHealth() == 0),
-					selected = false,
-					highlighted = false
+					selected = false
 				}
 
 				for i, hook in ipairs(modApiExt.pawnTrackedHooks) do
@@ -86,14 +80,6 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 						hook(mission, pawn)
 					end
 				end
-
-				-- Unhighlighted
-				if pd.highlighted and mpoint ~= p then
-					pd.highlighted = false
-					for i, hook in ipairs(modApiExt.pawnUnhighlightedHooks) do
-						hook(mission, pawn)
-					end
-				end
 			else
 				-- Not tracked yet, but pawn was nil? Some bizarre edge case.
 				-- Can't do anything with this, ignore.
@@ -108,13 +94,6 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				if pawn:IsSelected() and not pd.selected then
 					pd.selected = true
 					for i, hook in ipairs(modApiExt.pawnSelectedHooks) do
-						hook(mission, pawn)
-					end
-				end
-
-				if not pd.highlighted and mpoint == pawn:GetSpace() then
-					pd.highlighted = true
-					for i, hook in ipairs(modApiExt.pawnHighlightedHooks) do
 						hook(mission, pawn)
 					end
 				end
@@ -141,6 +120,23 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 
 				for i, hook in ipairs(modApiExt.pawnUntrackedHooks) do
 					hook(mission, pawn)
+				end
+			end
+		end
+
+		local mtile = mouseTile()
+		if modApiExt.currentTile ~= mtile then
+			if modApiExt.currentTile then -- could be nil
+				for i, hook in ipairs(modApiExt.tileUnhighlightedHooks) do
+					hook(mission, modApiExt.currentTile)
+				end
+			end
+
+			modApiExt.currentTile = mtile
+
+			if modApiExt.currentTile then -- could be nil
+				for i, hook in ipairs(modApiExt.tileHighlightedHooks) do
+					hook(mission, modApiExt.currentTile)
 				end
 			end
 		end

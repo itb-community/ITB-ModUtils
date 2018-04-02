@@ -37,11 +37,11 @@ function screenPointToTile(screenPoint)
 	-- Top corner of the (0, 0) tile
 	local tile00 = {
 		x = screen:w() / 2,
-		y = screen:h() / 2 - 8 * th * scale + 0.5
+		y = screen:h() / 2 - 8 * th * scale
 	}
 
 	if scale == 2 then
-		tile00.y = tile00.y + 5 * scale
+		tile00.y = tile00.y + 5 * scale + 0.5
 	end
 
 	-- Change screenPoint to be relative to the (0, 0) tile
@@ -53,8 +53,11 @@ function screenPointToTile(screenPoint)
 	local lineX = function(x) return x * th/tw end
 	local lineY = function(x) return -lineX(x) end
 
+	-- round to nearest integer
+	local round = function(a) return math.floor(a + 0.5) end
+
 	local isPointAboveLine = function(point, lineFn)
-		return point.y >= lineFn(point.x)
+		return round(point.y) >= round(lineFn(point.x))
 	end
 
 	local tileContains = function(tilex, tiley, point)
@@ -69,9 +72,13 @@ function screenPointToTile(screenPoint)
 	-- Start at the end of the board and move backwards.
 	-- That way we only need to check 2 lines instead of 4.
 	local bsize = Board:GetSize()
-	for tileY = bsize.y - 1, 0, -1 do
-		for tileX = bsize.x - 1, 0, -1 do
+	for tileY = bsize.y, 0, -1 do
+		for tileX = bsize.x, 0, -1 do
 			if tileContains(tileX, tileY, relPoint) then
+				if tileY == bsize.y or tileX == bsize.x then
+					-- outside of the board
+					return nil
+				end
 				return Point(tileX, tileY)
 			end
 		end

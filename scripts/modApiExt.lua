@@ -103,15 +103,16 @@ end
 --[[
 	Returns the pawn with the specified id. Works for pawns which
 	may have been removed from the board.
-]]--
+--]]
 function modApiExt:getPawnById(pawnId)
 	return Board:GetPawn(pawnId) or self.pawnUserdata[pawnId]
 end
 
 --[[
 	Returns the currently selected pawn, or nil if none is selected.
-]]--
+--]]
 function modApiExt:getSelectedPawn()
+	-- just Pawn works as well -- but it stays set even after it is deselected.
 	for id, pawn in pairs(modApiExt.pawnUserdata) do
 		if pawn:IsSelected() then return pawn end
 	end
@@ -121,7 +122,7 @@ end
 
 --[[
 	Executes the function on the game's next update step.
-]]--
+--]]
 function modApiExt:runLater(f)
 	local hook = nil
 	hook = function(mission)

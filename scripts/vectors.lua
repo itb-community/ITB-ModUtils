@@ -39,7 +39,7 @@ end
 --[[
 	Tests whether two points form a line colinear to the specified axis
 	(ie. have the same value for that axis' coordinate)
-]]--
+--]]
 function modApiExt.vector:isColinear(refPoint, testPoint, axis)
 	assert_point(refPoint)
 	assert_point(testPoint)
@@ -59,14 +59,14 @@ end
 --[[
 	Returns a vector normal to the one provided in argument.
 	Normal in this context means perpendicular.
-]]--
+--]]
 function modApiExt.vector:normal(vec)
 	return Point(vec.y, vec.x)
 end
 
 --[[
 	Returns length of the vector.
-]]--
+--]]
 function modApiExt.vector:length(vec)
 	return math.sqrt(vec.x * vec.x + vec.y * vec.y)
 end
@@ -80,7 +80,7 @@ end
 
 	For fractional values, use UnitVectorF(), which returns a custom table
 	with x and y fields.
-]]--
+--]]
 function modApiExt.vector:unitVectorI(vec)
 	local l = self.length(vec)
 	if l == 0 then return Point(0, 0) end
@@ -90,7 +90,7 @@ end
 --[[
 	Returns a unit vector constructed from the vector provided in argument.
 	Unit vector is a vector with length of 1.
-]]--
+--]]
 function modApiExt.vector:unitVectorF(vec)
 	local l = self.length(vec)
 
@@ -107,7 +107,7 @@ end
 	Returns AXIS_X if this vector has Y = 0.
 	Returns AXIS_Y if this vector has X = 0.
 	Returns nil otherwise.
-]]--
+--]]
 function modApiExt.vector:toAxis(vec)
 	if vec == Point(0, 0) then return nil end
 
@@ -123,7 +123,7 @@ end
 --[[
 	Returns index of the direction vector built from the specified 
 	vector in the DIR_VECTORS_8 table
-]]--
+--]]
 function modApiExt.vector:getDirection8(vec)
 	return list_indexof(self.DIR_VECTORS_8, self:unitVectorI(vec))
 end

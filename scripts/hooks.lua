@@ -180,7 +180,7 @@ function modApiExtHooks:trackAndUpdateBuildings(mission)
 
 		for idx, bld in pairs(GAME.trackedBuildings) do
 			if not bld.destroyed then
-				--[[
+--[[
 				local pawnId = bld.dummy:GetId()
 				local pawn = Board:GetPawn(pawnId)
 
@@ -206,13 +206,14 @@ function modApiExtHooks:trackAndUpdateBuildings(mission)
 						end
 					end
 				end
-				]]--
+--]]
 
 				if not Board:IsBuilding(bld.loc) then
 					bld.destroyed = true
-					--bld.dummy:Kill(true)
-					--Board:RemovePawn(bld.dummy)
-
+--[[
+					bld.dummy:Kill(true)
+					Board:RemovePawn(bld.dummy)
+--]]
 					for i, hook in ipairs(modApiExt.buildingDestroyedHooks) do
 						hook(mission, bld)
 					end

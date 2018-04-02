@@ -6,7 +6,7 @@ if not modApiExt.board then modApiExt.board = {} end
 
 	predicate
 		A function taking a Point as argument, and returning a boolean value.
-]]--
+--]]
 function modApiExt.board:getSpace(predicate)
 	assert(type(predicate) == "function")
 
@@ -25,7 +25,7 @@ end
 
 --[[
 	Returns the first point on the board that is not blocked.
-]]--
+--]]
 function modApiExt.board:getUnoccupiedSpace()
 	return self:getSpace(function(point)
 		return not Board:IsBlocked(point, PATH_GROUND)
@@ -41,7 +41,7 @@ end
 --[[
 	Returns true if the point is terrain that can be restored to its previous
 	state without any issues.
-]]--
+--]]
 function modApiExt.board:isRestorableTerrain(point)
 	local terrain = Board:GetTerrain(point)
 

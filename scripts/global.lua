@@ -1,14 +1,14 @@
 
 --[[
 	Nullsafe shorthand for point:GetLuaString(), cause I'm lazy
-]]--
+--]]
 function p2s(point)
 	return point and point:GetLuaString() or "nil"
 end
 
 --[[
 	Returns index of the specified element in the list, or -1 if not found.
-]]--
+--]]
 function list_indexof(list, element)
 	for i, v in ipairs(list) do
 		if element == v then return i end
@@ -19,14 +19,14 @@ end
 
 --[[
 	Returns currently highlighted board tile (Point), or nil.
-]]--
+--]]
 function mouseTile()
 	return screenPointToTile({ x = sdl.mouse.x(), y = sdl.mouse.y() })
 end
 
 --[[
 	Returns a board tile (Point) at the specified point on the screen, or nil.
-]]--
+--]]
 function screenPointToTile(screenPoint)
 	local screen = sdl.screen()
 	local scale = GetBoardScale()

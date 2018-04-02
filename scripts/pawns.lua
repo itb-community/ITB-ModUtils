@@ -22,7 +22,7 @@ if not modApiExt.pawn then modApiExt.pawn = {} end
 
 --[[
 	Sets the pawn on fire if true, or removes the Fire status from it if false.
-]]--
+--]]
 function modApiExt.pawn:setFire(pawn, fire)
 	local d = SpaceDamage()
 	if fire then d.iFire = EFFECT_CREATE else d.iFire = EFFECT_REMOVE end
@@ -40,7 +40,7 @@ end
 		The pawn to damage
 	spaceDamage
 		SpaceDamage instance to deal to the pawn.
-]]--
+--]]
 function modApiExt.pawn:damagePawn(pawn, spaceDamage)
 	local wasOnBoard = modApiExt.board:isPawnOnBoard(pawn)
 
@@ -65,7 +65,7 @@ end
 
 --[[
 	Attempts to copy state from source pawn to the target pawn.
-]]--
+--]]
 function modApiExt.pawn:copyPawnState(sourcePawn, targetPawn)
 	if sourcePawn:GetHealth() < targetPawn:GetHealth() then
 		local spaceDamage = SpaceDamage()
@@ -87,7 +87,7 @@ end
 		The Pawn instance to replace.
 	newPawnType
 		Name of the pawn class to create the pawn from.
-]]--
+--]]
 function modApiExt.pawn:replacePawn(targetPawn, newPawnType)
 	local newPawn = PAWN_FACTORY:CreatePawn(newPawnType)
 

@@ -55,6 +55,18 @@ List of available hooks:
 
 	Fired when `modApiExt` stops tracking a pawn (due to it being killed, or removed from the game board via `Board:RemovePawn()`)
 
+* `tileHighlightedHook( mission, point )`
+
+	Fired when the player moves their cursor over a board tile.
+
+* `tileUnhighlightedHook( mission, point )`
+
+	Fired when the player moves their cursor away from the previously highligthed tile.
+
+* `pawnPositionChangedHook( mission, pawn, oldPosition )`
+
+	Fired when a pawn's position is changed (either by moving, or by being pushed/flipped). Fired once for every tile.
+
 * `pawnSelectedHook( mission, pawn )`
 
 	Fired when a pawn is selected by the player.
@@ -63,15 +75,6 @@ List of available hooks:
 
 	Fired when a pawn is deselected by the player.
 	Always fired before pawnSelectedHook
-
-* `pawnHighlightedHook( mission, pawn )`
-
-	Fired when the player moves their cursor over the tile the pawn is standing on.
-
-* `pawnUnhighlightedHook( mission, pawn )`
-
-	Fired when the tile the pawn is standing on is no longer being hovered over by the player.
-	Always fired before pawnHighlightedHook
 
 * `pawnDamagedHook( mission, pawn, damageTaken )`
 

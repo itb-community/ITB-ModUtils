@@ -67,6 +67,7 @@ end
 --]]
 function modApiExt:init(modulesDir)
 	self.__index = self
+	self.modulesDir = modulesDir
 	
 	self.timer = nil
 	self.scheduledHooks = {}
@@ -97,6 +98,39 @@ function modApiExt:init(modulesDir)
 		function modApi:removeMissionUpdateHook(fn)
 			assert(type(fn) == "function")
 			remove_element(fn, modApi.missionUpdateHooks)
+		end
+	end
+end
+
+function modApiExt:load(mod, options, version)
+	-- clear out previously registered hooks, since we're relaoding.
+	if self.clearHooks then self:clearHooks() end
+
+	if self:isModuleAvailable(self.modulesDir.."alter") then
+		local hooks = require(self.modulesDir.."alter")
+
+		if hooks.preMissionStart then
+			modApi:addPreMissionStartHook(hooks.preMissionStart)
+		end
+		if hooks.missionStart then
+			modApi:addMissionStartHook(hooks.missionStart)
+		end
+		if hooks.missionEnd then
+			modApi:addMissionEndHook(hooks.missionEnd)
+		end
+		if hooks.missionUpdate then
+			modApi:addMissionUpdateHook(hooks.missionUpdate)
+		end
+
+		if hooks.overrideMoveSkill then
+			modApiExt:scheduleHook(20, function()
+				-- Execute on roughly the next frame in order to make sure
+				-- we are the last ones to modify the Move skill.
+				-- Could do that in preMissionStartHook, but then we won't
+				-- override the skill when the player loads the game.
+				-- And there's no preLoadGameHook() available in base modApi.
+				hooks:overrideMoveSkill()
+			end)
 		end
 	end
 end

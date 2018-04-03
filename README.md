@@ -66,7 +66,8 @@ Now, in your `init.lua` do the following:
 ```lua
 local function init(self)
 	if modApiExt then
-		-- modApiExt already defined. This means that the user has the complete ModUtils package installed. Use that instead of loading our gutted one.
+		-- modApiExt already defined. This means that the user has the complete
+		-- ModUtils package installed. Use that instead of loading our gutted one.
 		myname_modApiExt = modApiExt
 	else
 		-- modApiExt was not found. Load our gutted version.
@@ -102,15 +103,15 @@ modApi:isVersion(myMinimumRequiredVersion, modApiExt.version)
 ```
 
 This will return true if the currently installed version of ModUtils is at or above `1.0.0`.
-You can combine this with the `init()` code above when checking for `modApiExt` object, to only use it when ModUtils is at or above a certain version threshold:
+You can combine this with the `init()` code from [Integration](#option-2-integration) when checking for `modApiExt` object, to only use it when ModUtils is at or above a certain version threshold:
 
 ```lua
-local function init(self)
-	local v = "1.0.0"
-	if modApiExt and modApi:isVersion(v, modApiExt.version) then
-		myname_modApiExt = modApiExt
-	else
-		-- ...
+local v = "1.0.0"
+if modApiExt and modApi:isVersion(v, modApiExt.version) then
+	myname_modApiExt = modApiExt
+else
+	-- Load our own version
+end
 ```
 
 

@@ -5,7 +5,7 @@ This is a collection of various Lua modules useful for creators of mods for the 
 
 ## Usage
 
-You can either pick-and-choose parts you want by manually gutting the code I posted, or just include this mod as a dependency in your mod. Either way you choose, you'll need to include `"kf_ModUtils"` to the `requirements` table in your mod's `init.lua` file, like so:
+You can either integrate ModUtils into your mod and pick-and-choose by manually removing parts you don't need, or just include this mod as a dependency in your mod. Either way you choose, you'll need to include `"kf_ModUtils"` to the `requirements` table in your mod's `init.lua` file, like so:
 
 ```lua
 return {
@@ -25,27 +25,41 @@ Now which option should you choose? Here are the benefits and drawbacks of each:
 
 * Dependency
 	* [+] Minimum amount of setup required
-	* [+] Good when you're not sure which parts of ModUtils you need yet
+	* [+] Good when you don't want to bother manually gutting ModUtils
 	* [-] People playing your mod will need to download ModUtils too
 	* [-] Relies on the player to have up-to-date version of ModUtils
-* Picking apart
-	* [+] Your has no external dependencies - you don't rely on players keeping ModUtils up-to-date
+* Integration
+	* [+] If you opt not to use existing `modApiExt` object, then your mod is not likely to break with future releases of ModUtils
+	* [+] You don't rely on players keeping ModUtils up-to-date
 	* [+] Players don't have to download anything else
-	* [-] Requires a lot more setup
+	* [-] Requires more setup and effort to maintain compatibility
+
+Generally, the first option is good when what you're working on is a small project. The second option is better if you are willing to put in some effort to make a quality mod.
 
 
-### Option: Dependency
+### Option 1: Dependency
 
 To include as dependency, download the mod from the [Releases page](https://github.com/kartoFlane/ITB-ModUtils/releases/latest), and drop it into `mods` folder in Into the Breach's directory. **However, people who wish to play your mod will also need to download it.**
 
 Then in your mod, you can use the `modApiExt` variable to access any ModUtils functions you may need, without any additional setup.
 
 
-### Option: Picking apart
+### Option 2: Integration
 
-If you decide to pick only the parts you need, you'll need to follow several rules in order to allow compatibility with other mods.
+If you decide to integrate to pick only the parts you need, you'll need to follow several rules in order to allow compatibility with other mods.
 
-Generally, your `init()` function should look like so:
+Generally, you should put the scripts you download here in a `modApiExt` folder in your mod's `scripts` directory. Doing so keeps the structure of your mod neat and tidy, and prevents confusion. So your mod's directory should look like this:
+
+```
++ My_Mod/
++--+ scripts/
+   +--+ modApiExt/
+   |  +-- modApiExt.lua
+   |  +-- [other modules you need, etc]
+   +-- init.lua  [your mod's init file]
+```
+
+If you followed this directory structure, your `init()` function should look like so:
 
 ```lua
 local function init(self)
@@ -54,11 +68,9 @@ local function init(self)
 		myname_modApiExt = modApiExt
 	else
 		-- modApiExt was not found. Load our gutted version.
-		myname_modApiExt = require(self.scriptPath.."modApiExt")
-
-		-- load modules if you need any, and your gutted version includes them.
-		require(self.scriptPath.."global")
-		myname_modApiExt.somemodule = myname_modApiExt:loadModule(self.scriptPath.."somemodule")
+		local extDir = self.scriptPath.."modApiExt/"
+		myname_modApiExt = require(extDir.."modApiExt")
+		myname_modApiExt:init(extDir)
 	end
 
 	-- Rest of your init function
@@ -68,6 +80,7 @@ end
 ...Where the `myname` in `myname_modApiExt` should be changed to some unique identifier that is very unlikely to be used by other mods. A good convention is first using a short of your nickname, followed by name of the mod you're working on. For example, when I (kartoFlane) was working on a snake vek enemy mod, I named this variable `kf_snake_modApiExt`.
 
 Now in your mod, you can use the `myname_modApiExt` variable to access any ModUtils functions you may need.
+
 
 ### Versioning
 
@@ -95,17 +108,19 @@ local function init(self)
 
 Default `modApi` object is extended with a new function, `removeMissionUpdateHook`, which in turn allows for callbacks scheduled to execute during the game's next update step (see [`ModApiExt#RunLater()`](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/modApiExt.lua))
 
+
 ### Modules
 
 At the moment, the library consists of the following modules:
 
 - [Global](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/global.lua) - various assorted functions which didn't fit anywhere else
-- [Vectors](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/vectors.lua) - functions useful for vector/point manipulation, accessible via `modApiExt.vector`.
-- [Pawns](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/pawns.lua) - functions useful when manipulating pawns, accessible via `modApiExt.pawn`.
+- [Vector](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/vector.lua) - functions useful for vector/point manipulation, accessible via `modApiExt.vector`.
+- [Pawn](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/pawn.lua) - functions useful when manipulating pawns, accessible via `modApiExt.pawn`.
 - [Board](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/board.lua) - functions useful when dealing with the game board, accessible via `modApiExt.board`.
-- [Strings](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/strings.lua) - some basic string-related operations, accessible via `modApiExt.string`.
-- [Weapons](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/weapons.lua) - functions useful for weapons and targeting, accessible via `modApiExt.weapon`.
-- [ModApiExt](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/modApiExt.lua) - extended modApi with additional hooks, accessible via `modApiExt`.
+- [String](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/string.lua) - some basic string-related operations, accessible via `modApiExt.string`.
+- [Weapon](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/weapon.lua) - functions useful for weapons and targeting, accessible via `modApiExt.weapon`.
+- [Hook](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/hooks.lua) - extended modApi with additional hooks, accessible via `modApiExt`.
+
 
 ### Hooks
 

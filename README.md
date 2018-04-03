@@ -59,7 +59,9 @@ Generally, you should put the scripts you download here in a `modApiExt` folder 
    +-- init.lua  [your mod's init file]
 ```
 
-If you followed this directory structure, your `init()` function should look like so:
+**Important:** no matter which parts of ModUtils you need, you should copy `modApiExt.lua` as-is. It is used to initialize the whole thing. Only change it if you *really* know what you're doing.
+
+Now, in your `init.lua` do the following:
 
 ```lua
 local function init(self)
@@ -75,6 +77,14 @@ local function init(self)
 
 	-- Rest of your init function
 end
+
+local function load(self, options, version)
+	myname_modApiExt:load(self, options, version)
+
+	-- Rest of your load function
+end
+
+-- Rest of your init.lua file
 ```
 
 ...Where the `myname` in `myname_modApiExt` should be changed to some unique identifier that is very unlikely to be used by other mods. A good convention is first using a short of your nickname, followed by name of the mod you're working on. For example, when I (kartoFlane) was working on a snake vek enemy mod, I named this variable `kf_snake_modApiExt`.
@@ -106,7 +116,7 @@ local function init(self)
 
 ## Features
 
-Default `modApi` object is extended with a new function, `removeMissionUpdateHook`, which in turn allows for callbacks scheduled to execute during the game's next update step (see [`ModApiExt#RunLater()`](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/modApiExt.lua))
+Default `modApi` object is extended with a new function, `removeMissionUpdateHook`, which in turn allows for callbacks scheduled to execute during the game's next update step (see [`Hook#RunLater()`](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/hooks.lua))
 
 
 ### Modules

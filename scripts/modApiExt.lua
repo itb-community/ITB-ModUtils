@@ -125,16 +125,12 @@ function modApiExt:load(mod, options, version)
 			modApi:addMissionUpdateHook(hooks.missionUpdate)
 		end
 
-		if hooks.overrideMoveSkill then
-			self:scheduleHook(20, function()
-				-- Execute on roughly the next frame in order to make sure
-				-- we are the last ones to modify the Move skill.
-				-- Could do that in preMissionStartHook, but then we won't
-				-- override the skill when the player loads the game.
-				-- And there's no preLoadGameHook() available in base modApi.
-				hooks:overrideMoveSkill()
-			end)
-		end
+		self:scheduleHook(20, function()
+			-- Execute on roughly the next frame.
+			-- This allows us to reset the loaded flag after all other
+			-- mods are done loading.
+			self.loaded = false
+		end)
 	end
 
 	self.loaded = true

@@ -68,7 +68,7 @@ end
 function modApiExt:init(modulesDir)
 	self.__index = self
 	self.modulesDir = modulesDir
-	
+
 	self.timer = nil
 	self.scheduledHooks = {}
 
@@ -103,6 +103,9 @@ function modApiExt:init(modulesDir)
 end
 
 function modApiExt:load(mod, options, version)
+	-- We're already loaded. Bail.
+	if self.loaded then return end
+
 	-- clear out previously registered hooks, since we're relaoding.
 	if self.clearHooks then self:clearHooks() end
 
@@ -133,6 +136,8 @@ function modApiExt:load(mod, options, version)
 			end)
 		end
 	end
+
+	self.loaded = true
 end
 
 return modApiExt

@@ -163,6 +163,10 @@ List of available hooks:
 
 	Fired when a pawn's position is changed (either by moving, or by being pushed/flipped). Fired once for every tile.
 
+* `pawnUndoMoveHook( mission, pawn, oldPosition )`
+
+	Fired when a pawn's move is undone.
+
 * `pawnSelectedHook( mission, pawn )`
 
 	Fired when a pawn is selected by the player.

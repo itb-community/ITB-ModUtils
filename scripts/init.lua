@@ -4,27 +4,11 @@ local function init(self)
 			.. "one is not following API protocol correctly.")
 	else
 		modApiExt = require(self.scriptPath.."modApiExt")
+		modApiExt:init(self)
+
+		-- We only set this because we're the master ModUtils, to allow client
+		-- mods to check our version.
 		modApiExt.version = self.version
-		
-		require(self.scriptPath.."global")
-		modApiExt.vector   = modApiExt:loadModule(self.scriptPath.."vectors")
-		modApiExt.string   = modApiExt:loadModule(self.scriptPath.."strings")
-		modApiExt.board    = modApiExt:loadModule(self.scriptPath.."board")
-		modApiExt.weapon   = modApiExt:loadModule(self.scriptPath.."weapons")
-		modApiExt.pawn     = modApiExt:loadModule(self.scriptPath.."pawns")
-		modApiExt.statusui = modApiExt:loadModule(self.scriptPath.."statusui")
-
-		kf_ModUtils_DrawHook = sdl.drawHook(function(screen)
-			modApiExt:updateScheduledHooks()
-		end)
-
-
-		if modApi.removeMissionUpdateHook == nil then
-			function modApi:removeMissionUpdateHook(fn)
-				assert(type(fn) == "function")
-				remove_element(fn, modApi.missionUpdateHooks)
-			end
-		end
 	end
 end
 

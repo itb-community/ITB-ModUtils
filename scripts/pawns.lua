@@ -113,4 +113,32 @@ function pawn:isPawnDead(pawn)
 	return false
 end
 
+--[[
+	Returns the pawn with the specified id. Works for pawns which
+	may have been removed from the board.
+--]]
+function pawn:getById(pawnId)
+	return Board:GetPawn(pawnId) or self.pawnUserdata[pawnId]
+end
+
+--[[
+	Returns the currently selected pawn, or nil if none is selected.
+--]]
+function pawn:getSelected()
+	-- just Pawn works as well -- but it stays set even after it is deselected.
+	for id, pawn in pairs(modApiExt.pawnUserdata) do
+		if pawn:IsSelected() then return pawn end
+	end
+
+	return nil
+end
+
+--[[
+	Returns the currently highlighted pawn (the one the player is hovering his
+	mouse cursor over).
+--]]
+function pawn:getHighlighted()
+	return Board:GetPawn(mouseTile())
+end
+
 return pawn

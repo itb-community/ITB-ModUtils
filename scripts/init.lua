@@ -32,7 +32,7 @@ local function load(self, options, version)
 	-- clear out previously registered hooks, since we're relaoding.
 	modApiExt:clearHooks()
 
-	local hooks = require(self.scriptPath.."hooks")
+	local hooks = require(self.scriptPath.."alter")
 
 	modApi:addPreMissionStartHook(hooks.preMissionStart)
 	modApi:addMissionStartHook(hooks.missionStart)

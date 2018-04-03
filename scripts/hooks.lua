@@ -90,32 +90,6 @@ function hooks:addBuildingDestroyedHook(fn)
 	table.insert(self.buildingDestroyedHooks,fn)
 end
 
-hooks.timer = nil
-hooks.scheduledHooks = {}
-function hooks:scheduleHook(msTime, fn)
-	assert(type(msTime) == "number")
-	assert(type(fn) == "function")
-	if not self.timer then self.timer = sdl.timer() end
-
-	table.insert(self.scheduledHooks, {
-		triggerTime = self.timer:elapsed() + msTime,
-		hook = fn
-	})
-end
-
-function hooks:updateScheduledHooks()
-	if self.timer then
-		local t = self.timer:elapsed()
-
-		for i, tbl in ipairs(self.scheduledHooks) do
-			if tbl.triggerTime <= t then
-				table.remove(self.scheduledHooks, i)
-				tbl.hook()
-			end
-		end
-	end
-end
-
 --[[
 	Executes the function on the game's next update step. Only works during missions.
 --]]

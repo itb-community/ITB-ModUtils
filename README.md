@@ -5,7 +5,7 @@ This is a collection of various Lua modules useful for creators of mods for the 
 
 ## Usage
 
-You can either integrate ModUtils into your mod and pick-and-choose by manually removing parts you don't need, or just include this mod as a dependency in your mod. Either way you choose, you'll need to include `"kf_ModUtils"` to the `requirements` table in your mod's `init.lua` file, like so:
+You can either integrate ModUtils into your mod and pick-and-choose by manually removing parts you don't need, or just include this mod as a dependency in your mod. Either way you choose, you'll need to add `"kf_ModUtils"` entry to the `requirements` table in your mod's `init.lua` file, like so:
 
 ```lua
 return {

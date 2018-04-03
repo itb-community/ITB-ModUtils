@@ -4,7 +4,7 @@ local function init(self)
 			.. "one is not following API protocol correctly.")
 	else
 		modApiExt = require(self.scriptPath.."modApiExt")
-		modApiExt:init(self)
+		modApiExt:init(self.scriptPath)
 
 		-- We only set this because we're the master ModUtils, to allow client
 		-- mods to check our version.

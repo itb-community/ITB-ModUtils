@@ -34,27 +34,34 @@ function modApiExt:loadModuleIfAvailable(path)
 	end
 end
 
-function modApiExt:init(mod)
-	modApiExt.__index = modApiExt
+--[[
+	Initializes the modApiExt object by loading available modules and setting
+	up hooks.
 
-	if self:isModuleAvailable(mod.scriptPath.."global") then
-		require(mod.scriptPath.."global")
+	modulesDir - path to the directory containing all modules, with a forward
+	             slash (/) at the end
+--]]
+function modApiExt:init(modulesDir)
+	self.__index = self
+
+	if self:isModuleAvailable(modulesDir.."global") then
+		require(modulesDir.."global")
 	end
-	if self:isModuleAvailable(mod.scriptPath.."hooks") then
-		local hooks = require(mod.scriptPath.."hooks")
+	if self:isModuleAvailable(modulesDir.."hooks") then
+		local hooks = require(modulesDir.."hooks")
 		for k,v in pairs(hooks) do
-			modApiExt[k] = v
+			self[k] = v
 		end
 	end
 
-	modApiExt.vector   = modApiExt.loadModuleIfAvailable(mod.scriptPath.."vector")
-	modApiExt.string   = modApiExt.loadModuleIfAvailable(mod.scriptPath.."string")
-	modApiExt.board    = modApiExt.loadModuleIfAvailable(mod.scriptPath.."board")
-	modApiExt.weapon   = modApiExt.loadModuleIfAvailable(mod.scriptPath.."weapon")
-	modApiExt.pawn     = modApiExt.loadModuleIfAvailable(mod.scriptPath.."pawn")
+	self.vector   = self:loadModuleIfAvailable(modulesDir.."vector")
+	self.string   = self:loadModuleIfAvailable(modulesDir.."string")
+	self.board    = self:loadModuleIfAvailable(modulesDir.."board")
+	self.weapon   = self:loadModuleIfAvailable(modulesDir.."weapon")
+	self.pawn     = self:loadModuleIfAvailable(modulesDir.."pawn")
 
-	modApiExt.drawHook = sdl.drawHook(function(screen)
-		modApiExt:updateScheduledHooks()
+	self.drawHook = sdl.drawHook(function(screen)
+		self:updateScheduledHooks()
 
 	end)
 

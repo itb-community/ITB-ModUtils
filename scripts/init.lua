@@ -13,6 +13,9 @@ local function init(self)
 end
 
 local function load(self, options, version)
+	-- Reset the loaded flag to make sure we correctly reset hooks
+	-- in case we reload the game.
+	modApiExt.loaded = false
 	modApiExt:load(self, options, version)
 end
 

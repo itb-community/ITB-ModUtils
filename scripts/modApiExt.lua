@@ -126,7 +126,7 @@ function modApiExt:load(mod, options, version)
 		end
 
 		if hooks.overrideMoveSkill then
-			modApiExt:scheduleHook(20, function()
+			self:scheduleHook(20, function()
 				-- Execute on roughly the next frame in order to make sure
 				-- we are the last ones to modify the Move skill.
 				-- Could do that in preMissionStartHook, but then we won't

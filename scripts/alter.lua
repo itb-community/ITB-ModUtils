@@ -41,7 +41,8 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					maxHealth = _G[pawn:GetType()].Health,
 					curHealth = pawn:GetHealth(),
 					dead = (pawn:GetHealth() == 0),
-					selected = false
+					selected = false,
+					undoPossible = pawn:IsUndoPossible()
 				}
 
 				for i, hook in ipairs(modApiExt.pawnTrackedHooks) do
@@ -50,6 +51,25 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 			elseif pd then
 				-- Already tracked, update its data
 				local p = pawn:GetSpace()
+				local undo = pawn:IsUndoPossible()
+
+				if pd.undoPossible ~= undo then
+					-- Undo was possible in previous game update, but no longer is.
+					-- The pawn is also active, which means that the player did not
+					-- just attack with this pawn.
+					-- And positions are not the same, which means that the player
+					-- did not attack with another pawn. Swap weapons are not instant,
+					-- so it should be fine.
+					-- TODO: Maybe update when we have pawnAttackStart/EndHook
+					if pd.undoPossible and not undo and pawn:IsActive() and pd.loc ~= p then
+						for i, hook in ipairs(modApiExt.pawnUndoMoveHooks) do
+							hook(mission, pawn, pd.loc)
+						end
+					end
+
+					pd.undoPossible = undo
+				end
+
 				if pd.loc ~= p then
 					for i, hook in ipairs(modApiExt.pawnPositionChangedHooks) do
 						hook(mission, pawn, pd.loc)

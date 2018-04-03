@@ -30,6 +30,12 @@ function hooks:addPawnPositionChangedHook(fn)
 	table.insert(self.pawnPositionChangedHooks,fn)
 end
 
+hooks.pawnUndoMoveHooks = {}
+function hooks:addPawnUndoMoveHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.pawnUndoMoveHooks,fn)
+end
+
 hooks.pawnSelectedHooks = {}
 function hooks:addPawnSelectedHook(fn)
 	assert(type(fn) == "function")

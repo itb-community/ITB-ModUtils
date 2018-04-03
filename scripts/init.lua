@@ -4,6 +4,7 @@ local function init(self)
 			.. "one is not following API protocol correctly.")
 	else
 		modApiExt = require(self.scriptPath.."modApiExt")
+		modApiExt.version = self.version
 		
 		require(self.scriptPath.."global")
 		modApiExt.vector   = modApiExt:loadModule(self.scriptPath.."vectors")

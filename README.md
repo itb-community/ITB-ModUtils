@@ -5,19 +5,89 @@ This is a collection of various Lua modules useful for creators of mods for the 
 
 ## Usage
 
-You can either pick-and-choose parts you want by manually gutting the code I posted, or just include this mod as a dependency in your mod (players will have to download both).
-
-To include as dependency, download the mod from the [Releases page](https://github.com/kartoFlane/ITB-ModUtils/releases/latest), and drop it into `mods` folder in Into the Breach's directory. Then in your mod's `init.lua` file, add `"kf_ModUtils"` to the `requirements` table, like so:
+You can either pick-and-choose parts you want by manually gutting the code I posted, or just include this mod as a dependency in your mod. Either way you choose, you'll need to include `"kf_ModUtils"` to the `requirements` table in your mod's `init.lua` file, like so:
 
 ```lua
 return {
 	id = "MyModId",
 	name = "My Mod",
-	version = "1.0.0",
+	version = "someversion",
 	requirements = { "kf_ModUtils" }, -- <-- Here
 	init = init,
 	load = load,
 }
+```
+
+Doing so makes sure `kf_ModUtils` is loaded *before* your mod, if it is available.
+
+
+Now which option should you choose? Here are the benefits and drawbacks of each:
+
+* Dependency
+	* [+] Minimum amount of setup required
+	* [+] Good when you're not sure which parts of ModUtils you need yet
+	* [-] People playing your mod will need to download ModUtils too
+	* [-] Relies on the player to have up-to-date version of ModUtils
+* Picking apart
+	* [+] Your has no external dependencies - you don't rely on players keeping ModUtils up-to-date
+	* [+] Players don't have to download anything else
+	* [-] Requires a lot more setup
+
+
+### Option: Dependency
+
+To include as dependency, download the mod from the [Releases page](https://github.com/kartoFlane/ITB-ModUtils/releases/latest), and drop it into `mods` folder in Into the Breach's directory. **However, people who wish to play your mod will also need to download it.**
+
+Then in your mod, you can use the `modApiExt` variable to access any ModUtils functions you may need, without any additional setup.
+
+
+### Option: Picking apart
+
+If you decide to pick only the parts you need, you'll need to follow several rules in order to allow compatibility with other mods.
+
+Generally, your `init()` function should look like so:
+
+```lua
+local function init(self)
+	if modApiExt then
+		-- modApiExt already defined. This means that the user has the complete ModUtils package installed. Use that instead of loading our gutted one.
+		myname_modApiExt = modApiExt
+	else
+		-- modApiExt was not found. Load our gutted version.
+		myname_modApiExt = require(self.scriptPath.."modApiExt")
+
+		-- load modules if you need any, and your gutted version includes them.
+		require(self.scriptPath.."global")
+		myname_modApiExt.somemodule = myname_modApiExt:loadModule(self.scriptPath.."somemodule")
+	end
+
+	-- Rest of your init function
+end
+```
+
+...Where the `myname` in `myname_modApiExt` should be changed to some unique identifier that is very unlikely to be used by other mods. A good convention is first using a short of your nickname, followed by name of the mod you're working on. For example, when I (kartoFlane) was working on a snake vek enemy mod, I named this variable `kf_snake_modApiExt`.
+
+Now in your mod, you can use the `myname_modApiExt` variable to access any ModUtils functions you may need.
+
+### Versioning
+
+If you ever require a specific version of ModUtils, or need to make sure that the version the player has installed is above a certain milestone, you can check the version using the following code:
+
+```lua
+local myMinimumRequiredVersion = "1.0.0"
+modApi:isVersion(myMinimumRequiredVersion, modApiExt.version)
+```
+
+This will return true if the currently installed version of ModUtils is at or above `1.0.0`.
+You can combine this with the `init()` code above when checking for `modApiExt` object, to only use it when ModUtils is at or above a certain version threshold:
+
+```lua
+local function init(self)
+	local v = "1.0.0"
+	if modApiExt and modApi:isVersion(v, modApiExt.version) then
+		myname_modApiExt = modApiExt
+	else
+		-- ...
 ```
 
 

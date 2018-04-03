@@ -22,7 +22,7 @@ end
 return {
 	id = "kf_ModUtils",
 	name = "Modding Utilities",
-	version = "1.1.0",
+	version = "1.2.0",
 	requirements = {},
 	init = init,
 	load = load,

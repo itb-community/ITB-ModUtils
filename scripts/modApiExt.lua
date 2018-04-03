@@ -26,6 +26,14 @@ function modApiExt:loadModule(path)
 	return m
 end
 
+function modApiExt:loadModuleIfAvailable(path)
+	if self:isModuleAvailable(path) then
+		return self:loadModule(path)
+	else
+		return nil
+	end
+end
+
 function modApiExt:init(mod)
 	modApiExt.__index = modApiExt
 
@@ -39,21 +47,11 @@ function modApiExt:init(mod)
 		end
 	end
 
-	if self:isModuleAvailable(mod.scriptPath.."vector") then
-		modApiExt.vector = modApiExt:loadModule(mod.scriptPath.."vectors")
-	end
-	if self:isModuleAvailable(mod.scriptPath.."string") then
-		modApiExt.string = modApiExt:loadModule(mod.scriptPath.."strings")
-	end
-	if self:isModuleAvailable(mod.scriptPath.."board") then
-		modApiExt.board = modApiExt:loadModule(mod.scriptPath.."board")
-	end
-	if self:isModuleAvailable(mod.scriptPath.."weapon") then
-		modApiExt.weapon = modApiExt:loadModule(mod.scriptPath.."weapons")
-	end
-	if self:isModuleAvailable(mod.scriptPath.."pawn") then
-		modApiExt.pawn = modApiExt:loadModule(mod.scriptPath.."pawns")
-	end
+	modApiExt.vector   = modApiExt.loadModuleIfAvailable(mod.scriptPath.."vector")
+	modApiExt.string   = modApiExt.loadModuleIfAvailable(mod.scriptPath.."string")
+	modApiExt.board    = modApiExt.loadModuleIfAvailable(mod.scriptPath.."board")
+	modApiExt.weapon   = modApiExt.loadModuleIfAvailable(mod.scriptPath.."weapon")
+	modApiExt.pawn     = modApiExt.loadModuleIfAvailable(mod.scriptPath.."pawn")
 
 	modApiExt.drawHook = sdl.drawHook(function(screen)
 		modApiExt:updateScheduledHooks()

@@ -152,4 +152,15 @@ function modApiExt:clearHooks()
 	end
 end
 
+--[[
+	Load the ext API's modules through this function to ensure that they can
+	access other modules via self keyword.
+--]]
+function modApiExt:loadModule(path)
+	local m = require(path)
+	setmetatable(m, self)
+	return m
+end
+modApiExt.__index = modApiExt
+
 return modApiExt

@@ -20,12 +20,12 @@ AddPawn("ModUtils_Dummy")
 
 --------------------------------------------------------------------------
 
-if not modApiExt.pawn then modApiExt.pawn = {} end
+local pawn = {}
 
 --[[
 	Sets the pawn on fire if true, or removes the Fire status from it if false.
 --]]
-function modApiExt.pawn:setFire(pawn, fire)
+function pawn:setFire(pawn, fire)
 	local d = SpaceDamage()
 	if fire then d.iFire = EFFECT_CREATE else d.iFire = EFFECT_REMOVE end
 	self:damagePawn(pawn, d)
@@ -43,13 +43,13 @@ end
 	spaceDamage
 		SpaceDamage instance to deal to the pawn.
 --]]
-function modApiExt.pawn:damagePawn(pawn, spaceDamage)
-	local wasOnBoard = modApiExt.board:isPawnOnBoard(pawn)
+function pawn:damagePawn(pawn, spaceDamage)
+	local wasOnBoard = self.board:isPawnOnBoard(pawn)
 
 	local pawnSpace = pawn:GetSpace()
-	local safeSpace = modApiExt.board:getUnoccupiedRestorableSpace()
+	local safeSpace = self.board:getUnoccupiedRestorableSpace()
 
-	local terrainData = modApiExt.board:getRestorableTerrainData(safeSpace)
+	local terrainData = self.board:getRestorableTerrainData(safeSpace)
 
 	if not wasOnBoard then
 		Board:AddPawn(pawn, safeSpace)
@@ -60,7 +60,7 @@ function modApiExt.pawn:damagePawn(pawn, spaceDamage)
 	Board:DamageSpace(spaceDamage)
 
 	pawn:SetSpace(pawnSpace)
-	modApiExt.board:RestoreTerrain(safeSpace, terrainData)
+	self.board:RestoreTerrain(safeSpace, terrainData)
 
 	if not wasOnBoard then Board:RemovePawn(pawn) end
 end
@@ -68,7 +68,7 @@ end
 --[[
 	Attempts to copy state from source pawn to the target pawn.
 --]]
-function modApiExt.pawn:copyPawnState(sourcePawn, targetPawn)
+function pawn:copyPawnState(sourcePawn, targetPawn)
 	if sourcePawn:GetHealth() < targetPawn:GetHealth() then
 		local spaceDamage = SpaceDamage()
 		spaceDamage.iDamage = targetPawn:GetHealth() - sourcePawn:GetHealth()
@@ -90,7 +90,7 @@ end
 	newPawnType
 		Name of the pawn class to create the pawn from.
 --]]
-function modApiExt.pawn:replacePawn(targetPawn, newPawnType)
+function pawn:replacePawn(targetPawn, newPawnType)
 	local newPawn = PAWN_FACTORY:CreatePawn(newPawnType)
 
 	newPawn:SetInvisible(true)
@@ -100,15 +100,17 @@ function modApiExt.pawn:replacePawn(targetPawn, newPawnType)
 	self:copyPawnState(targetPawn, newPawn)
 	Board:RemovePawn(targetPawn)
 
-	modApiExt:runLater(function() newPawn:SetInvisible(false) end)
+	self:runLater(function() newPawn:SetInvisible(false) end)
 end
 
-function modApiExt.pawn:isPawnDead(pawn)
+function pawn:isPawnDead(pawn)
 	if pawn:IsPlayer() and pawn:IsMech() then
 		return pawn:GetHealth() == 0 or pawn:IsDead()
-	elseif pawn:GetHealth() == 0 or not modApiExt.board:isPawnOnBoard(pawn) then
+	elseif pawn:GetHealth() == 0 or not self.board:isPawnOnBoard(pawn) then
 		return true
 	end
 
 	return false
 end
+
+return pawn

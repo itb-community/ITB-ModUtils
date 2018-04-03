@@ -1,36 +1,36 @@
-if not modApiExt.vector then modApiExt.vector = {} end
+local vector = {}
 
-modApiExt.vector.VEC_DOWN_RIGHT = Point( 1,  1)
-modApiExt.vector.VEC_DOWN_LEFT  = Point(-1,  1)
-modApiExt.vector.VEC_UP_RIGHT   = Point( 1, -1)
-modApiExt.vector.VEC_UP_LEFT    = Point(-1, -1)
+vector.VEC_DOWN_RIGHT = Point( 1,  1)
+vector.VEC_DOWN_LEFT  = Point(-1,  1)
+vector.VEC_UP_RIGHT   = Point( 1, -1)
+vector.VEC_UP_LEFT    = Point(-1, -1)
 
 -- shorthands
-modApiExt.vector.VEC_DR = modApiExt.vector.VEC_DOWN_RIGHT
-modApiExt.vector.VEC_DL = modApiExt.vector.VEC_DOWN_LEFT
-modApiExt.vector.VEC_UR = modApiExt.vector.VEC_UP_RIGHT
-modApiExt.vector.VEC_UL = modApiExt.vector.VEC_UP_LEFT
+vector.VEC_DR = vector.VEC_DOWN_RIGHT
+vector.VEC_DL = vector.VEC_DOWN_LEFT
+vector.VEC_UR = vector.VEC_UP_RIGHT
+vector.VEC_UL = vector.VEC_UP_LEFT
 
-modApiExt.vector.DIR_VECTORS_8 =
+vector.DIR_VECTORS_8 =
 {
-	modApiExt.vector.VEC_RIGHT,
-	modApiExt.vector.VEC_DOWN,
-	modApiExt.vector.VEC_LEFT,
-	modApiExt.vector.VEC_UP,
+	vector.VEC_RIGHT,
+	vector.VEC_DOWN,
+	vector.VEC_LEFT,
+	vector.VEC_UP,
 	
-	modApiExt.vector.VEC_DOWN_RIGHT,
-	modApiExt.vector.VEC_DOWN_LEFT,
-	modApiExt.vector.VEC_UP_RIGHT,
-	modApiExt.vector.VEC_UP_LEFT
+	vector.VEC_DOWN_RIGHT,
+	vector.VEC_DOWN_LEFT,
+	vector.VEC_UP_RIGHT,
+	vector.VEC_UP_LEFT
 }
 
-modApiExt.vector.AXIS_X   = 0
-modApiExt.vector.AXIS_Y   = 1
-modApiExt.vector.AXIS_ANY = 2
+vector.AXIS_X   = 0
+vector.AXIS_Y   = 1
+vector.AXIS_ANY = 2
 
 --------------------------------------------------------------------------
 
-function assert_point(o)
+function vector:assert_point(o)
 	assert(type(o) == "userdata")
 	assert(type(o.x) == "number")
 	assert(type(o.y) == "number")
@@ -40,7 +40,7 @@ end
 	Tests whether two points form a line colinear to the specified axis
 	(ie. have the same value for that axis' coordinate)
 --]]
-function modApiExt.vector:isColinear(refPoint, testPoint, axis)
+function vector:isColinear(refPoint, testPoint, axis)
 	assert_point(refPoint)
 	assert_point(testPoint)
 	axis = axis or self.AXIS_ANY
@@ -60,14 +60,14 @@ end
 	Returns a vector normal to the one provided in argument.
 	Normal in this context means perpendicular.
 --]]
-function modApiExt.vector:normal(vec)
+function vector:normal(vec)
 	return Point(vec.y, vec.x)
 end
 
 --[[
 	Returns length of the vector.
 --]]
-function modApiExt.vector:length(vec)
+function vector:length(vec)
 	return math.sqrt(vec.x * vec.x + vec.y * vec.y)
 end
 
@@ -81,8 +81,8 @@ end
 	For fractional values, use UnitVectorF(), which returns a custom table
 	with x and y fields.
 --]]
-function modApiExt.vector:unitVectorI(vec)
-	local l = self.length(vec)
+function vector:unitVectorI(vec)
+	local l = self:length(vec)
 	if l == 0 then return Point(0, 0) end
 	return Point(vec.x / l, vec.y / l)
 end
@@ -91,8 +91,8 @@ end
 	Returns a unit vector constructed from the vector provided in argument.
 	Unit vector is a vector with length of 1.
 --]]
-function modApiExt.vector:unitVectorF(vec)
-	local l = self.length(vec)
+function vector:unitVectorF(vec)
+	local l = self:length(vec)
 
 	local t = {}
 	if l == 0 then t.x = 0 else t.x = vec.x / l end
@@ -108,7 +108,7 @@ end
 	Returns AXIS_Y if this vector has X = 0.
 	Returns nil otherwise.
 --]]
-function modApiExt.vector:toAxis(vec)
+function vector:toAxis(vec)
 	if vec == Point(0, 0) then return nil end
 
 	if vec.y == 0 then
@@ -124,7 +124,8 @@ end
 	Returns index of the direction vector built from the specified 
 	vector in the DIR_VECTORS_8 table
 --]]
-function modApiExt.vector:getDirection8(vec)
+function vector:getDirection8(vec)
 	return list_indexof(self.DIR_VECTORS_8, self:unitVectorI(vec))
 end
 
+return vector

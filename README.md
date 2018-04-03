@@ -145,7 +145,7 @@ List of available hooks:
 
 * `pawnTrackedHook( mission, pawn )`
 
-	Fired when `modApiExt` becomes aware of the pawn and beings tracking it. This is usually at the very start of the mission (for pre-existing pawns), or as soon as the pawn is spawned on the board.
+	Fired when `modApiExt` becomes aware of the pawn and begins tracking it. This is usually at the very start of the mission (for pre-existing pawns), or as soon as the pawn is spawned on the board.
 
 * `pawnUntrackedHook( mission, pawn )`
 
@@ -161,7 +161,7 @@ List of available hooks:
 
 * `pawnPositionChangedHook( mission, pawn, oldPosition )`
 
-	Fired when a pawn's position is changed (either by moving, or by being pushed/flipped). Fired once for every tile.
+	Fired when a pawn's position is changed (either by moving, being pushed/flipped, or undoing move). For normal move or push, this is fired for every tile visibly traversed. For instantenous traversal (teleportation, leap, undo move, `pawn:SetSpace()`) this fires only once.
 
 * `pawnUndoMoveHook( mission, pawn, oldPosition )`
 

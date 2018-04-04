@@ -174,7 +174,7 @@ function modApiExtHooks:trackAndUpdateBuildings(mission)
 			local idx = point.y * w + point.x
 			if not GAME.trackedBuildings[idx] then
 				-- Building not tracked yet
-				GAME.trackedBuildings[idx] = {
+				local bld = {
 					loc = point,
 					destroyed = false,
 					--maxHealth = -1, -- NO WAY TO FIND OUT
@@ -182,12 +182,13 @@ function modApiExtHooks:trackAndUpdateBuildings(mission)
 					--dummy = nil,
 					--lastHealth = -1
 				}
-				--[[
-				local id = Board:AddPawn("ModApi_Ext_Dummy", b.loc)
-				b.dummy = Board:GetPawn(id)
-				b.lastHealth = b.dummy:GetHealth()
-				b.dummy:SetInvisible(true)
-				]]--
+--[[
+				local id = Board:AddPawn("ModUtils_Dummy", point)
+				bld.dummy = Board:GetPawn(id)
+				bld.dummy:SetInvisible(true)
+				bld.lastHealth = bld.dummy:GetHealth()
+--]]
+				GAME.trackedBuildings[idx] = bld
 			else
 				-- Already tracked, update its data...
 				-- ...if there were any
@@ -205,22 +206,23 @@ function modApiExtHooks:trackAndUpdateBuildings(mission)
 				-- But since the dummy is invisible, the shield is also
 				-- invisible (sound shield plays, correct pop text is
 				-- shown, and damage is correctly blocked)
-				-- TODO: Idea: try to detect when the pawn is shielded,
-				-- move it off the board, then programmatically put shield
-				-- on the building is stood on? But there's no way to
-				-- detect when the building's shield goes down...
 				pawn:SetInvisible(not pawn:IsShield())
 
 				local diff = pawn:GetHealth() - bld.lastHealth
 				if diff < 0 then
 					bld.lastHealth = pawn:GetHealth()
+					self:scheduleHook(50, function()
+						if self.gridWasDrawn then
+							for i, hook in ipairs(self.buildingResistHooks) do
+								hook(mission, bld, -diff)
+							end
+						else
 
-					-- Grid resist *groan*					
-					if Board:IsDamaged(bld.loc) then
-						for i, hook in ipairs(modApiExt.buildingDamagedHooks) do
-							hook(mission, bld, -diff)
+							for i, hook in ipairs(self.buildingDamagedHooks) do
+								hook(mission, bld, -diff)
+							end
 						end
-					end
+					end)
 				end
 --]]
 

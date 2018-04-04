@@ -159,6 +159,14 @@ List of available hooks:
 
 	Fired when the player moves their cursor away from the previously highligthed tile.
 
+* `pawnMoveStartHook( mission, pawn )`
+
+	Fired when a pawn begins moving. **ONLY WORKS FOR PLAYER MECHS**
+
+* `pawnMoveEndHook( mission, pawn )`
+
+	Fired when a pawn finishes moving. **ONLY WORKS FOR PLAYER MECHS**
+
 * `pawnPositionChangedHook( mission, pawn, oldPosition )`
 
 	Fired when a pawn's position is changed (either by moving, being pushed/flipped, or undoing move). For normal move or push, this is fired for every tile visibly traversed. For instantenous traversal (teleportation, leap, undo move, `pawn:SetSpace()`) this fires only once.

@@ -5,7 +5,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 		if not GAME.trackedPawns then GAME.trackedPawns = {} end
 		-- pawn userdata cannot be serialized, so store them in a separate
 		-- table that is rebuilt at runtime.
-		if not modApiExt_pawnUserdata then modApiExt_pawnUserdata = {} end
+		if not modApiExt_internal.pawns then modApiExt_internal.pawns = {} end
 
 		local tbl = extract_table(Board:GetPawns(TEAM_ANY))
 
@@ -26,11 +26,11 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 			local pd = GAME.trackedPawns[id]
 			local pawn = Board:GetPawn(id)
 
-			if pawn and not modApiExt_pawnUserdata[id] then
+			if pawn and not modApiExt_internal.pawns[id] then
 				-- regenerate pawn userdata table
-				modApiExt_pawnUserdata[id] = pawn
-			elseif not pawn and modApiExt_pawnUserdata[id] then
-				pawn = modApiExt_pawnUserdata[id]
+				modApiExt_internal.pawns[id] = pawn
+			elseif not pawn and modApiExt_internal.pawns[id] then
+				pawn = modApiExt_internal.pawns[id]
 			end
 
 			if not pd and pawn then
@@ -109,7 +109,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 		for id, pd in pairs(GAME.trackedPawns) do
 			-- Process selection in separate loop, so that callbacks always go
 			-- Deselection -> Selection, instead of relying on pawn order in table
-			local pawn = Board:GetPawn(id) or modApiExt_pawnUserdata[id]
+			local pawn = Board:GetPawn(id) or modApiExt_internal.pawns[id]
 			if pawn then
 				if pawn:IsSelected() and not pd.selected then
 					pd.selected = true
@@ -136,7 +136,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				-- dead. Don't remove them from the tracking table, since if we
 				-- do that, they're going to get reinserted.
 				GAME.trackedPawns[id] = nil
-				modApiExt_pawnUserdata[id] = nil
+				modApiExt_internal.pawns[id] = nil
 
 				for i, hook in ipairs(self.pawnUntrackedHooks) do
 					hook(mission, pawn)
@@ -246,7 +246,7 @@ end
 function modApiExtHooks:resetTrackingTables()
 	GAME.trackedBuildings = nil
 	GAME.trackedPawns = nil
-	modApiExt_pawnUserdata = nil
+	modApiExt_internal.pawns = nil
 end
 
 ---------------------------------------------
@@ -260,9 +260,13 @@ end
 
 modApiExtHooks.missionEnd = function(mission, ret)
 	modApiExtHooks:resetTrackingTables()
+	modApiExt_internal.mission = nil
 end
 
 modApiExtHooks.missionUpdate = function(mission)
+	-- in case we load into a game in progress
+	if not modApiExt_internal.mission then modApiExt_internal.mission = mission end
+
 	modApiExtHooks:trackAndUpdateBuildings(mission)
 	modApiExtHooks:trackAndUpdatePawns(mission)
 end

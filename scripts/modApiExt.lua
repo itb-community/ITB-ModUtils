@@ -59,6 +59,25 @@ function modApiExt:updateScheduledHooks()
 end
 
 --[[
+	Initializes globals used by all instances of modApiExt.
+--]]
+function modApiExt:internal_initGlobals()
+	if not modApiExt_internal then
+		modApiExt_internal = {}
+		-- list of all modApiExt instances
+		modApiExt_internal.extObjects = {}
+		-- current mission, for passing as arg to move hooks
+		modApiExt_internal.mission = nil
+		-- table of pawn userdata, kept only at runtime to help
+		-- with pawn hooks
+		modApiExt_internal.pawns = nil
+		-- reference to the original Move skill, used for chaining
+		-- and implementation of move hooks
+		modApiExt_internal.oldMoveSkill = nil
+	end
+end
+
+--[[
 	Initializes the modApiExt object by loading available modules and setting
 	up hooks.
 
@@ -68,6 +87,9 @@ end
 function modApiExt:init(modulesDir)
 	self.__index = self
 	self.modulesDir = modulesDir
+	
+	self:internal_initGlobals()
+	table.insert(modApiExt_internal.extObjects, self)
 
 	self.timer = nil
 	self.scheduledHooks = {}
@@ -90,9 +112,7 @@ function modApiExt:init(modulesDir)
 
 	self.drawHook = sdl.drawHook(function(screen)
 		self:updateScheduledHooks()
-
 	end)
-
 
 	if modApi.removeMissionUpdateHook == nil then
 		function modApi:removeMissionUpdateHook(fn)

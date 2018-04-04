@@ -74,6 +74,46 @@ function modApiExt:internal_initGlobals()
 		-- reference to the original Move skill, used for chaining
 		-- and implementation of move hooks
 		modApiExt_internal.oldMoveSkill = nil
+
+		-- creates a broadcast function for the specified hooks field,
+		-- allowing to trigger the hook callbacks on all registered
+		-- modApiExt objects
+		-- the second argument is a function that provides arguments
+		-- the hooks will be invoked with
+		local buildBroadcastFunc = function(hooksField, argsFunc)
+			local errfunc = function(e)
+				return string.format( "A %s callback failed: %s, %s",
+					hooksField, e, debug.traceback()
+				)
+			end
+
+			return function()
+				-- make sure that all hooks receive the same arguments
+				local args = {argsFunc()}
+
+				for i, extObj in ipairs(modApiExt_internal.extObjects) do
+					if extObj[hooksField] then
+						for j, hook in ipairs(extObj[hooksField]) do
+							-- invoke the hook in a xpcall, since errors in SkillEffect
+							-- scripts fail silently, making debugging a nightmare.
+							local ok, err = xpcall(
+								function() hook(unpack(args)) end,
+								errfunc
+							)
+
+							if not ok then
+								LOG(err)
+								--io.log(err)
+							end
+						end
+					end
+				end
+			end
+		end
+
+		local moveArgsFunc = function() return modApiExt_internal.mission, Pawn end
+		modApiExt_internal.fireMoveStartHooks = buildBroadcastFunc("pawnMoveStartHooks", moveArgsFunc)
+		modApiExt_internal.fireMoveEndHooks = buildBroadcastFunc("pawnMoveEndHooks", moveArgsFunc)
 	end
 end
 
@@ -150,6 +190,14 @@ function modApiExt:load(mod, options, version)
 			-- This allows us to reset the loaded flag after all other
 			-- mods are done loading.
 			self.loaded = false
+
+			if hooks.overrideMoveSkill then
+				-- Make sure we are the last ones to modify the Move skill.
+				-- Could do that in preMissionStartHook, but then we won't
+				-- override the skill when the player loads the game.
+				-- And there's no preLoadGameHook() available in base modApi.
+				hooks:overrideMoveSkill()
+			end
 		end)
 	end
 

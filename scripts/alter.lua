@@ -249,6 +249,32 @@ function modApiExtHooks:resetTrackingTables()
 	modApiExt_internal.pawns = nil
 end
 
+--[[
+	Overrides the default Move skill to implement pawnMoveStart/End hooks.
+	Can optionally provide your own Move skill as argument to this function
+	in case some non-standard Move skill chaining is required.
+--]]
+function modApiExtHooks:overrideMoveSkill(oldMoveSkill)
+	if not modApiExt_internal.oldMoveSkill or oldMoveSkill then
+		modApiExt_internal.oldMoveSkill = oldMoveSkill or Move.GetSkillEffect
+
+		Move.GetSkillEffect = function(self, p1, p2)
+			local effect = SkillEffect()
+
+			effect:AddScript("modApiExt_internal.fireMoveStartHooks()")
+
+			local tmp = modApiExt_internal.oldMoveSkill(self, p1, p2)
+			for i, e in pairs(extract_table(tmp.effect)) do
+				effect.effect:push_back(e)
+			end
+
+			effect:AddScript("modApiExt_internal.fireMoveEndHooks()")
+
+			return effect
+		end
+	end
+end
+
 ---------------------------------------------
 
 modApiExtHooks.preMissionStart = function(mission)

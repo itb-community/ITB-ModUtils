@@ -5,7 +5,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 		if not GAME.trackedPawns then GAME.trackedPawns = {} end
 		-- pawn userdata cannot be serialized, so store them in a separate
 		-- table that is rebuilt at runtime.
-		if not modApiExt.pawnUserdata then modApiExt.pawnUserdata = {} end
+		if not modApiExt_pawnUserdata then modApiExt_pawnUserdata = {} end
 
 		local tbl = extract_table(Board:GetPawns(TEAM_ANY))
 
@@ -26,11 +26,11 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 			local pd = GAME.trackedPawns[id]
 			local pawn = Board:GetPawn(id)
 
-			if pawn and not modApiExt.pawnUserdata[id] then
+			if pawn and not modApiExt_pawnUserdata[id] then
 				-- regenerate pawn userdata table
-				modApiExt.pawnUserdata[id] = pawn
-			elseif not pawn and modApiExt.pawnUserdata[id] then
-				pawn = modApiExt.pawnUserdata[id]
+				modApiExt_pawnUserdata[id] = pawn
+			elseif not pawn and modApiExt_pawnUserdata[id] then
+				pawn = modApiExt_pawnUserdata[id]
 			end
 
 			if not pd and pawn then
@@ -45,10 +45,10 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					undoPossible = pawn:IsUndoPossible()
 				}
 
-				for i, hook in ipairs(modApiExt.pawnTrackedHooks) do
+				for i, hook in ipairs(self.pawnTrackedHooks) do
 					hook(mission, pawn)
 				end
-			elseif pd then
+			elseif pd and pawn then
 				-- Already tracked, update its data
 				local p = pawn:GetSpace()
 				local undo = pawn:IsUndoPossible()
@@ -62,7 +62,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					-- so it should be fine.
 					-- TODO: Maybe update when we have pawnAttackStart/EndHook
 					if pd.undoPossible and not undo and pawn:IsActive() and pd.loc ~= p then
-						for i, hook in ipairs(modApiExt.pawnUndoMoveHooks) do
+						for i, hook in ipairs(self.pawnUndoMoveHooks) do
 							hook(mission, pawn, pd.loc)
 						end
 					end
@@ -71,7 +71,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				end
 
 				if pd.loc ~= p then
-					for i, hook in ipairs(modApiExt.pawnPositionChangedHooks) do
+					for i, hook in ipairs(self.pawnPositionChangedHooks) do
 						hook(mission, pawn, pd.loc)
 					end
 					pd.loc = p
@@ -83,12 +83,12 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 
 				if diff < 0 then
 					-- took damage
-					for i, hook in ipairs(modApiExt.pawnDamagedHooks) do
+					for i, hook in ipairs(self.pawnDamagedHooks) do
 						hook(mission, pawn, -diff)
 					end
 				elseif diff > 0 then
 					-- healed
-					for i, hook in ipairs(modApiExt.pawnHealedHooks) do
+					for i, hook in ipairs(self.pawnHealedHooks) do
 						hook(mission, pawn, diff)
 					end
 				end
@@ -96,7 +96,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				-- Deselection
 				if pd.selected and not pawn:IsSelected() then
 					pd.selected = false
-					for i, hook in ipairs(modApiExt.pawnDeselectedHooks) do
+					for i, hook in ipairs(self.pawnDeselectedHooks) do
 						hook(mission, pawn)
 					end
 				end
@@ -109,11 +109,11 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 		for id, pd in pairs(GAME.trackedPawns) do
 			-- Process selection in separate loop, so that callbacks always go
 			-- Deselection -> Selection, instead of relying on pawn order in table
-			local pawn = Board:GetPawn(id) or modApiExt.pawnUserdata[id]
+			local pawn = Board:GetPawn(id) or modApiExt_pawnUserdata[id]
 			if pawn then
 				if pawn:IsSelected() and not pd.selected then
 					pd.selected = true
-					for i, hook in ipairs(modApiExt.pawnSelectedHooks) do
+					for i, hook in ipairs(self.pawnSelectedHooks) do
 						hook(mission, pawn)
 					end
 				end
@@ -121,7 +121,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 
 			if not pd.dead and pd.curHealth == 0 then
 				pd.dead = true
-				for i, hook in ipairs(modApiExt.pawnKilledHooks) do
+				for i, hook in ipairs(self.pawnKilledHooks) do
 					hook(mission, pawn)
 				end
 			end
@@ -136,27 +136,27 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				-- dead. Don't remove them from the tracking table, since if we
 				-- do that, they're going to get reinserted.
 				GAME.trackedPawns[id] = nil
-				modApiExt.pawnUserdata[id] = nil
+				modApiExt_pawnUserdata[id] = nil
 
-				for i, hook in ipairs(modApiExt.pawnUntrackedHooks) do
+				for i, hook in ipairs(self.pawnUntrackedHooks) do
 					hook(mission, pawn)
 				end
 			end
 		end
 
 		local mtile = mouseTile()
-		if modApiExt.currentTile ~= mtile then
-			if modApiExt.currentTile then -- could be nil
-				for i, hook in ipairs(modApiExt.tileUnhighlightedHooks) do
-					hook(mission, modApiExt.currentTile)
+		if self.currentTile ~= mtile then
+			if self.currentTile then -- could be nil
+				for i, hook in ipairs(self.tileUnhighlightedHooks) do
+					hook(mission, self.currentTile)
 				end
 			end
 
-			modApiExt.currentTile = mtile
+			self.currentTile = mtile
 
-			if modApiExt.currentTile then -- could be nil
-				for i, hook in ipairs(modApiExt.tileHighlightedHooks) do
-					hook(mission, modApiExt.currentTile)
+			if self.currentTile then -- could be nil
+				for i, hook in ipairs(self.tileHighlightedHooks) do
+					hook(mission, self.currentTile)
 				end
 			end
 		end
@@ -230,7 +230,7 @@ function modApiExtHooks:trackAndUpdateBuildings(mission)
 					bld.dummy:Kill(true)
 					Board:RemovePawn(bld.dummy)
 --]]
-					for i, hook in ipairs(modApiExt.buildingDestroyedHooks) do
+					for i, hook in ipairs(self.buildingDestroyedHooks) do
 						hook(mission, bld)
 					end
 
@@ -244,7 +244,7 @@ end
 function modApiExtHooks:resetTrackingTables()
 	GAME.trackedBuildings = nil
 	GAME.trackedPawns = nil
-	modApiExt.pawnUserdata = nil
+	modApiExt_pawnUserdata = nil
 end
 
 ---------------------------------------------
@@ -253,11 +253,11 @@ modApiExtHooks.preMissionStart = function(mission)
 end
 
 modApiExtHooks.missionStart = function(mission)
-	modApiExtHooks:resetTrackingTables(mission)
+	modApiExtHooks:resetTrackingTables()
 end
 
 modApiExtHooks.missionEnd = function(mission, ret)
-	modApiExtHooks:resetTrackingTables(mission)
+	modApiExtHooks:resetTrackingTables()
 end
 
 modApiExtHooks.missionUpdate = function(mission)

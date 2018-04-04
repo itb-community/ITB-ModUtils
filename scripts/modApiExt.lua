@@ -110,7 +110,7 @@ function modApiExt:load(mod, options, version)
 	if self.clearHooks then self:clearHooks() end
 
 	if self:isModuleAvailable(self.modulesDir.."alter") then
-		local hooks = require(self.modulesDir.."alter")
+		local hooks = self:loadModule(self.modulesDir.."alter")
 
 		if hooks.preMissionStart then
 			modApi:addPreMissionStartHook(hooks.preMissionStart)

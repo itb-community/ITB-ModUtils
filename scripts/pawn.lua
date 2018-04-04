@@ -118,7 +118,7 @@ end
 	may have been removed from the board.
 --]]
 function pawn:getById(pawnId)
-	return Board:GetPawn(pawnId) or self.pawnUserdata[pawnId]
+	return Board:GetPawn(pawnId) or (modApiExt_pawnUserdata and modApiExt_pawnUserdata[pawnId]) or nil
 end
 
 --[[

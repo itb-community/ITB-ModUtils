@@ -21,6 +21,8 @@ end
 	Returns currently highlighted board tile (Point), or nil.
 --]]
 function mouseTile()
+	-- Use custom table instead of the existing Point class, since Point
+	-- can only hold integer values and automatically rounds them.
 	return screenPointToTile({ x = sdl.mouse.x(), y = sdl.mouse.y() })
 end
 
@@ -29,9 +31,6 @@ if not screenPointToTile then
 		Returns a board tile (Point) at the specified point on the screen, or nil.
 	--]]
 	function screenPointToTile(screenPoint)
-		-- Use custom table instead of the existing Point class, since Point
-		-- can only hold integer values and automatically rounds them.
-
 		local screen = sdl.screen()
 		local scale = GetBoardScale()
 		

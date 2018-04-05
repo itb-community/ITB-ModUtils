@@ -1,5 +1,17 @@
 local hooks = {}
 
+hooks.tileHighlightedHooks = {}
+function hooks:addTileHighlightedHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.tileHighlightedHooks,fn)
+end
+
+hooks.tileUnhighlightedHooks = {}
+function hooks:addTileUnhighlightedHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.tileUnhighlightedHooks,fn)
+end
+
 hooks.pawnTrackedHooks = {}
 function hooks:addPawnTrackedHook(fn)
 	assert(type(fn) == "function")
@@ -46,18 +58,6 @@ hooks.pawnDeselectedHooks = {}
 function hooks:addPawnDeselectedHook(fn)
 	assert(type(fn) == "function")
 	table.insert(self.pawnDeselectedHooks,fn)
-end
-
-hooks.tileHighlightedHooks = {}
-function hooks:addTileHighlightedHook(fn)
-	assert(type(fn) == "function")
-	table.insert(self.tileHighlightedHooks,fn)
-end
-
-hooks.tileUnhighlightedHooks = {}
-function hooks:addTileUnhighlightedHook(fn)
-	assert(type(fn) == "function")
-	table.insert(self.tileUnhighlightedHooks,fn)
 end
 
 hooks.pawnDamagedHooks = {}

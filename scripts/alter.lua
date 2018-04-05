@@ -297,10 +297,12 @@ function modApiExtHooks:overrideMoveSkill(oldMoveSkill)
 	end
 end
 
-function modApiExtHooks:resetTrackingTables()
+function modApiExtHooks:reset()
 	GAME.trackedBuildings = nil
 	GAME.trackedPawns = nil
 	modApiExt_internal.pawns = nil
+	modApiExt_internal.mission = nil
+	modApiExt_internal.runLaterQueue = nil
 end
 
 ---------------------------------------------
@@ -309,13 +311,11 @@ modApiExtHooks.preMissionStart = function(mission)
 end
 
 modApiExtHooks.missionStart = function(mission)
-	modApiExtHooks:resetTrackingTables()
+	modApiExtHooks:reset()
 end
 
 modApiExtHooks.missionEnd = function(mission, ret)
-	modApiExtHooks:resetTrackingTables()
-	modApiExt_internal.mission = nil
-	modApiExt_internal.runLaterQueue = nil
+	modApiExtHooks:reset()
 end
 
 modApiExtHooks.missionUpdate = function(mission)
@@ -323,7 +323,7 @@ modApiExtHooks.missionUpdate = function(mission)
 	-- the missionUpdate hook.
 	-- Set it here, in case we load into a game in progress (missionStart
 	-- is not executed then)
-	if not modApiExt_internal.mission then modApiExt_internal.mission = mission end
+	if not modApiExt_internal.mission and mission then modApiExt_internal.mission = mission end
 
 	modApiExtHooks:processRunLater(mission)
 	modApiExtHooks:updateTiles()

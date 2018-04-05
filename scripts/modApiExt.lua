@@ -58,6 +58,51 @@ function modApiExt:updateScheduledHooks()
 end
 
 --[[
+	Ceates a broadcast function for the specified hooks field, allowing
+	to trigger the hook callbacks on all registered modApiExt objects.
+
+	The second argument is a function that provides arguments the hooks
+	will be invoked with, used only if the broadcast function was invoked
+	without any arguments. Can be nil to invoke argument-less hooks.
+--]]
+function modApiExt:buildBroadcastFunc(hooksField, argsFunc)
+	local errfunc = function(e)
+		return string.format( "A %s callback failed: %s, %s",
+			hooksField, e, debug.traceback()
+		)
+	end
+
+	return function(...)
+		local args = {...}
+
+		if #args == 0 then
+			-- We didn't receive arguments directly. Fall back to
+			-- the argument function.
+			-- Make sure that all hooks receive the same arguments.
+			args = argsFunc and {argsFunc()} or nil
+		end
+
+		for i, extObj in ipairs(modApiExt_internal.extObjects) do
+			if extObj[hooksField] then -- may have opted out of that hook
+				for j, hook in ipairs(extObj[hooksField]) do
+					-- invoke the hook in a xpcall, since errors in SkillEffect
+					-- scripts fail silently, making debugging a nightmare.
+					local ok, err = xpcall(
+						args and function() hook(unpack(args)) end or function() hook() end,
+						errfunc
+					)
+
+					if not ok then
+						LOG(err)
+						--io.log(err)
+					end
+				end
+			end
+		end
+	end
+end
+
+--[[
 	Initializes globals used by all instances of modApiExt.
 --]]
 function modApiExt:internal_initGlobals()
@@ -70,60 +115,21 @@ function modApiExt:internal_initGlobals()
 		-- table of pawn userdata, kept only at runtime to help
 		-- with pawn hooks
 		modApiExt_internal.pawns = nil
-		-- reference to the original Move's GetSkillEffect, used
-		-- for chaining and implementation of move hooks
-		modApiExt_internal.oldMoveEffect = nil
 
 		modApiExt_internal.timer = sdl.timer()
 		modApiExt_internal.elapsedTime = nil
 
-		-- creates a broadcast function for the specified hooks field,
-		-- allowing to trigger the hook callbacks on all registered
-		-- modApiExt objects
-		-- the second argument is a function that provides arguments
-		-- the hooks will be invoked with
-		local buildBroadcastFunc = function(hooksField, argsFunc)
-			local errfunc = function(e)
-				return string.format( "A %s callback failed: %s, %s",
-					hooksField, e, debug.traceback()
-				)
-			end
+		-- reference to the original Move's GetSkillEffect, used
+		-- for chaining and implementation of move hooks
+		modApiExt_internal.oldMoveEffect = nil
 
-			return function(...)
-				local args = {...}
 
-				if #args == 0 then
-					-- We didn't receive arguments directly. Fall back to
-					-- the argument function.
-					-- Make sure that all hooks receive the same arguments.
-					args = argsFunc and {argsFunc()} or nil
-				end
+		modApiExt_internal.fireMoveStartHooks = self:buildBroadcastFunc("pawnMoveStartHooks")
+		modApiExt_internal.fireMoveEndHooks   = self:buildBroadcastFunc("pawnMoveEndHooks")
 
-				for i, extObj in ipairs(modApiExt_internal.extObjects) do
-					if extObj[hooksField] then -- may have opted out of that hook
-						for j, hook in ipairs(extObj[hooksField]) do
-							-- invoke the hook in a xpcall, since errors in SkillEffect
-							-- scripts fail silently, making debugging a nightmare.
-							local ok, err = xpcall(
-								args and function() hook(unpack(args)) end or function() hook() end,
-								errfunc
-							)
 
-							if not ok then
-								LOG(err)
-								--io.log(err)
-							end
-						end
-					end
-				end
-			end
-		end
 
-		local moveArgsFunc = function() return modApiExt_internal.mission, Pawn end
-		modApiExt_internal.fireMoveStartHooks = buildBroadcastFunc("pawnMoveStartHooks", moveArgsFunc)
-		modApiExt_internal.fireMoveEndHooks   = buildBroadcastFunc("pawnMoveEndHooks", moveArgsFunc)
-
-		modApiExt_internal.fireResetTurnHook = buildBroadcastFunc("resetTurnHooks")
+		modApiExt_internal.fireResetTurnHook = self:buildBroadcastFunc("resetTurnHooks")
 	end
 end
 

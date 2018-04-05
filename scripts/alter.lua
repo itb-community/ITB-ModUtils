@@ -283,14 +283,14 @@ function modApiExtHooks:overrideMoveSkill(oldMoveSkill)
 		Move.GetSkillEffect = function(slf, p1, p2)
 			local tmp = SkillEffect()
 
-			tmp:AddScript("modApiExt_internal.fireMoveStartHooks()")
+			tmp:AddScript("modApiExt_internal.fireMoveStartHooks(modApiExt_internal.mission, Pawn)")
 
 			local moveFx = modApiExt_internal.oldMoveEffect(slf, p1, p2)
 			for i, e in pairs(extract_table(moveFx.effect)) do
 				tmp.effect:push_back(e)
 			end
 
-			tmp:AddScript("modApiExt_internal.fireMoveEndHooks()")
+			tmp:AddScript("modApiExt_internal.fireMoveEndHooks(modApiExt_internal.mission, Pawn)")
 
 			moveFx.effect = tmp.effect
 			return moveFx

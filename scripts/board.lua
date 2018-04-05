@@ -46,7 +46,7 @@ function board:isRestorableTerrain(point)
 	local terrain = Board:GetTerrain(point)
 
 	-- Mountains and ice can be broken
-	-- Buildings can be damaged or damaged
+	-- Buildings can be damaged or destroyed
 	return terrain ~= TERRAIN_MOUNTAIN  and terrain ~= TERRAIN_ICE
 		and terrain ~= TERRAIN_BUILDING
 end
@@ -64,8 +64,9 @@ function board:restoreTerrain(point, terrainData)
 	Board:ClearSpace(point)
 	Board:SetTerrain(point, terrainData.type)
 	-- No idea what the second boolean argument does here
-	Board:SetSmoke(point,terrainData.smoke, false)
-	Board:SetAcid(point,terrainData.acid)
+	-- maybe normal smoke vs sand smoke?
+	Board:SetSmoke(point, terrainData.smoke, false)
+	Board:SetAcid(point, terrainData.acid)
 end
 
 function board:isWaterTerrain(point)

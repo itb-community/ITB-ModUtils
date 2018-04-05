@@ -10,6 +10,7 @@ ModUtils_Dummy = {
 	IgnoreSmoke = true,
 	IgnoreFlip = true,
 	Neutral = true,
+	Massive = true,
 	Corporate = false,
 	IsPortrait = false,
 	SpaceColor = false,
@@ -28,7 +29,7 @@ local pawn = {}
 function pawn:setFire(pawn, fire)
 	local d = SpaceDamage()
 	if fire then d.iFire = EFFECT_CREATE else d.iFire = EFFECT_REMOVE end
-	self:damagePawn(pawn, d)
+	self:safeDamage(pawn, d)
 end
 
 --[[
@@ -43,7 +44,7 @@ end
 	spaceDamage
 		SpaceDamage instance to deal to the pawn.
 --]]
-function pawn:damagePawn(pawn, spaceDamage)
+function pawn:safeDamage(pawn, spaceDamage)
 	local wasOnBoard = self.board:isPawnOnBoard(pawn)
 
 	local pawnSpace = pawn:GetSpace()
@@ -68,12 +69,12 @@ end
 --[[
 	Attempts to copy state from source pawn to the target pawn.
 --]]
-function pawn:copyPawnState(sourcePawn, targetPawn)
+function pawn:copyState(sourcePawn, targetPawn)
 	if sourcePawn:GetHealth() < targetPawn:GetHealth() then
 		local spaceDamage = SpaceDamage()
 		spaceDamage.iDamage = targetPawn:GetHealth() - sourcePawn:GetHealth()
 
-		self:damagePawn(targetPawn, spaceDamage)
+		self:safeDamage(targetPawn, spaceDamage)
 	end
 
 	if sourcePawn:IsFire() then self:setFire(targetPawn, true) end
@@ -89,21 +90,27 @@ end
 		The Pawn instance to replace.
 	newPawnType
 		Name of the pawn class to create the pawn from.
+	returns
+		The new pawn
 --]]
-function pawn:replacePawn(targetPawn, newPawnType)
+function pawn:replace(targetPawn, newPawnType)
 	local newPawn = PAWN_FACTORY:CreatePawn(newPawnType)
 
 	newPawn:SetInvisible(true)
 	newPawn:SetActive(targetPawn:IsActive())
 
 	Board:AddPawn(newPawn, targetPawn:GetSpace())
-	self:copyPawnState(targetPawn, newPawn)
+	self:copyState(targetPawn, newPawn)
 	Board:RemovePawn(targetPawn)
 
+	-- make it visible on the next step to prevent audiovisual
+	-- effects from playing
 	self:runLater(function() newPawn:SetInvisible(false) end)
+
+	return newPawn
 end
 
-function pawn:isPawnDead(pawn)
+function pawn:isDead(pawn)
 	if pawn:IsPlayer() and pawn:IsMech() then
 		return pawn:GetHealth() == 0 or pawn:IsDead()
 	elseif pawn:GetHealth() == 0 or not self.board:isPawnOnBoard(pawn) then

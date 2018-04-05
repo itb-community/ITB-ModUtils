@@ -1,5 +1,6 @@
 local vector = {}
 
+-- diagonal vectors
 vector.VEC_DOWN_RIGHT = Point( 1,  1)
 vector.VEC_DOWN_LEFT  = Point(-1,  1)
 vector.VEC_UP_RIGHT   = Point( 1, -1)
@@ -61,6 +62,7 @@ end
 	Normal in this context means perpendicular.
 --]]
 function vector:normal(vec)
+	assert_point(vec)
 	return Point(vec.y, vec.x)
 end
 
@@ -68,6 +70,7 @@ end
 	Returns length of the vector.
 --]]
 function vector:length(vec)
+	assert_point(vec)
 	return math.sqrt(vec.x * vec.x + vec.y * vec.y)
 end
 
@@ -76,12 +79,12 @@ end
 	Unit vector is a vector with length of 1.
 	HOWEVER in ItB, the Point class can only hold integers, and by default
 	rounds fractional values to nearest integers. 0.5 is rounded to 1, -0.5
-	is rounded to -1.
+	is rounded to -1, etc.
 
-	For fractional values, use UnitVectorF(), which returns a custom table
+	For fractional values, use UnitF(), which returns a custom table
 	with x and y fields.
 --]]
-function vector:unitVectorI(vec)
+function vector:unitI(vec)
 	local l = self:length(vec)
 	if l == 0 then return Point(0, 0) end
 	return Point(vec.x / l, vec.y / l)
@@ -91,7 +94,7 @@ end
 	Returns a unit vector constructed from the vector provided in argument.
 	Unit vector is a vector with length of 1.
 --]]
-function vector:unitVectorF(vec)
+function vector:unitF(vec)
 	local l = self:length(vec)
 
 	local t = {}
@@ -109,6 +112,7 @@ end
 	Returns nil otherwise.
 --]]
 function vector:toAxis(vec)
+	assert_point(vec)
 	if vec == Point(0, 0) then return nil end
 
 	if vec.y == 0 then
@@ -125,7 +129,7 @@ end
 	vector in the DIR_VECTORS_8 table
 --]]
 function vector:getDirection8(vec)
-	return list_indexof(self.DIR_VECTORS_8, self:unitVectorI(vec))
+	return list_indexof(self.DIR_VECTORS_8, self:unitI(vec))
 end
 
 return vector

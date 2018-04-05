@@ -243,10 +243,27 @@ function modApiExtHooks:trackAndUpdateBuildings(mission)
 	end
 end
 
-function modApiExtHooks:resetTrackingTables()
-	GAME.trackedBuildings = nil
-	GAME.trackedPawns = nil
-	modApiExt_internal.pawns = nil
+function modApiExtHooks:processRunLater(mission)
+	if modApiExt_internal.runLaterQueue then
+		local q = modApiExt_internal.runLaterQueue
+		local n = #q
+		for i = 1, n do
+			q[i](mission)
+			q[i] = nil
+		end
+
+		-- compact the table, if processed hooks also scheduled
+		-- their own runLater functions (but we will process those
+		-- on the next update step)
+		local i = n + 1
+		local j = 0
+		while q[i] do
+			j = j + 1
+			q[j] = q[i]
+			q[i] = nil
+			i = i + 1
+		end
+	end
 end
 
 --[[
@@ -276,6 +293,12 @@ function modApiExtHooks:overrideMoveSkill(oldMoveSkill)
 	end
 end
 
+function modApiExtHooks:resetTrackingTables()
+	GAME.trackedBuildings = nil
+	GAME.trackedPawns = nil
+	modApiExt_internal.pawns = nil
+end
+
 ---------------------------------------------
 
 modApiExtHooks.preMissionStart = function(mission)
@@ -288,12 +311,17 @@ end
 modApiExtHooks.missionEnd = function(mission, ret)
 	modApiExtHooks:resetTrackingTables()
 	modApiExt_internal.mission = nil
+	modApiExt_internal.runLaterQueue = nil
 end
 
 modApiExtHooks.missionUpdate = function(mission)
-	-- in case we load into a game in progress
+	-- Store the mission for use by other hooks which can't be called from
+	-- the missionUpdate hook.
+	-- Set it here, in case we load into a game in progress (missionStart
+	-- is not executed then)
 	if not modApiExt_internal.mission then modApiExt_internal.mission = mission end
 
+	modApiExtHooks:processRunLater(mission)
 	modApiExtHooks:trackAndUpdateBuildings(mission)
 	modApiExtHooks:trackAndUpdatePawns(mission)
 end

@@ -1,9 +1,9 @@
 
 --[[
-	Nullsafe shorthand for point:GetLuaString(), cause I'm lazy
+	Nullsafe shorthand for point:GetString(), cause I'm lazy
 --]]
 function p2s(point)
-	return point and point:GetLuaString() or "nil"
+	return point and point:GetString() or "nil"
 end
 
 --[[
@@ -28,6 +28,9 @@ end
 	Returns a board tile (Point) at the specified point on the screen, or nil.
 --]]
 function screenPointToTile(screenPoint)
+	-- Use custom table instead of the existing Point class, since Point
+	-- can only hold integer values and automatically rounds them.
+
 	local screen = sdl.screen()
 	local scale = GetBoardScale()
 	

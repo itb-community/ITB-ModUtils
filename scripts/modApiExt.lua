@@ -153,13 +153,6 @@ function modApiExt:init(modulesDir)
 	self.drawHook = sdl.drawHook(function(screen)
 		self:updateScheduledHooks()
 	end)
-
-	if modApi.removeMissionUpdateHook == nil then
-		function modApi:removeMissionUpdateHook(fn)
-			assert(type(fn) == "function")
-			remove_element(fn, modApi.missionUpdateHooks)
-		end
-	end
 end
 
 function modApiExt:load(mod, options, version)

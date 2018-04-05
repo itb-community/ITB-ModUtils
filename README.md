@@ -117,8 +117,23 @@ end
 
 ## Features
 
-Default `modApi` object is extended with a new function, `removeMissionUpdateHook`, which in turn allows for callbacks scheduled to execute during the game's next update step (see [`Hook#RunLater()`](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/hooks.lua))
+Some useful functions added by this library:
 
+* `modApiExt:runLater( fn )`
+
+	Schedules the specified function to be executed during the game's *next* update step. This allows for stuff like moving a pawn onto a fire tile, and moving it elsewhere in the next step -- the single tick inbetween is enough for the pawn to be affected by fire status.
+
+* `modApiExt:scheduleHook( timeMs, fn )`
+
+	Schedules the specified function to be executed in `timeMs` milliseconds (roughly; this is checked every frame, so the exact timing will depend on the user's framerate).
+
+* `mouseTile()` (global function)
+
+	Returns the Board tile currently being hovered over by the mouse cursor. Useful for debugging and testing, when placing pawns on the board -- you don't have to figure out the tile and then type it out, you just move your mouse there.
+
+* `List` class
+
+	A list class implemented as a double-ended queue, which allows it to act as both a queue and a stack.
 
 ### Modules
 
@@ -138,7 +153,11 @@ At the moment, the library consists of the following modules:
 New hooks are added exactly the same way as in the base mod loader's `modApi`, except you have to reference the extended API object (`modApiExt`) instead. For example:
 
 ```lua
-modApiExt:addPawnDamagedHook(myHookFunction)
+function logDamagedPawns( mission, pawn, damageTaken )
+	LOG( string.format( "%s took %s damage!", pawn:GetMechName(), damageTaken ) )
+end
+
+modApiExt:addPawnDamagedHook( logDamagedPawns )
 ```
 
 List of available hooks:

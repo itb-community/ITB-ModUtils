@@ -22,4 +22,14 @@ function weapon:plusTarget(center, size)
 	return ret
 end
 
+--[[
+	When called inside of GetSkillEffect(), returns true if the weapon is being
+	called from inside of a tip image. False otherwise.
+
+	Always returns false when called outside of GetSkillEffect().
+--]]
+function weapon:isTipImage()
+	return not Board.gameBoard
+end
+
 return weapon

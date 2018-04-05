@@ -341,7 +341,7 @@ modApiExtHooks.missionUpdate = function(mission)
 		-- Also shouldn't trigger when drawing UI which halts the game, since
 		-- both variables are updated together.
 
-		modApiExt_internal.fireResetTurnHook()
+		modApiExt_internal.fireResetTurnHook(mission)
 	end
 	local t = modApiExt_internal.timer:elapsed()
 	GAME.elapsedTime = t

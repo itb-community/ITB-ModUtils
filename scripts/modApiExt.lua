@@ -71,9 +71,9 @@ function modApiExt:internal_initGlobals()
 		-- table of pawn userdata, kept only at runtime to help
 		-- with pawn hooks
 		modApiExt_internal.pawns = nil
-		-- reference to the original Move skill, used for chaining
-		-- and implementation of move hooks
-		modApiExt_internal.oldMoveSkill = nil
+		-- reference to the original Move's GetSkillEffect, used
+		-- for chaining and implementation of move hooks
+		modApiExt_internal.oldMoveEffect = nil
 
 		-- creates a broadcast function for the specified hooks field,
 		-- allowing to trigger the hook callbacks on all registered

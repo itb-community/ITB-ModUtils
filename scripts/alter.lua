@@ -258,19 +258,20 @@ function modApiExtHooks:overrideMoveSkill(oldMoveSkill)
 	if not modApiExt_internal.oldMoveSkill or oldMoveSkill then
 		modApiExt_internal.oldMoveSkill = oldMoveSkill or Move.GetSkillEffect
 
-		Move.GetSkillEffect = function(self, p1, p2)
-			local effect = SkillEffect()
+		Move.GetSkillEffect = function(slf, p1, p2)
+			local tmp = SkillEffect()
 
-			effect:AddScript("modApiExt_internal.fireMoveStartHooks()")
+			tmp:AddScript("modApiExt_internal.fireMoveStartHooks()")
 
-			local tmp = modApiExt_internal.oldMoveSkill(self, p1, p2)
-			for i, e in pairs(extract_table(tmp.effect)) do
-				effect.effect:push_back(e)
+			local moveFx = modApiExt_internal.oldMoveSkill(slf, p1, p2)
+			for i, e in pairs(extract_table(moveFx.effect)) do
+				tmp.effect:push_back(e)
 			end
 
-			effect:AddScript("modApiExt_internal.fireMoveEndHooks()")
+			tmp:AddScript("modApiExt_internal.fireMoveEndHooks()")
 
-			return effect
+			moveFx.effect = tmp.effect
+			return moveFx
 		end
 	end
 end

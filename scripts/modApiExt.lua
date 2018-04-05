@@ -89,9 +89,15 @@ function modApiExt:internal_initGlobals()
 				)
 			end
 
-			return function()
-				-- make sure that all hooks receive the same arguments
-				local args = argsFunc and {argsFunc()} or nil
+			return function(...)
+				local args = {...}
+
+				if #args == 0 then
+					-- We didn't receive arguments directly. Fall back to
+					-- the argument function.
+					-- Make sure that all hooks receive the same arguments.
+					args = argsFunc and {argsFunc()} or nil
+				end
 
 				for i, extObj in ipairs(modApiExt_internal.extObjects) do
 					if extObj[hooksField] then -- may have opted out of that hook

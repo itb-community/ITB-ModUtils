@@ -102,6 +102,36 @@ function hooks:addBuildingDestroyedHook(fn)
 	table.insert(self.buildingDestroyedHooks,fn)
 end
 
+hooks.skillStartHooks = {}
+function hooks:addSkillStartHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.skillStartHooks,fn)
+end
+
+hooks.skillEndHooks = {}
+function hooks:addSkillEndHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.skillEndHooks,fn)
+end
+
+hooks.queuedSkillStartHooks = {}
+function hooks:addQueuedSkillStartHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.queuedSkillStartHooks,fn)
+end
+
+hooks.queuedSkillEndHooks = {}
+function hooks:addQueuedSkillEndHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.queuedSkillEndHooks,fn)
+end
+
+hooks.skillBuildHooks = {}
+function hooks:addSkillBuildHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.skillBuildHooks,fn)
+end
+
 --[[
 	Executes the function on the game's next update step. Only works during missions.
 	

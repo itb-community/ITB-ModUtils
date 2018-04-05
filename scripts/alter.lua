@@ -298,6 +298,79 @@ function modApiExtHooks:overrideMoveSkill(oldMoveSkill)
 	end
 end
 
+function modApiExtHooks:overrideSkill(id, skill)
+	assert(skill.GetSkillEffect)
+	assert(_G[id] == skill) -- no fun allowed
+
+	if modApiExt_internal.oldSkills[id] then
+		error(id .. " is already overridden!")
+	end
+
+	modApiExt_internal.oldSkills[id] = skill.GetSkillEffect
+
+	skill.GetSkillEffect = function(slf, p1, p2)
+		local skillFx = modApiExt_internal.oldSkills[id](slf, p1, p2)
+
+		modApiExt_internal.fireSkillBuildHook(
+			modApiExt_internal.mission,
+			Pawn, id, p1, p2, skillFx
+		)
+
+		if not skillFx.effect:empty() then
+			local tmp = SkillEffect()
+
+			tmp:AddScript("modApiExt_internal.fireSkillStartHook("
+				.."modApiExt_internal.mission, Pawn,"
+				.."unpack("..save_table({id, p1, p2}).."))"
+			)
+
+			for _, e in pairs(extract_table(skillFx.effect)) do
+				tmp.effect:push_back(e)
+			end
+
+			tmp:AddScript("modApiExt_internal.fireSkillEndHook("
+				.."modApiExt_internal.mission, Pawn,"
+				.."unpack("..save_table({id, p1, p2}).."))"
+			)
+			skillFx.effect = tmp.effect
+		end
+
+		if not skillFx.q_effect:empty() then
+			local tmp = SkillEffect()
+			tmp:AddScript("modApiExt_internal.fireQueuedSkillStartHook("
+				.."modApiExt_internal.mission, Pawn,"
+				.."unpack("..save_table({id, p1, p2}).."))"
+			)
+
+			for _, e in pairs(extract_table(skillFx.q_effect)) do
+				tmp.effect:push_back(e)
+			end
+
+			tmp:AddScript("modApiExt_internal.fireQueuedSkillEndHook("
+				.."modApiExt_internal.mission, Pawn,"
+				.."unpack("..save_table({id, p1, p2}).."))"
+			)
+			skillFx.q_effect = tmp.effect
+		end
+
+		return skillFx
+	end
+end
+
+function modApiExtHooks:overrideAllSkills()
+	if not modApiExt_internal.oldSkills then
+		modApiExt_internal.oldSkills = {}
+
+		for k, v in pairs(_G) do
+			if type(v) == "table" and v.GetSkillEffect then
+				if not list_contains(modApiExt_internal.skillBlacklist, k) then
+					self:overrideSkill(k, v)
+				end
+			end
+		end
+	end
+end
+
 function modApiExtHooks:reset()
 	GAME.trackedBuildings = nil
 	GAME.trackedPawns = nil

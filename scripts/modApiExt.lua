@@ -122,12 +122,19 @@ function modApiExt:internal_initGlobals()
 		-- reference to the original Move's GetSkillEffect, used
 		-- for chaining and implementation of move hooks
 		modApiExt_internal.oldMoveEffect = nil
+		-- list of skills that will not be overridden to have
+		-- skillStart/End etc hooks implemented
+		modApiExt_internal.skillBlacklist = { "Move" }
 
 
 		modApiExt_internal.fireMoveStartHooks = self:buildBroadcastFunc("pawnMoveStartHooks")
 		modApiExt_internal.fireMoveEndHooks   = self:buildBroadcastFunc("pawnMoveEndHooks")
 
-
+		modApiExt_internal.fireSkillStartHook       = self:buildBroadcastFunc("skillStartHooks")
+		modApiExt_internal.fireSkillEndHook         = self:buildBroadcastFunc("skillEndHooks")
+		modApiExt_internal.fireQueuedSkillStartHook = self:buildBroadcastFunc("queuedSkillStartHooks")
+		modApiExt_internal.fireQueuedSkillEndHook   = self:buildBroadcastFunc("queuedSkillEndHooks")
+		modApiExt_internal.fireSkillBuildHook       = self:buildBroadcastFunc("skillBuildHooks")
 
 		modApiExt_internal.fireResetTurnHook = self:buildBroadcastFunc("resetTurnHooks")
 	end
@@ -205,6 +212,9 @@ function modApiExt:load(mod, options, version)
 				-- override the skill when the player loads the game.
 				-- And there's no preLoadGameHook() available in base modApi.
 				hooks:overrideMoveSkill()
+			end
+			if hooks.overrideAllSkills then
+				hooks:overrideAllSkills()
 			end
 		end)
 	end

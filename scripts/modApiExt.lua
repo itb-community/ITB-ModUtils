@@ -89,15 +89,15 @@ function modApiExt:internal_initGlobals()
 
 			return function()
 				-- make sure that all hooks receive the same arguments
-				local args = {argsFunc()}
+				local args = argsFunc and {argsFunc()} or nil
 
 				for i, extObj in ipairs(modApiExt_internal.extObjects) do
-					if extObj[hooksField] then
+					if extObj[hooksField] then -- may have opted out of that hook
 						for j, hook in ipairs(extObj[hooksField]) do
 							-- invoke the hook in a xpcall, since errors in SkillEffect
 							-- scripts fail silently, making debugging a nightmare.
 							local ok, err = xpcall(
-								function() hook(unpack(args)) end,
+								args and function() hook(unpack(args)) end or function() hook() end,
 								errfunc
 							)
 

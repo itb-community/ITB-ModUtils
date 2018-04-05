@@ -135,6 +135,7 @@ Some useful functions added by this library:
 
 	A list class implemented as a double-ended queue, which allows it to act as both a queue and a stack.
 
+
 ### Modules
 
 At the moment, the library consists of the following modules:
@@ -232,11 +233,11 @@ List of available hooks:
 
 	Fired when the game finishes executing a weapon's `SkillEffect`, ie. after all of the skill's effects are executed (charge, push, damage, whatever).
 
-* `skillQueuedStartHook( mission, pawn, weaponId, p1, p2 )`
+* `queuedSkillStartHook( mission, pawn, weaponId, p1, p2 )`
 
 	Same as `skillStartHook`, but for the queued part of `SkillEffect`.
 
-* `skillQueuedEndHook( mission, pawn, weaponId, p1, p2 )`
+* `queuedSkillEndHook( mission, pawn, weaponId, p1, p2 )`
 
 	Same as `skillEndHook`, but for the queued part of `SkillEffect`.
 

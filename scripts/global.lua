@@ -31,6 +31,8 @@ if not screenPointToTile then
 		Returns a board tile (Point) at the specified point on the screen, or nil.
 	--]]
 	function screenPointToTile(screenPoint)
+		if not Board then return nil end
+		
 		local screen = sdl.screen()
 		local scale = GetBoardScale()
 		

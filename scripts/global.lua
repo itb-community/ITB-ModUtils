@@ -90,5 +90,71 @@ if not screenPointToTile then
 
 		return nil
 	end
+end
 
+if not List then
+	--[[
+		Double-ended queue implementation via www.lua.org/pil/11.4.html
+		Modified to use the class system from ItB mod loader.
+
+		To use like a queue: use either pushleft() and popright() OR
+		pushright() and popleft()
+
+		To use like a stack: use either pushleft() and popleft() OR
+		pushright() and popright()
+	--]]
+	List = Class.new()
+	function List:new()
+		self.first = 0
+		self.last = -1
+	end
+
+	--[[
+		Pushes the element onto the left side of the dequeue (beginning)
+	--]]
+	function List:pushleft(value)
+		local first = self.first - 1
+		self.first = first
+		self[first] = value
+	end
+
+	--[[
+		Pushes the element onto the right side of the dequeue (end)
+	--]]
+	function List:pushright(value)
+		local last = self.last + 1
+		self.last = last
+		self[last] = value
+	end
+
+	--[[
+		Removes and returns an element from the left side of the dequeue (beginning)
+	--]]
+	function List:popleft()
+		local first = self.first
+		if first > self.last then error("list is empty") end
+		local value = self[first]
+		self[first] = nil -- to allow garbage collection
+		self.first = first + 1
+		return value
+	end
+
+	--[[
+		Removes and returns an element from the right side of the dequeue (end)
+	--]]
+	function List:popright()
+		local last = self.last
+		if self.first > last then error("list is empty") end
+		local value = self[last]
+		self[last] = nil -- to allow garbage collection
+		self.last = last - 1
+		return value
+	end
+
+	--[[
+		Returns true if this dequeue is empty
+	--]]
+	function List:isempty()
+		return self.first > self.last
+	end
 end

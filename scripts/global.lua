@@ -24,68 +24,71 @@ function mouseTile()
 	return screenPointToTile({ x = sdl.mouse.x(), y = sdl.mouse.y() })
 end
 
---[[
-	Returns a board tile (Point) at the specified point on the screen, or nil.
---]]
-function screenPointToTile(screenPoint)
-	-- Use custom table instead of the existing Point class, since Point
-	-- can only hold integer values and automatically rounds them.
+if not screenPointToTile then
+	--[[
+		Returns a board tile (Point) at the specified point on the screen, or nil.
+	--]]
+	function screenPointToTile(screenPoint)
+		-- Use custom table instead of the existing Point class, since Point
+		-- can only hold integer values and automatically rounds them.
 
-	local screen = sdl.screen()
-	local scale = GetBoardScale()
-	
-	local tw = 28
-	local th = 21
+		local screen = sdl.screen()
+		local scale = GetBoardScale()
+		
+		local tw = 28
+		local th = 21
 
-	-- Top corner of the (0, 0) tile
-	local tile00 = {
-		x = screen:w() / 2,
-		y = screen:h() / 2 - 8 * th * scale
-	}
-
-	if scale == 2 then
-		tile00.y = tile00.y + 5 * scale + 0.5
-	end
-
-	-- Change screenPoint to be relative to the (0, 0) tile
-	-- and move to unscaled space.
-	local relPoint = {}
-	relPoint.x = (screenPoint.x - tile00.x) / scale
-	relPoint.y = (screenPoint.y - tile00.y) / scale
-
-	local lineX = function(x) return x * th/tw end
-	local lineY = function(x) return -lineX(x) end
-
-	-- round to nearest integer
-	local round = function(a) return math.floor(a + 0.5) end
-
-	local isPointAboveLine = function(point, lineFn)
-		return round(point.y) >= round(lineFn(point.x))
-	end
-
-	local tileContains = function(tilex, tiley, point)
-		local np = {
-			x = point.x - tw * (tilex - tiley),
-			y = point.y - th * (tilex + tiley)
+		-- Top corner of the (0, 0) tile
+		local tile00 = {
+			x = screen:w() / 2,
+			y = screen:h() / 2 - 8 * th * scale
 		}
-		return isPointAboveLine(np, lineX)
-			and isPointAboveLine(np, lineY)
-	end
 
-	-- Start at the end of the board and move backwards.
-	-- That way we only need to check 2 lines instead of 4.
-	local bsize = Board:GetSize()
-	for tileY = bsize.y, 0, -1 do
-		for tileX = bsize.x, 0, -1 do
-			if tileContains(tileX, tileY, relPoint) then
-				if tileY == bsize.y or tileX == bsize.x then
-					-- outside of the board
-					return nil
+		if scale == 2 then
+			tile00.y = tile00.y + 5 * scale + 0.5
+		end
+
+		-- Change screenPoint to be relative to the (0, 0) tile
+		-- and move to unscaled space.
+		local relPoint = {}
+		relPoint.x = (screenPoint.x - tile00.x) / scale
+		relPoint.y = (screenPoint.y - tile00.y) / scale
+
+		local lineX = function(x) return x * th/tw end
+		local lineY = function(x) return -lineX(x) end
+
+		-- round to nearest integer
+		local round = function(a) return math.floor(a + 0.5) end
+
+		local isPointAboveLine = function(point, lineFn)
+			return round(point.y) >= round(lineFn(point.x))
+		end
+
+		local tileContains = function(tilex, tiley, point)
+			local np = {
+				x = point.x - tw * (tilex - tiley),
+				y = point.y - th * (tilex + tiley)
+			}
+			return isPointAboveLine(np, lineX)
+				and isPointAboveLine(np, lineY)
+		end
+
+		-- Start at the end of the board and move backwards.
+		-- That way we only need to check 2 lines instead of 4.
+		local bsize = Board:GetSize()
+		for tileY = bsize.y, 0, -1 do
+			for tileX = bsize.x, 0, -1 do
+				if tileContains(tileX, tileY, relPoint) then
+					if tileY == bsize.y or tileX == bsize.x then
+						-- outside of the board
+						return nil
+					end
+					return Point(tileX, tileY)
 				end
-				return Point(tileX, tileY)
 			end
 		end
+
+		return nil
 	end
 
-	return nil
 end

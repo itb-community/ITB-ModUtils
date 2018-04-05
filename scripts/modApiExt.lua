@@ -37,17 +37,16 @@ end
 function modApiExt:scheduleHook(msTime, fn)
 	assert(type(msTime) == "number")
 	assert(type(fn) == "function")
-	if not self.timer then self.timer = sdl.timer() end
 
 	table.insert(self.scheduledHooks, {
-		triggerTime = self.timer:elapsed() + msTime,
+		triggerTime = modApiExt_internal.timer:elapsed() + msTime,
 		hook = fn
 	})
 end
 
 function modApiExt:updateScheduledHooks()
-	if self.timer then
-		local t = self.timer:elapsed()
+	if modApiExt_internal.timer then
+		local t = modApiExt_internal.timer:elapsed()
 
 		for i, tbl in ipairs(self.scheduledHooks) do
 			if tbl.triggerTime <= t then
@@ -74,6 +73,9 @@ function modApiExt:internal_initGlobals()
 		-- reference to the original Move's GetSkillEffect, used
 		-- for chaining and implementation of move hooks
 		modApiExt_internal.oldMoveEffect = nil
+
+		modApiExt_internal.timer = sdl.timer()
+		modApiExt_internal.elapsedTime = nil
 
 		-- creates a broadcast function for the specified hooks field,
 		-- allowing to trigger the hook callbacks on all registered
@@ -113,7 +115,9 @@ function modApiExt:internal_initGlobals()
 
 		local moveArgsFunc = function() return modApiExt_internal.mission, Pawn end
 		modApiExt_internal.fireMoveStartHooks = buildBroadcastFunc("pawnMoveStartHooks", moveArgsFunc)
-		modApiExt_internal.fireMoveEndHooks = buildBroadcastFunc("pawnMoveEndHooks", moveArgsFunc)
+		modApiExt_internal.fireMoveEndHooks   = buildBroadcastFunc("pawnMoveEndHooks", moveArgsFunc)
+
+		modApiExt_internal.fireResetTurnHook = buildBroadcastFunc("resetTurnHooks")
 	end
 end
 
@@ -131,7 +135,6 @@ function modApiExt:init(modulesDir)
 	self:internal_initGlobals()
 	table.insert(modApiExt_internal.extObjects, self)
 
-	self.timer = nil
 	self.scheduledHooks = {}
 
 	if self:isModuleAvailable(modulesDir.."global") then

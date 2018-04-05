@@ -1,5 +1,11 @@
 local hooks = {}
 
+hooks.resetTurnHooks = {}
+function hooks:addResetTurnHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.resetTurnHooks,fn)
+end
+
 hooks.tileHighlightedHooks = {}
 function hooks:addTileHighlightedHook(fn)
 	assert(type(fn) == "function")

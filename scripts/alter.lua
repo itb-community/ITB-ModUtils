@@ -304,6 +304,8 @@ function modApiExtHooks:reset()
 	modApiExt_internal.pawns = nil
 	modApiExt_internal.mission = nil
 	modApiExt_internal.runLaterQueue = nil
+	GAME.elapsedTime = nil
+	modApiExt_internal.elapsedTime = nil
 end
 
 ---------------------------------------------
@@ -325,6 +327,25 @@ modApiExtHooks.missionUpdate = function(mission)
 	-- Set it here, in case we load into a game in progress (missionStart
 	-- is not executed then)
 	if not modApiExt_internal.mission and mission then modApiExt_internal.mission = mission end
+
+	if
+		GAME.elapsedTime and modApiExt_internal.elapsedTime and
+		GAME.elapsedTime < modApiExt_internal.elapsedTime
+	then
+		-- Stored time is less than the timer, so we went back into the past.
+
+		-- Shouldn't trigger on game load, because when we load, the time saved
+		-- in GAME won't be nil, but the one saved in modApiExt_internal *will*.
+		-- And we synchronize them right after that, so they can't diverge.
+
+		-- Also shouldn't trigger when drawing UI which halts the game, since
+		-- both variables are updated together.
+
+		modApiExt_internal.fireResetTurnHook()
+	end
+	local t = modApiExt_internal.timer:elapsed()
+	GAME.elapsedTime = t
+	modApiExt_internal.elapsedTime = t
 
 	modApiExtHooks:processRunLater(mission)
 	modApiExtHooks:updateTiles()

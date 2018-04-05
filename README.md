@@ -162,13 +162,9 @@ modApiExt:addPawnDamagedHook( logDamagedPawns )
 
 List of available hooks:
 
-* `pawnTrackedHook( mission, pawn )`
+* `resetTurnHook( mission )`
 
-	Fired when `modApiExt` becomes aware of the pawn and begins tracking it. This is usually at the very start of the mission (for pre-existing pawns), or as soon as the pawn is spawned on the board.
-
-* `pawnUntrackedHook( mission, pawn )`
-
-	Fired when `modApiExt` stops tracking a pawn (due to it being killed, or removed from the game board via `Board:RemovePawn()`)
+	Fired when the player uses the `Reset Turn` button.
 
 * `tileHighlightedHook( mission, point )`
 
@@ -177,6 +173,14 @@ List of available hooks:
 * `tileUnhighlightedHook( mission, point )`
 
 	Fired when the player moves their cursor away from the previously highligthed tile.
+
+* `pawnTrackedHook( mission, pawn )`
+
+	Fired when `modApiExt` becomes aware of the pawn and begins tracking it. This is usually at the very start of the mission (for pre-existing pawns), or as soon as the pawn is spawned on the board.
+
+* `pawnUntrackedHook( mission, pawn )`
+
+	Fired when `modApiExt` stops tracking a pawn (due to it being killed, or removed from the game board via `Board:RemovePawn()`)
 
 * `pawnMoveStartHook( mission, pawn )`
 
@@ -219,6 +223,26 @@ List of available hooks:
 * `buildingDestroyedHook( mission, buildingData )`
 
 	Fired when a building is destroyed, and its tile is no longer blocked.
+
+* `skillStartHook( mission, pawn, weaponId, p1, p2 )`
+
+	Fired when the game begins executing a weapon's `SkillEffect`, ie. before any of the skill's effects are executed (charge, push, damage, whatever).
+
+* `skillEndHook( mission, pawn, weaponId, p1, p2 )`
+
+	Fired when the game finishes executing a weapon's `SkillEffect`, ie. after all of the skill's effects are executed (charge, push, damage, whatever).
+
+* `skillQueuedStartHook( mission, pawn, weaponId, p1, p2 )`
+
+	Same as `skillStartHook`, but for the queued part of `SkillEffect`.
+
+* `skillQueuedEndHook( mission, pawn, weaponId, p1, p2 )`
+
+	Same as `skillEndHook`, but for the queued part of `SkillEffect`.
+
+* `skillBuildHook( mission, pawn, weaponId, p1, p2, skillEffect )`
+
+	Fired right after the weapon's `GetSkillEffect` is called, but before its result is passed back to the game. `skillEffect` argument is the `SkillEffect` that will be executed. You can modify it in this hook to eg. give the weapon additional effects.
 
 ```lua
 buildingData = {

@@ -143,23 +143,6 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				end
 			end
 		end
-
-		local mtile = mouseTile()
-		if self.currentTile ~= mtile then
-			if self.currentTile then -- could be nil
-				for i, hook in ipairs(self.tileUnhighlightedHooks) do
-					hook(mission, self.currentTile)
-				end
-			end
-
-			self.currentTile = mtile
-
-			if self.currentTile then -- could be nil
-				for i, hook in ipairs(self.tileHighlightedHooks) do
-					hook(mission, self.currentTile)
-				end
-			end
-		end
 	end
 end
 
@@ -237,6 +220,27 @@ function modApiExtHooks:trackAndUpdateBuildings(mission)
 					end
 
 					--bld.dummy = nil
+				end
+			end
+		end
+	end
+end
+
+function modApiExtHooks:updateTiles()
+	if Board then
+		local mtile = mouseTile()
+		if self.currentTile ~= mtile then
+			if self.currentTile then -- could be nil
+				for i, hook in ipairs(self.tileUnhighlightedHooks) do
+					hook(mission, self.currentTile)
+				end
+			end
+
+			self.currentTile = mtile
+
+			if self.currentTile then -- could be nil
+				for i, hook in ipairs(self.tileHighlightedHooks) do
+					hook(mission, self.currentTile)
 				end
 			end
 		end
@@ -322,6 +326,7 @@ modApiExtHooks.missionUpdate = function(mission)
 	if not modApiExt_internal.mission then modApiExt_internal.mission = mission end
 
 	modApiExtHooks:processRunLater(mission)
+	modApiExtHooks:updateTiles()
 	modApiExtHooks:trackAndUpdateBuildings(mission)
 	modApiExtHooks:trackAndUpdatePawns(mission)
 end

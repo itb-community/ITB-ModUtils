@@ -1,4 +1,4 @@
-# Hooks
+# Table of Contents
 
 * [resetTurnHook](#resetturnhook)
 * [gameLoadedHook](#gameloadedhook)
@@ -24,6 +24,8 @@
 * [tipImageShownHook](#tipimageshownhook)
 * [tipImageHiddenHook](#tipimagehiddenhook)
 
+
+# Hooks
 
 ## `resetTurnHook`
 

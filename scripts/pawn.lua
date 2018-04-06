@@ -1,4 +1,4 @@
-ModUtils_Dummy = {
+kf_ModApiExt_Dummy = {
 	Name = "",
 	Image = nil,
 	Health = 100,
@@ -17,7 +17,7 @@ ModUtils_Dummy = {
 	DefaultTeam = TEAM_PLAYER,
 	GetDangerScore = function() return 0 end
 }
-AddPawn("ModUtils_Dummy")
+AddPawn("kf_ModApiExt_Dummy")
 
 --------------------------------------------------------------------------
 

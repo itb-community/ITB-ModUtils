@@ -278,7 +278,7 @@ function modApiExtHooks:overrideSkill(id, skill)
 
 		if not Board.gameBoard then
 			-- Hacky AF solution to detect when tip image is visible
-			local d = Board:GetPawn(Board:AddPawn("ModUtils_Dummy", Point(0, 0)))
+			local d = Board:GetPawn(Board:AddPawn("kf_ModApiExt_Dummy", Point(0, 0)))
 			d:SetCustomAnim("kf_ModApiExt_TipMarker")
 		end
 

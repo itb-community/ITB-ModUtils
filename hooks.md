@@ -297,9 +297,9 @@ modApiExt:addPawnKilledHook(hook)
 | Argument name | Type | Description |
 |---------------|------|-------------|
 | `mission` | table | A table holding information about the current mission |
-| `buildingData` | table | Table holding information about the building |
+| `buildingData` | table | Table holding information about the building. See [`buildingData`](#buildingdata) |
 
-Fired when a building is destroyed, and its tile is no longer blocked. See [`buildingData`](#buildingData).
+Fired when a building is destroyed, and its tile is no longer blocked.
 
 Example:
 ```lua

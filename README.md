@@ -167,6 +167,10 @@ List of available hooks:
 
 	Fired when the player uses the `Reset Turn` button.
 
+* `gameLoadedHook( mission )`
+
+	Fired when the player loads a game in progress, or starts a new one. If the loaded game state is during a mission, then the `mission` argument contains a reference to the mission instance. Otherwise, it is nil, indicating that we loaded into the strategy phase (island/region selection).
+
 * `tileHighlightedHook( mission, point )`
 
 	Fired when the player moves their cursor over a board tile.
@@ -244,6 +248,15 @@ List of available hooks:
 * `skillBuildHook( mission, pawn, weaponId, p1, p2, skillEffect )`
 
 	Fired right after the weapon's `GetSkillEffect` is called, but before its result is passed back to the game. `skillEffect` argument is the `SkillEffect` that will be executed. You can modify it in this hook to eg. give the weapon additional effects.
+
+* `tipImageShownHook()`
+
+	Fired when a tip image (animated weapon preview) is shown.
+
+* `tipImageHiddenHook()`
+
+	Fired when a tip image (animated weapon preview) is hidden.
+
 
 ```lua
 buildingData = {

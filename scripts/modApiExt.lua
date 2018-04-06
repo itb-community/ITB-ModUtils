@@ -157,6 +157,7 @@ function modApiExt:internal_initGlobals()
 			if not Game then
 				modApiExt_internal.gameLoaded = false
 				modApiExt_internal.elapsedTime = nil
+				modApiExt_internal.mission = nil
 			elseif not modApiExt_internal.gameLoaded then
 				modApiExt_internal.gameLoaded = true
 				modApiExt_internal.fireGameLoadedHook(modApiExt_internal.mission)

@@ -110,6 +110,18 @@ function modApiExt:internal_initGlobals()
 		-- list of all modApiExt instances
 		modApiExt_internal.extObjects = {}
 
+		-- Hacky AF solution to detect when tip image is visible.
+		-- Need something that will absolutely not get drawn during gameplay,
+		-- and apparently we can't insert our own sprite, it doesn't work...
+		local s = "strategy/hangar_stencil.png"
+		modApiExt_internal.tipMarkerVisible = false
+		modApiExt_internal.tipMarker = sdlext.surface("img/"..s)
+		ANIMS.kf_ModApiExt_TipMarker = ANIMS.Animation:new({
+			Image = s,
+			PosY = 1000, -- make sure it's outside of the viewport
+			Loop = true
+		})
+
 		-- current mission, for passing as arg to move hooks
 		modApiExt_internal.mission = nil
 		-- table of pawn userdata, kept only at runtime to help
@@ -137,10 +149,22 @@ function modApiExt:internal_initGlobals()
 
 		modApiExt_internal.fireResetTurnHook = self:buildBroadcastFunc("resetTurnHooks")
 
+		modApiExt_internal.fireTipImageShownHook = self:buildBroadcastFunc("tipImageShownHooks")
+		modApiExt_internal.fireTipImageHiddenHook = self:buildBroadcastFunc("tipImageHiddenHooks")
+
 		modApiExt_internal.drawHook = sdl.drawHook(function(screen)
 			for i, extObj in ipairs(modApiExt_internal.extObjects) do
 				extObj:updateScheduledHooks()
 			end
+			
+			if modApiExt_internal.tipMarkerVisible ~= modApiExt_internal.tipMarker:wasDrawn() then
+				if modApiExt_internal.tipMarkerVisible then
+					modApiExt_internal.fireTipImageHiddenHook()
+				else
+					modApiExt_internal.fireTipImageShownHook()
+				end
+			end
+			modApiExt_internal.tipMarkerVisible = modApiExt_internal.tipMarker:wasDrawn()
 		end)
 	end
 end

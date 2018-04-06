@@ -266,6 +266,12 @@ function modApiExtHooks:overrideSkill(id, skill)
 	skill.GetSkillEffect = function(slf, p1, p2)
 		local skillFx = modApiExt_internal.oldSkills[id](slf, p1, p2)
 
+		if not Board.gameBoard then
+			-- Hacky AF solution to detect when tip image is visible
+			local d = Board:GetPawn(Board:AddPawn("ModUtils_Dummy", Point(0, 0)))
+			d:SetCustomAnim("kf_ModApiExt_TipMarker")
+		end
+
 		modApiExt_internal.fireSkillBuildHook(
 			modApiExt_internal.mission,
 			Pawn, id, p1, p2, skillFx

@@ -132,6 +132,18 @@ function hooks:addSkillBuildHook(fn)
 	table.insert(self.skillBuildHooks,fn)
 end
 
+hooks.tipImageShownHooks = {}
+function hooks:addTipImageShownHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.tipImageShownHooks,fn)
+end
+
+hooks.tipImageHiddenHooks = {}
+function hooks:addTipImageHiddenHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.tipImageHiddenHooks,fn)
+end
+
 --[[
 	Executes the function on the game's next update step. Only works during missions.
 	

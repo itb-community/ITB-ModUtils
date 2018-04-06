@@ -6,6 +6,12 @@ function hooks:addResetTurnHook(fn)
 	table.insert(self.resetTurnHooks,fn)
 end
 
+hooks.gameLoadedHooks = {}
+function hooks:addGameLoadedHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.gameLoadedHooks,fn)
+end
+
 hooks.tileHighlightedHooks = {}
 function hooks:addTileHighlightedHook(fn)
 	assert(type(fn) == "function")

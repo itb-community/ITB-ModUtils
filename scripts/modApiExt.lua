@@ -148,12 +148,19 @@ function modApiExt:internal_initGlobals()
 		modApiExt_internal.fireSkillBuildHook       = self:buildBroadcastFunc("skillBuildHooks")
 
 		modApiExt_internal.fireResetTurnHook = self:buildBroadcastFunc("resetTurnHooks")
+		modApiExt_internal.fireGameLoadedHook = self:buildBroadcastFunc("gameLoadedHooks")
 
 		modApiExt_internal.fireTipImageShownHook = self:buildBroadcastFunc("tipImageShownHooks")
 		modApiExt_internal.fireTipImageHiddenHook = self:buildBroadcastFunc("tipImageHiddenHooks")
 
 		modApiExt_internal.drawHook = sdl.drawHook(function(screen)
-			if not Game then modApiExt_internal.elapsedTime = nil end
+			if not Game then
+				modApiExt_internal.gameLoaded = false
+				modApiExt_internal.elapsedTime = nil
+			elseif not modApiExt_internal.gameLoaded then
+				modApiExt_internal.gameLoaded = true
+				modApiExt_internal.fireGameLoadedHook(modApiExt_internal.mission)
+			end
 
 			for i, extObj in ipairs(modApiExt_internal.extObjects) do
 				extObj:updateScheduledHooks()

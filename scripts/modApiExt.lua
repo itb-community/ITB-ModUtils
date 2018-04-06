@@ -57,6 +57,45 @@ function modApiExt:updateScheduledHooks()
 end
 
 --[[
+	Returns true if this instance of modApiExt is the most recent one
+	out of all registered instances.
+--]]
+function modApiExt:isMostRecent()
+	assert(modApiExt_internal)
+	assert(modApiExt_internal.extObjects)
+
+	local v = self.version
+	for _, extObj in ipairs(modApiExt_internal.extObjects) do
+		if v ~= extObj.version and modApi:isVersion(v, extObj.version) then
+			return false
+		end
+	end
+
+	return true
+end
+
+--[[
+	Returns the most recent registered instance of modApiExt.
+--]]
+function modApiExt:getMostRecent()
+	assert(modApiExt_internal)
+	assert(modApiExt_internal.extObjects)
+
+	local result = nil
+	for _, extObj in ipairs(modApiExt_internal.extObjects) do
+		result = result or extObj
+		if
+			result.version ~= extObj.version and 
+			modApi:isVersion(result.version, extObj.version)
+		then
+			result = extObj
+		end
+	end
+
+	return result
+end
+
+--[[
 	Ceates a broadcast function for the specified hooks field, allowing
 	to trigger the hook callbacks on all registered modApiExt objects.
 
@@ -105,10 +144,17 @@ end
 	Initializes globals used by all instances of modApiExt.
 --]]
 function modApiExt:internal_initGlobals()
-	if not modApiExt_internal then
-		modApiExt_internal = {}
+	if not modApiExt_internal then modApiExt_internal = {} end
+
+	-- either initialize (if no version was previously defined),
+	-- or overwrite if we're more recent. Either way, we want to
+	-- keep old fields around in case the older version needs them.
+	local v = modApiExt_internal.version
+	if not v or (v ~= self.version and modApi:isVersion(v, self.version)) then
+		modApiExt_internal.version = self.version
 		-- list of all modApiExt instances
-		modApiExt_internal.extObjects = {}
+		-- make sure we remember the ones that have registered thus far
+		modApiExt_internal.extObjects = modApiExt_internal.extObjects or {}
 
 		-- Hacky AF solution to detect when tip image is visible.
 		-- Need something that will absolutely not get drawn during gameplay,
@@ -188,6 +234,7 @@ end
 --]]
 function modApiExt:init(modulesDir)
 	self.__index = self
+	self.version = "1.5.0"
 	self.modulesDir = modulesDir
 	
 	self:internal_initGlobals()
@@ -240,15 +287,17 @@ function modApiExt:load(mod, options, version)
 			-- mods are done loading.
 			self.loaded = false
 
-			if hooks.overrideMoveSkill then
-				-- Make sure we are the last ones to modify the Move skill.
-				-- Could do that in preMissionStartHook, but then we won't
-				-- override the skill when the player loads the game.
-				-- And there's no preLoadGameHook() available in base modApi.
-				hooks:overrideMoveSkill()
-			end
-			if hooks.overrideAllSkills then
-				hooks:overrideAllSkills()
+			if self:getMostRecent() == self then
+				if hooks.overrideMoveSkill then
+					-- Make sure we are the last ones to modify the Move skill.
+					-- Could do that in preMissionStartHook, but then we won't
+					-- override the skill when the player loads the game.
+					-- And there's no preLoadGameHook() available in base modApi.
+					hooks:overrideMoveSkill()
+				end
+				if hooks.overrideAllSkills then
+					hooks:overrideAllSkills()
+				end
 			end
 		end)
 	end

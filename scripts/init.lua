@@ -5,10 +5,6 @@ local function init(self)
 	else
 		modApiExt = require(self.scriptPath.."modApiExt")
 		modApiExt:init(self.scriptPath)
-
-		-- We only set this because we're the master ModUtils, to allow client
-		-- mods to check our version.
-		modApiExt.version = self.version
 	end
 end
 

@@ -34,6 +34,7 @@ function modApiExt:loadModuleIfAvailable(path)
 	end
 end
 
+modApiExt.scheduledHooks = {}
 function modApiExt:scheduleHook(msTime, fn)
 	assert(type(msTime) == "number")
 	assert(type(fn) == "function")
@@ -45,14 +46,12 @@ function modApiExt:scheduleHook(msTime, fn)
 end
 
 function modApiExt:updateScheduledHooks()
-	if modApiExt_internal.timer then
-		local t = modApiExt_internal.timer:elapsed()
+	local t = modApiExt_internal.timer:elapsed()
 
-		for i, tbl in ipairs(self.scheduledHooks) do
-			if tbl.triggerTime <= t then
-				table.remove(self.scheduledHooks, i)
-				tbl.hook()
-			end
+	for i, tbl in ipairs(self.scheduledHooks) do
+		if tbl.triggerTime <= t then
+			table.remove(self.scheduledHooks, i)
+			tbl.hook()
 		end
 	end
 end
@@ -110,6 +109,7 @@ function modApiExt:internal_initGlobals()
 		modApiExt_internal = {}
 		-- list of all modApiExt instances
 		modApiExt_internal.extObjects = {}
+
 		-- current mission, for passing as arg to move hooks
 		modApiExt_internal.mission = nil
 		-- table of pawn userdata, kept only at runtime to help
@@ -126,7 +126,6 @@ function modApiExt:internal_initGlobals()
 		-- skillStart/End etc hooks implemented
 		modApiExt_internal.skillBlacklist = { "Move" }
 
-
 		modApiExt_internal.fireMoveStartHooks = self:buildBroadcastFunc("pawnMoveStartHooks")
 		modApiExt_internal.fireMoveEndHooks   = self:buildBroadcastFunc("pawnMoveEndHooks")
 
@@ -137,6 +136,12 @@ function modApiExt:internal_initGlobals()
 		modApiExt_internal.fireSkillBuildHook       = self:buildBroadcastFunc("skillBuildHooks")
 
 		modApiExt_internal.fireResetTurnHook = self:buildBroadcastFunc("resetTurnHooks")
+
+		modApiExt_internal.drawHook = sdl.drawHook(function(screen)
+			for i, extObj in ipairs(modApiExt_internal.extObjects) do
+				extObj:updateScheduledHooks()
+			end
+		end)
 	end
 end
 
@@ -154,11 +159,10 @@ function modApiExt:init(modulesDir)
 	self:internal_initGlobals()
 	table.insert(modApiExt_internal.extObjects, self)
 
-	self.scheduledHooks = {}
-
 	if self:isModuleAvailable(modulesDir.."global") then
 		require(modulesDir.."global")
 	end
+	
 	if self:isModuleAvailable(modulesDir.."hooks") then
 		local hooks = require(modulesDir.."hooks")
 		for k,v in pairs(hooks) do
@@ -171,10 +175,6 @@ function modApiExt:init(modulesDir)
 	self.board    = self:loadModuleIfAvailable(modulesDir.."board")
 	self.weapon   = self:loadModuleIfAvailable(modulesDir.."weapon")
 	self.pawn     = self:loadModuleIfAvailable(modulesDir.."pawn")
-
-	self.drawHook = sdl.drawHook(function(screen)
-		self:updateScheduledHooks()
-	end)
 end
 
 function modApiExt:load(mod, options, version)

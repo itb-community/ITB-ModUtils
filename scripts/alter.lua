@@ -157,21 +157,10 @@ function modApiExtHooks:trackAndUpdateBuildings(mission)
 			local idx = point.y * w + point.x
 			if not GAME.trackedBuildings[idx] then
 				-- Building not tracked yet
-				local bld = {
+				GAME.trackedBuildings[idx] = {
 					loc = point,
-					destroyed = false,
-					--maxHealth = -1, -- NO WAY TO FIND OUT
-					--curHealth = -1, -- NO WAY TO FIND OUT
-					--dummy = nil,
-					--lastHealth = -1
+					destroyed = false
 				}
---[[
-				local id = Board:AddPawn("ModUtils_Dummy", point)
-				bld.dummy = Board:GetPawn(id)
-				bld.dummy:SetInvisible(true)
-				bld.lastHealth = bld.dummy:GetHealth()
---]]
-				GAME.trackedBuildings[idx] = bld
 			else
 				-- Already tracked, update its data...
 				-- ...if there were any
@@ -180,46 +169,12 @@ function modApiExtHooks:trackAndUpdateBuildings(mission)
 
 		for idx, bld in pairs(GAME.trackedBuildings) do
 			if not bld.destroyed then
---[[
-				local pawnId = bld.dummy:GetId()
-				local pawn = Board:GetPawn(pawnId)
-
-				-- Putting shield on a building with an invisible dummy
-				-- on top of it will put the shield on the dummy.
-				-- But since the dummy is invisible, the shield is also
-				-- invisible (sound shield plays, correct pop text is
-				-- shown, and damage is correctly blocked)
-				pawn:SetInvisible(not pawn:IsShield())
-
-				local diff = pawn:GetHealth() - bld.lastHealth
-				if diff < 0 then
-					bld.lastHealth = pawn:GetHealth()
-					self:scheduleHook(50, function()
-						if self.gridWasDrawn then
-							for i, hook in ipairs(self.buildingResistHooks) do
-								hook(mission, bld, -diff)
-							end
-						else
-
-							for i, hook in ipairs(self.buildingDamagedHooks) do
-								hook(mission, bld, -diff)
-							end
-						end
-					end)
-				end
---]]
-
 				if not Board:IsBuilding(bld.loc) then
 					bld.destroyed = true
---[[
-					bld.dummy:Kill(true)
-					Board:RemovePawn(bld.dummy)
---]]
+
 					for i, hook in ipairs(self.buildingDestroyedHooks) do
 						hook(mission, bld)
 					end
-
-					--bld.dummy = nil
 				end
 			end
 		end

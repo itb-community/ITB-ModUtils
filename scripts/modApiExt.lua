@@ -153,6 +153,8 @@ function modApiExt:internal_initGlobals()
 		modApiExt_internal.fireTipImageHiddenHook = self:buildBroadcastFunc("tipImageHiddenHooks")
 
 		modApiExt_internal.drawHook = sdl.drawHook(function(screen)
+			if not Game then modApiExt_internal.elapsedTime = nil end
+
 			for i, extObj in ipairs(modApiExt_internal.extObjects) do
 				extObj:updateScheduledHooks()
 			end

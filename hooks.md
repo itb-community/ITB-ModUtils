@@ -1,5 +1,29 @@
 # Hooks
 
+* [resetTurnHook](#resetturnhook)
+* [gameLoadedHook](#gameloadedhook)
+* [tileHighlightedHook](#tilehighlightedhook)
+* [tileUnhighlightedHook](#tileunhighlightedhook)
+* [pawnTrackedHook](#pawntrackedhook)
+* [pawnUntrackedHook](#pawnuntrackedhook)
+* [pawnMoveStartHook](#pawnmovestarthook)
+* [pawnMoveEndHook](#pawnmoveendhook)
+* [pawnPositionChangedHook](#pawnpositionchangedhook)
+* [pawnUndoMoveHook](#pawnundomovehook)
+* [pawnSelectedHook](#pawnselectedhook)
+* [pawnDeslectedHook](#pawndeslectedhook)
+* [pawnDamagedHook](#pawndamagedhook)
+* [pawnHealedHook](#pawnhealedhook)
+* [pawnKilledHook](#pawnkilledhook)
+* [buildingDestroyedHook](#buildingdestroyedhook)
+* [skillStartHook](#skillstarthook)
+* [skillEndHook](#skillendhook)
+* [queuedSkillStartHook](#queuedskillstarthook)
+* [queuedSkillEndHook](#queuedskillendhook)
+* [skillBuildHook](#skillbuildhook)
+* [tipImageShownHook](#tipimageshownhook)
+* [tipImageHiddenHook](#tipimagehiddenhook)
+
 
 ## `resetTurnHook`
 

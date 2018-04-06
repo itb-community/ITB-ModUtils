@@ -33,23 +33,26 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				pawn = modApiExt_internal.pawns[id]
 			end
 
-			if not pd and pawn then
-				-- Pawn is not tracked yet
-				-- Create a pawnData table for it
-				GAME.trackedPawns[id] = {
-					loc = pawn:GetSpace(),
-					maxHealth = _G[pawn:GetType()].Health,
-					curHealth = pawn:GetHealth(),
-					dead = (pawn:GetHealth() == 0),
-					selected = false,
-					undoPossible = pawn:IsUndoPossible()
-				}
+			if pawn then
+				if not pd then
+					-- Pawn is not tracked yet
+					-- Create an empty table for its tracked fields
+					pd = {}
+					GAME.trackedPawns[id] = pd
 
-				for i, hook in ipairs(self.pawnTrackedHooks) do
-					hook(mission, pawn)
+					for i, hook in ipairs(self.pawnTrackedHooks) do
+						hook(mission, pawn)
+					end
 				end
-			elseif pd and pawn then
-				-- Already tracked, update its data
+
+				-- Setup tracked fields.
+				if pd.loc == nil then pd.loc = pawn:GetSpace() end
+				if pd.maxHealth == nil then pd.maxHealth = _G[pawn:GetType()].Health end
+				if pd.curHealth == nil then pd.curHealth = pawn:GetHealth() end
+				if pd.dead == nil then pd.dead = (pawn:GetHealth() == 0) end
+				if pd.selected == nil then pd.selected = pawn:IsSelected() end
+				if pd.undoPossible == nil then pd.undoPossible = pawn:IsUndoPossible() end
+
 				local p = pawn:GetSpace()
 				local undo = pawn:IsUndoPossible()
 
@@ -57,10 +60,11 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					-- Undo was possible in previous game update, but no longer is.
 					-- The pawn is also active, which means that the player did not
 					-- just attack with this pawn.
-					-- And positions are not the same, which means that the player
-					-- did not attack with another pawn. Swap weapons are not instant,
-					-- so it should be fine.
-					-- TODO: Maybe update when we have pawnAttackStart/EndHook
+					-- Positions are different, which means that the undo was *not*
+					-- disabled due to skill usage on another pawn -- swap skills
+					-- are not instant, so we wouldn't register change in *both*
+					-- undo state AND pawn position in a single update if that were
+					-- the case. So it has to be the 'undo move' option.
 					if pd.undoPossible and not undo and pawn:IsActive() and pd.loc ~= p then
 						for i, hook in ipairs(self.pawnUndoMoveHooks) do
 							hook(mission, pawn, pd.loc)
@@ -74,72 +78,78 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					for i, hook in ipairs(self.pawnPositionChangedHooks) do
 						hook(mission, pawn, pd.loc)
 					end
+
 					pd.loc = p
 				end
 
-				local oldHealth = pd.curHealth
-				pd.curHealth = pawn:GetHealth()
-				local diff = pd.curHealth - oldHealth
+				local hp = pawn:GetHealth()
+				if pd.curHealth ~= hp then
+					local diff = hp - pd.curHealth
 
-				if diff < 0 then
-					-- took damage
-					for i, hook in ipairs(self.pawnDamagedHooks) do
-						hook(mission, pawn, -diff)
+					if diff < 0 then
+						-- took damage
+						for i, hook in ipairs(self.pawnDamagedHooks) do
+							hook(mission, pawn, -diff)
+						end
+					else
+						-- healed
+						for i, hook in ipairs(self.pawnHealedHooks) do
+							hook(mission, pawn, diff)
+						end
 					end
-				elseif diff > 0 then
-					-- healed
-					for i, hook in ipairs(self.pawnHealedHooks) do
-						hook(mission, pawn, diff)
-					end
+
+					pd.curHealth = hp
 				end
 
 				-- Deselection
 				if pd.selected and not pawn:IsSelected() then
-					pd.selected = false
 					for i, hook in ipairs(self.pawnDeselectedHooks) do
 						hook(mission, pawn)
 					end
+
+					pd.selected = false
 				end
 			else
-				-- Not tracked yet, but pawn was nil? Some bizarre edge case.
+				-- Pawn was nil? Some bizarre edge case.
 				-- Can't do anything with this, ignore.
 			end
 		end
 
 		for id, pd in pairs(GAME.trackedPawns) do
-			-- Process selection in separate loop, so that callbacks always go
-			-- Deselection -> Selection, instead of relying on pawn order in table
 			local pawn = Board:GetPawn(id) or modApiExt_internal.pawns[id]
+
 			if pawn then
-				if pawn:IsSelected() and not pd.selected then
+				-- Process selection in separate loop, so that callbacks always go
+				-- Deselection -> Selection, instead of relying on pawn order in table
+				if not pd.selected and pawn:IsSelected() then
 					pd.selected = true
 					for i, hook in ipairs(self.pawnSelectedHooks) do
 						hook(mission, pawn)
 					end
 				end
-			end
 
-			if not pd.dead and pd.curHealth == 0 then
-				pd.dead = true
-				for i, hook in ipairs(self.pawnKilledHooks) do
-					hook(mission, pawn)
+				if not pd.dead and pd.curHealth == 0 then
+					pd.dead = true
+					for i, hook in ipairs(self.pawnKilledHooks) do
+						hook(mission, pawn)
+					end
 				end
-			end
 
-			-- Treat pawns not registered in the onBoard table as on board.
-			local wasOnBoard = onBoard[id] or onBoard[id] == nil
-			if not wasOnBoard then
-				-- Dead non-player pawns are removed from the board, so we can
-				-- just remove them from tracking since they're not going to
-				-- come back to life.
-				-- However, player pawns (mechs) stay on the board when
-				-- dead. Don't remove them from the tracking table, since if we
-				-- do that, they're going to get reinserted.
-				GAME.trackedPawns[id] = nil
-				modApiExt_internal.pawns[id] = nil
+				-- Treat pawns not registered in the onBoard table as on board.
+				local wasOnBoard = onBoard[id] or onBoard[id] == nil
+				if not wasOnBoard then
+					-- Dead non-player pawns are removed from the board, so we can
+					-- just remove them from tracking since they're not going to
+					-- come back to life.
+					-- However, player pawns (mechs) stay on the board when
+					-- dead. Don't remove them from the tracking table, since if we
+					-- do that, they're going to get reinserted.
+					GAME.trackedPawns[id] = nil
+					modApiExt_internal.pawns[id] = nil
 
-				for i, hook in ipairs(self.pawnUntrackedHooks) do
-					hook(mission, pawn)
+					for i, hook in ipairs(self.pawnUntrackedHooks) do
+						hook(mission, pawn)
+					end
 				end
 			end
 		end
@@ -280,7 +290,8 @@ function modApiExtHooks:overrideSkill(id, skill)
 		if not skillFx.effect:empty() then
 			local tmp = SkillEffect()
 
-			tmp:AddScript("modApiExt_internal.fireSkillStartHook("
+			tmp:AddScript(
+				"modApiExt_internal.fireSkillStartHook("
 				.."modApiExt_internal.mission, Pawn,"
 				.."unpack("..save_table({id, p1, p2}).."))"
 			)
@@ -289,7 +300,8 @@ function modApiExtHooks:overrideSkill(id, skill)
 				tmp.effect:push_back(e)
 			end
 
-			tmp:AddScript("modApiExt_internal.fireSkillEndHook("
+			tmp:AddScript(
+				"modApiExt_internal.fireSkillEndHook("
 				.."modApiExt_internal.mission, Pawn,"
 				.."unpack("..save_table({id, p1, p2}).."))"
 			)
@@ -298,7 +310,8 @@ function modApiExtHooks:overrideSkill(id, skill)
 
 		if not skillFx.q_effect:empty() then
 			local tmp = SkillEffect()
-			tmp:AddScript("modApiExt_internal.fireQueuedSkillStartHook("
+			tmp:AddScript(
+				"modApiExt_internal.fireQueuedSkillStartHook("
 				.."modApiExt_internal.mission, Pawn,"
 				.."unpack("..save_table({id, p1, p2}).."))"
 			)
@@ -307,7 +320,8 @@ function modApiExtHooks:overrideSkill(id, skill)
 				tmp.effect:push_back(e)
 			end
 
-			tmp:AddScript("modApiExt_internal.fireQueuedSkillEndHook("
+			tmp:AddScript(
+				"modApiExt_internal.fireQueuedSkillEndHook("
 				.."modApiExt_internal.mission, Pawn,"
 				.."unpack("..save_table({id, p1, p2}).."))"
 			)

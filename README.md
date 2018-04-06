@@ -5,7 +5,18 @@ This is a collection of various Lua modules useful for creators of mods for the 
 
 ## Usage
 
-You can either integrate ModUtils into your mod and pick-and-choose by manually removing parts you don't need, or just include this mod as a dependency in your mod. Either way you choose, you'll need to add `"kf_ModUtils"` entry to the `requirements` table in your mod's `init.lua` file, like so:
+1. Create a folder named `modApiExt` inside of your mod's `scripts` directory, and place all of ModUtils' `.lua` files there. To illustrate, the directory structure should look like this:
+
+```
++ My_Mod/
++--+ scripts/
+   +--+ modApiExt/
+   |  +-- modApiExt.lua
+   |  +-- [other ModUtils .lua files]
+   +-- init.lua  [your mod's init file]
+```
+
+2. In your mod's `init.lua`, add `"kf_ModUtils"` entry to the `requirements` table:
 
 ```lua
 return {
@@ -18,63 +29,13 @@ return {
 }
 ```
 
-Doing so makes sure `kf_ModUtils` is loaded *before* your mod, if it is available.
-
-
-Now which option should you choose? Here are the benefits and drawbacks of each:
-
-* Dependency
-	* [+] Minimum amount of setup required
-	* [+] Good when you don't want to bother manually gutting ModUtils
-	* [-] People playing your mod will need to download ModUtils too
-	* [-] Relies on the player to have up-to-date version of ModUtils
-* Integration
-	* [+] If you opt not to use existing `modApiExt` object, then your mod is not likely to break with future releases of ModUtils
-	* [+] You don't rely on players keeping ModUtils up-to-date
-	* [+] Players don't have to download anything else
-	* [-] Requires more setup and effort to maintain compatibility
-
-Generally, the first option is good when what you're working on is a small project. The second option is better if you are willing to put in some effort to make a quality mod.
-
-
-### Option 1: Dependency
-
-To include as dependency, download the mod from the [Releases page](https://github.com/kartoFlane/ITB-ModUtils/releases/latest), and drop it into `mods` folder in Into the Breach's directory. **However, people who wish to play your mod will also need to download it.**
-
-Then in your mod, you can use the `modApiExt` variable to access any ModUtils functions you may need, without any additional setup.
-
-
-### Option 2: Integration
-
-If you decide to integrate to pick only the parts you need, you'll need to follow several rules in order to allow compatibility with other mods.
-
-Generally, you should put the scripts you download here in a `modApiExt` folder in your mod's `scripts` directory. Doing so keeps the structure of your mod neat and tidy, and prevents confusion. So your mod's directory should look like this:
-
-```
-+ My_Mod/
-+--+ scripts/
-   +--+ modApiExt/
-   |  +-- modApiExt.lua
-   |  +-- [other modules you need, etc]
-   +-- init.lua  [your mod's init file]
-```
-
-**Important:** no matter which parts of ModUtils you need, you should copy `modApiExt.lua` as-is. It is used to initialize the whole thing. Only change it if you *really* know what you're doing.
-
-Now, in your `init.lua` do the following:
+3. Now, in your mod's `init.lua` do the following:
 
 ```lua
 local function init(self)
-	if modApiExt then
-		-- modApiExt already defined. This means that the user has the complete
-		-- ModUtils package installed. Use that instead of loading our gutted one.
-		myname_modApiExt = modApiExt
-	else
-		-- modApiExt was not found. Load our gutted version.
-		local extDir = self.scriptPath.."modApiExt/"
-		myname_modApiExt = require(extDir.."modApiExt")
-		myname_modApiExt:init(extDir)
-	end
+	local extDir = self.scriptPath.."modApiExt/"
+	myname_modApiExt = require(extDir.."modApiExt")
+	myname_modApiExt:init(extDir)
 
 	-- Rest of your init function
 end
@@ -92,27 +53,7 @@ end
 
 Now in your mod, you can use the `myname_modApiExt` variable to access any ModUtils functions you may need.
 
-
-### Versioning
-
-If you ever require a specific version of ModUtils, or need to make sure that the version the player has installed is above a certain milestone, you can check the version using the following code:
-
-```lua
-local myMinimumRequiredVersion = "1.0.0"
-modApi:isVersion(myMinimumRequiredVersion, modApiExt.version)
-```
-
-This will return true if the currently installed version of ModUtils is at or above `1.0.0`.
-You can combine this with the `init()` code from [Integration](#option-2-integration) when checking for `modApiExt` object, to only use it when ModUtils is at or above a certain version threshold:
-
-```lua
-local v = "1.0.0"
-if modApiExt and modApi:isVersion(v, modApiExt.version) then
-	myname_modApiExt = modApiExt
-else
-	-- Load our own version
-end
-```
+If you ever need to check whether the version you're running is the most recent one available to the player, or want to get the most recent version, you can use `myname_modApiExt:isMostRecent()` and `myname_modApiExt:getMostRecent()` respectively.
 
 
 ## Features

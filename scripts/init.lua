@@ -15,7 +15,7 @@ end
 return {
 	id = "kf_ModUtils",
 	name = "Modding Utilities",
-	version = "1.5.0",
+	version = "1.5.0", -- also update in modApiExt.lua
 	requirements = {},
 	init = init,
 	load = load,

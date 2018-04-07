@@ -9,7 +9,14 @@ local function init(self)
 end
 
 local function load(self, options, version)
-	modApiExt:load(self, options, version)
+	if modApiExt then
+		modApiExt:load(self, options, version)
+	else
+		-- can happen if the mod was disabled, then enabled via Mod Config
+		-- in that case, the mod loader does not execute the init function.
+		LOG("ModApiExt: ERROR - Failed to load because modApiExt was not initialized. "
+			.. "Restart the game to fix.")
+	end
 end
 
 return {

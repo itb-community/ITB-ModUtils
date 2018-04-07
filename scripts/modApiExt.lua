@@ -151,17 +151,19 @@ function modApiExt:internal_initGlobals()
 	-- keep old fields around in case the older version needs them.
 	local v = modApiExt_internal.version
 	if not v or (v ~= self.version and modApi:isVersion(v, self.version)) then
-		modApiExt_internal.version = self.version
+		local m = modApiExt_internal -- for convenience and readability
+
+		m.version = self.version
 		-- list of all modApiExt instances
 		-- make sure we remember the ones that have registered thus far
-		modApiExt_internal.extObjects = modApiExt_internal.extObjects or {}
+		m.extObjects = m.extObjects or {}
 
 		-- Hacky AF solution to detect when tip image is visible.
 		-- Need something that will absolutely not get drawn during gameplay,
 		-- and apparently we can't insert our own sprite, it doesn't work...
 		local s = "strategy/hangar_stencil.png"
-		modApiExt_internal.tipMarkerVisible = false
-		modApiExt_internal.tipMarker = sdlext.surface("img/"..s)
+		m.tipMarkerVisible = false
+		m.tipMarker = sdlext.surface("img/"..s)
 		ANIMS.kf_ModApiExt_TipMarker = ANIMS.Animation:new({
 			Image = s,
 			PosY = 1000, -- make sure it's outside of the viewport
@@ -169,37 +171,37 @@ function modApiExt:internal_initGlobals()
 		})
 
 		-- current mission, for passing as arg to move hooks
-		modApiExt_internal.mission = nil
+		m.mission = nil
 		-- table of pawn userdata, kept only at runtime to help
 		-- with pawn hooks
-		modApiExt_internal.pawns = nil
+		m.pawns = nil
 
-		modApiExt_internal.timer = sdl.timer()
-		modApiExt_internal.elapsedTime = nil
+		m.timer = sdl.timer()
+		m.elapsedTime = nil
 
 		-- reference to the original Move's GetSkillEffect, used
 		-- for chaining and implementation of move hooks
-		modApiExt_internal.oldMoveEffect = nil
+		m.oldMoveEffect = nil
 		-- list of skills that will not be overridden to have
 		-- skillStart/End etc hooks implemented
-		modApiExt_internal.skillBlacklist = { "Move" }
+		m.skillBlacklist = { "Move" }
 
-		modApiExt_internal.fireMoveStartHooks = self:buildBroadcastFunc("pawnMoveStartHooks")
-		modApiExt_internal.fireMoveEndHooks   = self:buildBroadcastFunc("pawnMoveEndHooks")
+		m.fireMoveStartHooks       = self:buildBroadcastFunc("pawnMoveStartHooks")
+		m.fireMoveEndHooks         = self:buildBroadcastFunc("pawnMoveEndHooks")
 
-		modApiExt_internal.fireSkillStartHook       = self:buildBroadcastFunc("skillStartHooks")
-		modApiExt_internal.fireSkillEndHook         = self:buildBroadcastFunc("skillEndHooks")
-		modApiExt_internal.fireQueuedSkillStartHook = self:buildBroadcastFunc("queuedSkillStartHooks")
-		modApiExt_internal.fireQueuedSkillEndHook   = self:buildBroadcastFunc("queuedSkillEndHooks")
-		modApiExt_internal.fireSkillBuildHook       = self:buildBroadcastFunc("skillBuildHooks")
+		m.fireSkillStartHook       = self:buildBroadcastFunc("skillStartHooks")
+		m.fireSkillEndHook         = self:buildBroadcastFunc("skillEndHooks")
+		m.fireQueuedSkillStartHook = self:buildBroadcastFunc("queuedSkillStartHooks")
+		m.fireQueuedSkillEndHook   = self:buildBroadcastFunc("queuedSkillEndHooks")
+		m.fireSkillBuildHook       = self:buildBroadcastFunc("skillBuildHooks")
 
-		modApiExt_internal.fireResetTurnHook = self:buildBroadcastFunc("resetTurnHooks")
-		modApiExt_internal.fireGameLoadedHook = self:buildBroadcastFunc("gameLoadedHooks")
+		m.fireResetTurnHook        = self:buildBroadcastFunc("resetTurnHooks")
+		m.fireGameLoadedHook       = self:buildBroadcastFunc("gameLoadedHooks")
 
-		modApiExt_internal.fireTipImageShownHook = self:buildBroadcastFunc("tipImageShownHooks")
-		modApiExt_internal.fireTipImageHiddenHook = self:buildBroadcastFunc("tipImageHiddenHooks")
+		m.fireTipImageShownHook    = self:buildBroadcastFunc("tipImageShownHooks")
+		m.fireTipImageHiddenHook   = self:buildBroadcastFunc("tipImageHiddenHooks")
 
-		modApiExt_internal.drawHook = sdl.drawHook(function(screen)
+		m.drawHook = sdl.drawHook(function(screen)
 			if not Game then
 				modApiExt_internal.gameLoaded = false
 				modApiExt_internal.elapsedTime = nil

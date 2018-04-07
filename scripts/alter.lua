@@ -343,6 +343,7 @@ end
 ---------------------------------------------
 
 modApiExtHooks.preMissionStart = function(mission)
+	if Board and not Board.gameBoard then Board.gameBoard = true end
 end
 
 modApiExtHooks.missionStart = function(mission)

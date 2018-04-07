@@ -186,20 +186,33 @@ function modApiExt:internal_initGlobals()
 		-- skillStart/End etc hooks implemented
 		m.skillBlacklist = { "Move" }
 
-		m.fireMoveStartHooks       = self:buildBroadcastFunc("pawnMoveStartHooks")
-		m.fireMoveEndHooks         = self:buildBroadcastFunc("pawnMoveEndHooks")
+		m.firePawnTrackedHooks       = self:buildBroadcastFunc("pawnTrackedHooks")
+		m.firePawnUntrackedHooks     = self:buildBroadcastFunc("pawnUntrackedHooks")
+		m.firePawnUndoMoveHooks      = self:buildBroadcastFunc("pawnUndoMoveHooks")
+		m.firePawnPosChangedHooks    = self:buildBroadcastFunc("pawnPositionChangedHooks")
+		m.firePawnDamagedHooks       = self:buildBroadcastFunc("pawnDamagedHooks")
+		m.firePawnHealedHooks        = self:buildBroadcastFunc("pawnHealedHooks")
+		m.firePawnKilledHooks        = self:buildBroadcastFunc("pawnKilledHooks")
+		m.firePawnSelectedHooks      = self:buildBroadcastFunc("pawnSelectedHooks")
+		m.firePawnDeselectedHooks    = self:buildBroadcastFunc("pawnDeselectedHooks")
+		m.fireBuildingDamagedHooks   = self:buildBroadcastFunc("buildingDamagedHooks")
+		m.fireBuildingResistHooks    = self:buildBroadcastFunc("buildingResistHooks")
+		m.fireBuildingDestroyedHooks = self:buildBroadcastFunc("buildingDestroyedHooks")
 
-		m.fireSkillStartHook       = self:buildBroadcastFunc("skillStartHooks")
-		m.fireSkillEndHook         = self:buildBroadcastFunc("skillEndHooks")
-		m.fireQueuedSkillStartHook = self:buildBroadcastFunc("queuedSkillStartHooks")
-		m.fireQueuedSkillEndHook   = self:buildBroadcastFunc("queuedSkillEndHooks")
-		m.fireSkillBuildHook       = self:buildBroadcastFunc("skillBuildHooks")
+		m.fireMoveStartHooks         = self:buildBroadcastFunc("pawnMoveStartHooks")
+		m.fireMoveEndHooks           = self:buildBroadcastFunc("pawnMoveEndHooks")
 
-		m.fireResetTurnHook        = self:buildBroadcastFunc("resetTurnHooks")
-		m.fireGameLoadedHook       = self:buildBroadcastFunc("gameLoadedHooks")
+		m.fireSkillStartHooks        = self:buildBroadcastFunc("skillStartHooks")
+		m.fireSkillEndHooks          = self:buildBroadcastFunc("skillEndHooks")
+		m.fireQueuedSkillStartHooks  = self:buildBroadcastFunc("queuedSkillStartHooks")
+		m.fireQueuedSkillEndHooks    = self:buildBroadcastFunc("queuedSkillEndHooks")
+		m.fireSkillBuildHooks        = self:buildBroadcastFunc("skillBuildHooks")
 
-		m.fireTipImageShownHook    = self:buildBroadcastFunc("tipImageShownHooks")
-		m.fireTipImageHiddenHook   = self:buildBroadcastFunc("tipImageHiddenHooks")
+		m.fireResetTurnHooks         = self:buildBroadcastFunc("resetTurnHooks")
+		m.fireGameLoadedHooks        = self:buildBroadcastFunc("gameLoadedHooks")
+
+		m.fireTipImageShownHooks     = self:buildBroadcastFunc("tipImageShownHooks")
+		m.fireTipImageHiddenHooks    = self:buildBroadcastFunc("tipImageHiddenHooks")
 
 		m.drawHook = sdl.drawHook(function(screen)
 			if not Game then
@@ -208,7 +221,7 @@ function modApiExt:internal_initGlobals()
 				modApiExt_internal.mission = nil
 			elseif not modApiExt_internal.gameLoaded then
 				modApiExt_internal.gameLoaded = true
-				modApiExt_internal.fireGameLoadedHook(modApiExt_internal.mission)
+				modApiExt_internal.fireGameLoadedHooks(modApiExt_internal.mission)
 			end
 
 			for i, extObj in ipairs(modApiExt_internal.extObjects) do
@@ -217,9 +230,9 @@ function modApiExt:internal_initGlobals()
 			
 			if modApiExt_internal.tipMarkerVisible ~= modApiExt_internal.tipMarker:wasDrawn() then
 				if modApiExt_internal.tipMarkerVisible then
-					modApiExt_internal.fireTipImageHiddenHook()
+					modApiExt_internal.fireTipImageHiddenHooks()
 				else
-					modApiExt_internal.fireTipImageShownHook()
+					modApiExt_internal.fireTipImageShownHooks()
 				end
 			end
 			modApiExt_internal.tipMarkerVisible = modApiExt_internal.tipMarker:wasDrawn()

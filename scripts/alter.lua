@@ -1,5 +1,17 @@
 local modApiExtHooks = {}
 
+function modApiExtHooks:setupTrackedData(pd, pawn)
+	-- check each field separately, so that if there's a newer version
+	-- checking after the data is created, it can append its own fields
+	-- without overwriting the old ones.
+	if pd.loc == nil then pd.loc = pawn:GetSpace() end
+	if pd.maxHealth == nil then pd.maxHealth = _G[pawn:GetType()].Health end
+	if pd.curHealth == nil then pd.curHealth = pawn:GetHealth() end
+	if pd.dead == nil then pd.dead = (pawn:GetHealth() == 0) end
+	if pd.selected == nil then pd.selected = pawn:IsSelected() end
+	if pd.undoPossible == nil then pd.undoPossible = pawn:IsUndoPossible() end
+end
+
 function modApiExtHooks:trackAndUpdatePawns(mission)
 	if Board then
 		if not GAME.trackedPawns then GAME.trackedPawns = {} end
@@ -40,18 +52,10 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					pd = {}
 					GAME.trackedPawns[id] = pd
 
-					for i, hook in ipairs(self.pawnTrackedHooks) do
-						hook(mission, pawn)
-					end
+					modApiExt_internal.firePawnTrackedHooks(mission, pawn)
 				end
 
-				-- Setup tracked fields.
-				if pd.loc == nil then pd.loc = pawn:GetSpace() end
-				if pd.maxHealth == nil then pd.maxHealth = _G[pawn:GetType()].Health end
-				if pd.curHealth == nil then pd.curHealth = pawn:GetHealth() end
-				if pd.dead == nil then pd.dead = (pawn:GetHealth() == 0) end
-				if pd.selected == nil then pd.selected = pawn:IsSelected() end
-				if pd.undoPossible == nil then pd.undoPossible = pawn:IsUndoPossible() end
+				self:setupTrackedData(pd, pawn)
 
 				local p = pawn:GetSpace()
 				local undo = pawn:IsUndoPossible()
@@ -64,18 +68,14 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					-- undo state AND pawn position in a single update if that were
 					-- the case. So it has to be the 'undo move' option.
 					if pd.undoPossible and not undo and pd.loc ~= p then
-						for i, hook in ipairs(self.pawnUndoMoveHooks) do
-							hook(mission, pawn, pd.loc)
-						end
+						modApiExt_internal.firePawnUndoMoveHooks(mission, pawn, pd.loc)
 					end
 
 					pd.undoPossible = undo
 				end
 
 				if pd.loc ~= p then
-					for i, hook in ipairs(self.pawnPositionChangedHooks) do
-						hook(mission, pawn, pd.loc)
-					end
+					modApiExt_internal.firePawnPosChangedHooks(mission, pawn, pd.loc)
 
 					pd.loc = p
 				end
@@ -86,14 +86,10 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 
 					if diff < 0 then
 						-- took damage
-						for i, hook in ipairs(self.pawnDamagedHooks) do
-							hook(mission, pawn, -diff)
-						end
+						modApiExt_internal.firePawnDamagedHooks(mission, pawn, -diff)
 					else
 						-- healed
-						for i, hook in ipairs(self.pawnHealedHooks) do
-							hook(mission, pawn, diff)
-						end
+						modApiExt_internal.firePawnHealedHooks(mission, pawn, diff)
 					end
 
 					pd.curHealth = hp
@@ -101,9 +97,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 
 				-- Deselection
 				if pd.selected and not pawn:IsSelected() then
-					for i, hook in ipairs(self.pawnDeselectedHooks) do
-						hook(mission, pawn)
-					end
+					modApiExt_internal.firePawnDeselectedHooks(mission, pawn)
 
 					pd.selected = false
 				end
@@ -121,16 +115,12 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				-- Deselection -> Selection, instead of relying on pawn order in table
 				if not pd.selected and pawn:IsSelected() then
 					pd.selected = true
-					for i, hook in ipairs(self.pawnSelectedHooks) do
-						hook(mission, pawn)
-					end
+					modApiExt_internal.firePawnSelectedHooks(mission, pawn)
 				end
 
 				if not pd.dead and pd.curHealth == 0 then
 					pd.dead = true
-					for i, hook in ipairs(self.pawnKilledHooks) do
-						hook(mission, pawn)
-					end
+					modApiExt_internal.firePawnKilledHooks(mission, pawn)
 				end
 
 				-- Treat pawns not registered in the onBoard table as on board.
@@ -145,9 +135,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					GAME.trackedPawns[id] = nil
 					modApiExt_internal.pawns[id] = nil
 
-					for i, hook in ipairs(self.pawnUntrackedHooks) do
-						hook(mission, pawn)
-					end
+					modApiExt_internal.firePawnUntrackedHooks(mission, pawn)
 				end
 			end
 		end
@@ -180,9 +168,7 @@ function modApiExtHooks:trackAndUpdateBuildings(mission)
 				if not Board:IsBuilding(bld.loc) then
 					bld.destroyed = true
 
-					for i, hook in ipairs(self.buildingDestroyedHooks) do
-						hook(mission, bld)
-					end
+					modApiExt_internal.fireBuildingDestroyedHooks(mission, bld)
 				end
 			end
 		end
@@ -280,7 +266,7 @@ function modApiExtHooks:overrideSkill(id, skill)
 			d:SetCustomAnim("kf_ModApiExt_TipMarker")
 		end
 
-		modApiExt_internal.fireSkillBuildHook(
+		modApiExt_internal.fireSkillBuildHooks(
 			modApiExt_internal.mission,
 			Pawn, id, p1, p2, skillFx
 		)
@@ -289,7 +275,7 @@ function modApiExtHooks:overrideSkill(id, skill)
 			local tmp = SkillEffect()
 
 			tmp:AddScript(
-				"modApiExt_internal.fireSkillStartHook("
+				"modApiExt_internal.fireSkillStartHooks("
 				.."modApiExt_internal.mission, Pawn,"
 				.."unpack("..save_table({id, p1, p2}).."))"
 			)
@@ -299,7 +285,7 @@ function modApiExtHooks:overrideSkill(id, skill)
 			end
 
 			tmp:AddScript(
-				"modApiExt_internal.fireSkillEndHook("
+				"modApiExt_internal.fireSkillEndHooks("
 				.."modApiExt_internal.mission, Pawn,"
 				.."unpack("..save_table({id, p1, p2}).."))"
 			)
@@ -309,7 +295,7 @@ function modApiExtHooks:overrideSkill(id, skill)
 		if not skillFx.q_effect:empty() then
 			local tmp = SkillEffect()
 			tmp:AddScript(
-				"modApiExt_internal.fireQueuedSkillStartHook("
+				"modApiExt_internal.fireQueuedSkillStartHooks("
 				.."modApiExt_internal.mission, Pawn,"
 				.."unpack("..save_table({id, p1, p2}).."))"
 			)
@@ -319,7 +305,7 @@ function modApiExtHooks:overrideSkill(id, skill)
 			end
 
 			tmp:AddScript(
-				"modApiExt_internal.fireQueuedSkillEndHook("
+				"modApiExt_internal.fireQueuedSkillEndHooks("
 				.."modApiExt_internal.mission, Pawn,"
 				.."unpack("..save_table({id, p1, p2}).."))"
 			)
@@ -388,7 +374,7 @@ modApiExtHooks.missionUpdate = function(mission)
 		-- Also shouldn't trigger when drawing UI which halts the game, since
 		-- both variables are updated together.
 
-		modApiExt_internal.fireResetTurnHook(mission)
+		modApiExt_internal.fireResetTurnHooks(mission)
 	end
 	local t = modApiExt_internal.timer:elapsed()
 	GAME.elapsedTime = t

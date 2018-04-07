@@ -58,14 +58,12 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 
 				if pd.undoPossible ~= undo then
 					-- Undo was possible in previous game update, but no longer is.
-					-- The pawn is also active, which means that the player did not
-					-- just attack with this pawn.
 					-- Positions are different, which means that the undo was *not*
-					-- disabled due to skill usage on another pawn -- swap skills
+					-- disabled due to skill usage on a pawn -- swap skills
 					-- are not instant, so we wouldn't register change in *both*
 					-- undo state AND pawn position in a single update if that were
 					-- the case. So it has to be the 'undo move' option.
-					if pd.undoPossible and not undo and pawn:IsActive() and pd.loc ~= p then
+					if pd.undoPossible and not undo and pd.loc ~= p then
 						for i, hook in ipairs(self.pawnUndoMoveHooks) do
 							hook(mission, pawn, pd.loc)
 						end

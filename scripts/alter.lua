@@ -261,9 +261,17 @@ function modApiExtHooks:overrideSkill(id, skill)
 		local skillFx = modApiExt_internal.oldSkills[id](slf, p1, p2)
 
 		if not Board.gameBoard then
-			-- Hacky AF solution to detect when tip image is visible
-			local d = Board:GetPawn(Board:AddPawn("kf_ModApiExt_Dummy", Point(0, 0)))
-			d:SetCustomAnim("kf_ModApiExt_TipMarker")
+			if Board:GetSize() == Point(6, 6) then
+				-- Hacky AF solution to detect when tip image is visible
+				local d = Board:GetPawn(Board:AddPawn("kf_ModApiExt_Dummy", Point(0, 0)))
+				d:SetCustomAnim("kf_ModApiExt_TipMarker")
+			else
+				-- It seems that sometimes Board.gameBoard is not set,
+				-- but I can't reproduce the bug.
+				-- For now use a board size check and log the message to try
+				-- to figure it out.
+				LOG("Was in game board, but Board.gameBoard was not set!")
+			end
 		end
 
 		modApiExt_internal.fireSkillBuildHooks(

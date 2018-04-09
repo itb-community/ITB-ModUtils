@@ -1,3 +1,5 @@
+-- Standalone support.
+
 local function init(self)
 	if modApiExt then
 		error("`modApiExt` object is already defined! A mod loaded before this "

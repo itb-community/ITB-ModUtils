@@ -81,13 +81,13 @@ Some useful functions added by this library:
 
 At the moment, the library consists of the following modules:
 
-- [Global](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/global.lua) - various assorted functions which didn't fit anywhere else
-- [Vector](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/vector.lua) - functions useful for vector/point manipulation, accessible via `modApiExt.vector`.
-- [Pawn](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/pawn.lua) - functions useful when manipulating pawns, accessible via `modApiExt.pawn`.
-- [Board](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/board.lua) - functions useful when dealing with the game board, accessible via `modApiExt.board`.
-- [String](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/string.lua) - some basic string-related operations, accessible via `modApiExt.string`.
-- [Weapon](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/weapon.lua) - functions useful for weapons and targeting, accessible via `modApiExt.weapon`.
-- [Hook](https://github.com/kartoFlane/ITB-ModUtils/blob/master/scripts/hooks.lua) - extended modApi with additional hooks, accessible via `modApiExt`.
+- [Global](https://github.com/kartoFlane/ITB-ModUtils/blob/master/modApiExt/global.lua) - various assorted functions which didn't fit anywhere else
+- [Vector](https://github.com/kartoFlane/ITB-ModUtils/blob/master/modApiExt/vector.lua) - functions useful for vector/point manipulation, accessible via `modApiExt.vector`.
+- [Pawn](https://github.com/kartoFlane/ITB-ModUtils/blob/master/modApiExt/pawn.lua) - functions useful when manipulating pawns, accessible via `modApiExt.pawn`.
+- [Board](https://github.com/kartoFlane/ITB-ModUtils/blob/master/modApiExt/board.lua) - functions useful when dealing with the game board, accessible via `modApiExt.board`.
+- [String](https://github.com/kartoFlane/ITB-ModUtils/blob/master/modApiExt/string.lua) - some basic string-related operations, accessible via `modApiExt.string`.
+- [Weapon](https://github.com/kartoFlane/ITB-ModUtils/blob/master/modApiExt/weapon.lua) - functions useful for weapons and targeting, accessible via `modApiExt.weapon`.
+- [Hook](https://github.com/kartoFlane/ITB-ModUtils/blob/master/modApiExt/hooks.lua) - extended modApi with additional hooks, accessible via `modApiExt`.
 
 
 ### Hooks

@@ -455,7 +455,7 @@ modApiExt:addSkillBuildHook(hook)
 
 ## `tipImageShownHook`
 
-Fired when a tip image (animated weapon preview) is shown.
+Fired when a tip image (animated weapon preview) is shown. If you're looking to detect if your weapon is in a TipImage, then just check for `Board.gameBoard`.
 
 Example:
 ```lua
@@ -469,7 +469,7 @@ modApiExt:addTipImageShownHook(hook)
 
 ## `tipImageHiddenHook`
 
-Fired when a tip image (animated weapon preview) is hidden.
+Fired when a tip image (animated weapon preview) is hidden. If you're looking to detect if your weapon is in a TipImage, then just check for `Board.gameBoard`.
 
 Example:
 ```lua

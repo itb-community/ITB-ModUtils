@@ -92,14 +92,4 @@ At the moment, the library consists of the following modules:
 
 ### Hooks
 
-New hooks are added exactly the same way as in the base mod loader's `modApi`, except you have to reference the extended API object (`modApiExt`) instead. For example:
-
-```lua
-function logDamagedPawns( mission, pawn, damageTaken )
-	LOG( string.format( "%s took %s damage!", pawn:GetMechName(), damageTaken ) )
-end
-
-modApiExt:addPawnDamagedHook( logDamagedPawns )
-```
-
-[Click here](hooks.md) for an exhaustive list of hooks.
+New hooks are added exactly the same way as in the base mod loader's `modApi`, except you have to reference the extended API object (`modApiExt`) instead. [Click here](hooks.md) for an exhaustive list of hooks.

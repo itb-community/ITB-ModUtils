@@ -132,7 +132,6 @@ function modApiExt:buildBroadcastFunc(hooksField, argsFunc)
 
 					if not ok then
 						LOG(err)
-						--io.log(err)
 					end
 				end
 			end
@@ -221,6 +220,7 @@ function modApiExt:internal_initGlobals()
 				modApiExt_internal.mission = nil
 			elseif not modApiExt_internal.gameLoaded then
 				modApiExt_internal.gameLoaded = true
+				if Board and not Board.gameBoard then Board.gameBoard = true end
 				modApiExt_internal.fireGameLoadedHooks(modApiExt_internal.mission)
 			end
 
@@ -283,9 +283,6 @@ function modApiExt:load(mod, options, version)
 	if self:isModuleAvailable(self.modulesDir.."alter") then
 		local hooks = self:loadModule(self.modulesDir.."alter")
 
-		if hooks.preMissionStart then
-			modApi:addPreMissionStartHook(hooks.preMissionStart)
-		end
 		if hooks.missionStart then
 			modApi:addMissionStartHook(hooks.missionStart)
 		end

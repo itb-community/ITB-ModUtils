@@ -270,7 +270,7 @@ function modApiExtHooks:overrideSkill(id, skill)
 				-- but I can't reproduce the bug.
 				-- For now use a board size check and log the message to try
 				-- to figure it out.
-				LOG("Was in game board, but Board.gameBoard was not set!")
+				LOG("Was in game board, but Board.gameBoard was not set! " .. tostring(modApiExt_internal.version))
 			end
 		end
 
@@ -350,12 +350,11 @@ end
 
 ---------------------------------------------
 
-modApiExtHooks.preMissionStart = function(mission)
-	if Board and not Board.gameBoard then Board.gameBoard = true end
-end
-
 modApiExtHooks.missionStart = function(mission)
 	modApiExtHooks:reset()
+	if Board and not Board.gameBoard then
+		Board.gameBoard = true 
+	end
 end
 
 modApiExtHooks.missionEnd = function(mission, ret)
@@ -368,7 +367,9 @@ modApiExtHooks.missionUpdate = function(mission)
 	-- Set it here, in case we load into a game in progress (missionStart
 	-- is not executed then)
 	if not modApiExt_internal.mission and mission then modApiExt_internal.mission = mission end
-	if Board and not Board.gameBoard then Board.gameBoard = true end
+	if Board and not Board.gameBoard then
+		Board.gameBoard = true 
+	end
 
 	if
 		GAME.elapsedTime and modApiExt_internal.elapsedTime and
@@ -383,6 +384,7 @@ modApiExtHooks.missionUpdate = function(mission)
 		-- Also shouldn't trigger when drawing UI which halts the game, since
 		-- both variables are updated together.
 
+		Board.gameBoard = true
 		modApiExt_internal.fireResetTurnHooks(mission)
 	end
 	local t = modApiExt_internal.timer:elapsed()

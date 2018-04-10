@@ -177,7 +177,7 @@ local hook = function(mission, pawn)
 	LOG(pawn:GetMechName() .. " has finished moving, end point: " .. pawn:GetSpace():GetString())
 end
 
-modApiExt:addPawnMoveStartHook(hook)
+modApiExt:addPawnMoveEndHook(hook)
 ```
 
 

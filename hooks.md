@@ -207,14 +207,14 @@ modApiExt:addPawnPositionChangedHook(hook)
 |---------------|------|-------------|
 | `mission` | table | A table holding information about the current mission |
 | `pawn` | userdata | The pawn whose move was undone |
-| `oldPosition` | Point | The pawn's position before its move was undone |
+| `undonePosition` | Point | The pawn's position **before its move was undone** |
 
 Fired when a pawn's move is undone.
 
 Example:
 ```lua
-local hook = function(mission, pawn, oldPosition)
-	LOG(pawn:GetMechName() .. " move was undone! Was at: " .. oldPosition:GetSpace():GetString())
+local hook = function(mission, pawn, undonePosition)
+	LOG(pawn:GetMechName() .. " move was undone! Was at: " .. undonePosition:GetString() .. ", returned to: " .. pawn:GetSpace():GetString())
 end
 
 modApiExt:addPawnUndoMoveHook(hook)

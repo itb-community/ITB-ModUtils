@@ -78,4 +78,30 @@ function board:isPawnOnBoard(pawn)
 	return list_contains(extract_table(Board:GetPawns(TEAM_ANY)), pawn:GetId())
 end
 
+function board:getCurrentRegion()
+	if RegionData and RegionData.iBattleRegion then
+		return RegionData["region"..RegionData.iBattleRegion]
+	end
+
+	return nil
+end
+
+function board:getMapTable()
+	local region = self:getCurrentRegion()
+	assert(region, "Battle region could not be found - not in battle mode!")
+	return region.player.map_data.map
+end
+
+function board:getTileTable(point)
+	assert(point)
+	local region = self:getCurrentRegion()
+	assert(region, "Battle region could not be found - not in battle mode!")
+
+	for i, entry in ipairs(region.player.map_data.map) do
+		if entry.loc == point then
+			return entry
+		end
+	end
+end
+
 return board

@@ -102,55 +102,35 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				
 				local isFire = pawn:IsFire()
 				if pd.isFire ~= isFire then
-					if isFire then
-						modApiExt_internal.firePawnOnFireHooks(mission, pawn)
-					else
-						modApiExt_internal.firePawnExtinguishedHooks(mission, pawn)
-					end
+					modApiExt_internal.firePawnIsFireHooks(mission, pawn, isFire)
 					
 					pd.isFire = isFire
 				end
 				
 				local isAcid = pawn:IsAcid()
 				if pd.isAcid ~= isAcid then
-					if isAcid then
-						modApiExt_internal.firePawnAcidedHooks(mission, pawn)
-					else
-						modApiExt_internal.firePawnUnacidedHooks(mission, pawn)
-					end
+					modApiExt_internal.firePawnIsAcidHooks(mission, pawn, isAcid)
 					
 					pd.isAcid = isAcid
 				end
 				
 				local isFrozen = pawn:IsFrozen()
 				if pd.isFrozen ~= isFrozen then
-					if isFrozen then
-						modApiExt_internal.firePawnFrozenHooks(mission, pawn)
-					else
-						modApiExt_internal.firePawnUnfrozenHooks(mission, pawn)
-					end
+					modApiExt_internal.firePawnIsFrozenHooks(mission, pawn, isFrozen)
 					
 					pd.isFrozen = isFrozen
 				end
 				
 				local isGrappled = pawn:IsGrappled()
 				if pd.isGrappled ~= isGrappled then
-					if isGrappled then
-						modApiExt_internal.firePawnGrappledHooks(mission, pawn)
-					else
-						modApiExt_internal.firePawnUngrappledHooks(mission, pawn)
-					end
+					modApiExt_internal.firePawnIsGrappledHooks(mission, pawn, isGrappled)
 					
 					pd.isGrappled = isGrappled
 				end
 				
 				local isShield = pawn:IsShield()
 				if pd.isShield ~= isShield then
-					if isShield then
-						modApiExt_internal.firePawnShieldedHooks(mission, pawn)
-					else
-						modApiExt_internal.firePawnUnshieldedHooks(mission, pawn)
-					end
+					modApiExt_internal.firePawnIsShieldedHooks(mission, pawn, isShield)
 					
 					pd.isShield = isShield
 				end

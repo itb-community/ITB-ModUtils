@@ -90,64 +90,34 @@ function hooks:addPawnKilledHook(fn)
 	table.insert(self.pawnKilledHooks,fn)
 end
 
-hooks.pawnOnFireHooks = {}
-function hooks:addPawnOnFireHook(fn)
+hooks.pawnIsFireHooks = {}
+function hooks:addPawnIsFireHook(fn)
 	assert(type(fn) == "function")
-	table.insert(self.pawnOnFireHooks, fn)
+	table.insert(self.pawnIsFireHooks, fn)
 end
 
-hooks.pawnExtinguishedHooks = {}
-function hooks:addPawnExtinguishedHook(fn)
+hooks.pawnIsAcidHooks = {}
+function hooks:addPawnIsAcidHook(fn)
 	assert(type(fn) == "function")
-	table.insert(self.pawnExtinguishedHooks, fn)
+	table.insert(self.pawnIsAcidHooks, fn)
 end
 
-hooks.pawnAcidedHooks = {}
-function hooks:addPawnAcidedHook(fn)
+hooks.pawnIsFrozenHooks = {}
+function hooks:addPawnIsFrozenHook(fn)
 	assert(type(fn) == "function")
-	table.insert(self.pawnAcidedHooks, fn)
+	table.insert(self.pawnIsFrozenHooks, fn)
 end
 
-hooks.pawnUnacidedHooks = {}
-function hooks:addPawnUnacidedHook(fn)
+hooks.pawnIsGrappledHooks = {}
+function hooks:addPawnIsGrappledHook(fn)
 	assert(type(fn) == "function")
-	table.insert(self.pawnUnacidedHooks, fn)
+	table.insert(self.pawnIsGrappledHooks, fn)
 end
 
-hooks.pawnFrozenHooks = {}
-function hooks:addPawnFrozenHook(fn)
+hooks.pawnIsShieldedHooks = {}
+function hooks:addPawnIsShieldedHook(fn)
 	assert(type(fn) == "function")
-	table.insert(self.pawnFrozenHooks, fn)
-end
-
-hooks.pawnUnfrozenHooks = {}
-function hooks:addPawnUnfrozenHook(fn)
-	assert(type(fn) == "function")
-	table.insert(self.pawnUnfrozenHooks, fn)
-end
-
-hooks.pawnGrappledHooks = {}
-function hooks:addPawnGrappledHook(fn)
-	assert(type(fn) == "function")
-	table.insert(self.pawnGrappledHooks, fn)
-end
-
-hooks.pawnUngrappledHooks = {}
-function hooks:addPawnUngrappledHook(fn)
-	assert(type(fn) == "function")
-	table.insert(self.pawnUngrappledHooks, fn)
-end
-
-hooks.pawnShieldedHooks = {}
-function hooks:addPawnShieldedHook(fn)
-	assert(type(fn) == "function")
-	table.insert(self.pawnShieldedHooks, fn)
-end
-
-hooks.pawnUnshieldedHooks = {}
-function hooks:addPawnUnshieldedHook(fn)
-	assert(type(fn) == "function")
-	table.insert(self.pawnUnshieldedHooks, fn)
+	table.insert(self.pawnIsShieldedHooks, fn)
 end
 
 hooks.buildingDamagedHooks = {}

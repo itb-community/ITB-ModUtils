@@ -96,7 +96,7 @@ function modApiExt:getMostRecent()
 end
 
 --[[
-	Ceates a broadcast function for the specified hooks field, allowing
+	Creates a broadcast function for the specified hooks field, allowing
 	to trigger the hook callbacks on all registered modApiExt objects.
 
 	The second argument is a function that provides arguments the hooks
@@ -185,33 +185,33 @@ function modApiExt:internal_initGlobals()
 		-- skillStart/End etc hooks implemented
 		m.skillBlacklist = { "Move" }
 
-		m.firePawnTrackedHooks       = self:buildBroadcastFunc("pawnTrackedHooks")
-		m.firePawnUntrackedHooks     = self:buildBroadcastFunc("pawnUntrackedHooks")
-		m.firePawnUndoMoveHooks      = self:buildBroadcastFunc("pawnUndoMoveHooks")
-		m.firePawnPosChangedHooks    = self:buildBroadcastFunc("pawnPositionChangedHooks")
-		m.firePawnDamagedHooks       = self:buildBroadcastFunc("pawnDamagedHooks")
-		m.firePawnHealedHooks        = self:buildBroadcastFunc("pawnHealedHooks")
-		m.firePawnKilledHooks        = self:buildBroadcastFunc("pawnKilledHooks")
-		m.firePawnSelectedHooks      = self:buildBroadcastFunc("pawnSelectedHooks")
-		m.firePawnDeselectedHooks    = self:buildBroadcastFunc("pawnDeselectedHooks")
-		m.fireBuildingDamagedHooks   = self:buildBroadcastFunc("buildingDamagedHooks")
-		m.fireBuildingResistHooks    = self:buildBroadcastFunc("buildingResistHooks")
+		m.firePawnTrackedHooks =       self:buildBroadcastFunc("pawnTrackedHooks")
+		m.firePawnUntrackedHooks =     self:buildBroadcastFunc("pawnUntrackedHooks")
+		m.firePawnUndoMoveHooks =      self:buildBroadcastFunc("pawnUndoMoveHooks")
+		m.firePawnPosChangedHooks =    self:buildBroadcastFunc("pawnPositionChangedHooks")
+		m.firePawnDamagedHooks =       self:buildBroadcastFunc("pawnDamagedHooks")
+		m.firePawnHealedHooks =        self:buildBroadcastFunc("pawnHealedHooks")
+		m.firePawnKilledHooks =        self:buildBroadcastFunc("pawnKilledHooks")
+		m.firePawnSelectedHooks =      self:buildBroadcastFunc("pawnSelectedHooks")
+		m.firePawnDeselectedHooks =    self:buildBroadcastFunc("pawnDeselectedHooks")
+		m.fireBuildingDamagedHooks =   self:buildBroadcastFunc("buildingDamagedHooks")
+		m.fireBuildingResistHooks =    self:buildBroadcastFunc("buildingResistHooks")
 		m.fireBuildingDestroyedHooks = self:buildBroadcastFunc("buildingDestroyedHooks")
 
-		m.fireMoveStartHooks         = self:buildBroadcastFunc("pawnMoveStartHooks")
-		m.fireMoveEndHooks           = self:buildBroadcastFunc("pawnMoveEndHooks")
+		m.fireMoveStartHooks =         self:buildBroadcastFunc("pawnMoveStartHooks")
+		m.fireMoveEndHooks =           self:buildBroadcastFunc("pawnMoveEndHooks")
 
-		m.fireSkillStartHooks        = self:buildBroadcastFunc("skillStartHooks")
-		m.fireSkillEndHooks          = self:buildBroadcastFunc("skillEndHooks")
-		m.fireQueuedSkillStartHooks  = self:buildBroadcastFunc("queuedSkillStartHooks")
-		m.fireQueuedSkillEndHooks    = self:buildBroadcastFunc("queuedSkillEndHooks")
-		m.fireSkillBuildHooks        = self:buildBroadcastFunc("skillBuildHooks")
+		m.fireSkillStartHooks =        self:buildBroadcastFunc("skillStartHooks")
+		m.fireSkillEndHooks =          self:buildBroadcastFunc("skillEndHooks")
+		m.fireQueuedSkillStartHooks =  self:buildBroadcastFunc("queuedSkillStartHooks")
+		m.fireQueuedSkillEndHooks =    self:buildBroadcastFunc("queuedSkillEndHooks")
+		m.fireSkillBuildHooks =        self:buildBroadcastFunc("skillBuildHooks")
 
-		m.fireResetTurnHooks         = self:buildBroadcastFunc("resetTurnHooks")
-		m.fireGameLoadedHooks        = self:buildBroadcastFunc("gameLoadedHooks")
+		m.fireResetTurnHooks =         self:buildBroadcastFunc("resetTurnHooks")
+		m.fireGameLoadedHooks =        self:buildBroadcastFunc("gameLoadedHooks")
 
-		m.fireTipImageShownHooks     = self:buildBroadcastFunc("tipImageShownHooks")
-		m.fireTipImageHiddenHooks    = self:buildBroadcastFunc("tipImageHiddenHooks")
+		m.fireTipImageShownHooks =     self:buildBroadcastFunc("tipImageShownHooks")
+		m.fireTipImageHiddenHooks =    self:buildBroadcastFunc("tipImageHiddenHooks")
 
 		m.drawHook = sdl.drawHook(function(screen)
 			if not Game then
@@ -266,11 +266,11 @@ function modApiExt:init(modulesDir)
 		end
 	end
 
-	self.vector   = self:loadModuleIfAvailable(modulesDir.."vector")
-	self.string   = self:loadModuleIfAvailable(modulesDir.."string")
-	self.board    = self:loadModuleIfAvailable(modulesDir.."board")
-	self.weapon   = self:loadModuleIfAvailable(modulesDir.."weapon")
-	self.pawn     = self:loadModuleIfAvailable(modulesDir.."pawn")
+	self.vector =   self:loadModuleIfAvailable(modulesDir.."vector")
+	self.string =   self:loadModuleIfAvailable(modulesDir.."string")
+	self.board =    self:loadModuleIfAvailable(modulesDir.."board")
+	self.weapon =   self:loadModuleIfAvailable(modulesDir.."weapon")
+	self.pawn =     self:loadModuleIfAvailable(modulesDir.."pawn")
 end
 
 function modApiExt:load(mod, options, version)

@@ -366,7 +366,9 @@ modApiExtHooks.missionUpdate = function(mission)
 	-- the missionUpdate hook.
 	-- Set it here, in case we load into a game in progress (missionStart
 	-- is not executed then)
-	if not modApiExt_internal.mission and mission then modApiExt_internal.mission = mission end
+	if not modApiExt_internal.mission and mission then
+		modApiExt_internal.mission = mission
+	end
 	if Board and not Board.gameBoard then
 		Board.gameBoard = true 
 	end

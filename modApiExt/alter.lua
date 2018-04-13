@@ -4,12 +4,17 @@ function modApiExtHooks:setupTrackedData(pd, pawn)
 	-- check each field separately, so that if there's a newer version
 	-- checking after the data is created, it can append its own fields
 	-- without overwriting the old ones.
-	if pd.loc == nil then pd.loc = pawn:GetSpace() end
-	if pd.maxHealth == nil then pd.maxHealth = _G[pawn:GetType()].Health end
-	if pd.curHealth == nil then pd.curHealth = pawn:GetHealth() end
-	if pd.dead == nil then pd.dead = (pawn:GetHealth() == 0) end
-	if pd.selected == nil then pd.selected = pawn:IsSelected() end
+	if pd.loc == nil then          pd.loc = pawn:GetSpace() end
+	if pd.maxHealth == nil then    pd.maxHealth = _G[pawn:GetType()].Health end
+	if pd.curHealth == nil then    pd.curHealth = pawn:GetHealth() end
+	if pd.dead == nil then         pd.dead = (pawn:GetHealth() == 0) end
+	if pd.selected == nil then     pd.selected = pawn:IsSelected() end
 	if pd.undoPossible == nil then pd.undoPossible = pawn:IsUndoPossible() end
+	if pd.isFire == nil then       pd.isFire = pawn:IsFire() end
+	if pd.isAcid == nil then       pd.isAcid = pawn:IsAcid() end
+	if pd.isFrozen == nil then     pd.isFrozen = pawn:IsFrozen() end
+	if pd.isGrappled == nil then   pd.isGrappled = pawn:IsGrappled() end
+	if pd.isShield == nil then     pd.isShield = pawn:IsShield() end
 end
 
 function modApiExtHooks:trackAndUpdatePawns(mission)
@@ -93,6 +98,61 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					end
 
 					pd.curHealth = hp
+				end
+				
+				local isFire = pawn:IsFire()
+				if pd.isFire ~= isFire then
+					if isFire then
+						modApiExt_internal.firePawnOnFireHooks(mission, pawn)
+					else
+						modApiExt_internal.firePawnExtinguishedHooks(mission, pawn)
+					end
+					
+					pd.isFire = isFire
+				end
+				
+				local isAcid = pawn:IsAcid()
+				if pd.isAcid ~= isAcid then
+					if isAcid then
+						modApiExt_internal.firePawnAcidedHooks(mission, pawn)
+					else
+						modApiExt_internal.firePawnUnacidedHooks(mission, pawn)
+					end
+					
+					pd.isAcid = isAcid
+				end
+				
+				local isFrozen = pawn:IsFrozen()
+				if pd.isFrozen ~= isFrozen then
+					if isFrozen then
+						modApiExt_internal.firePawnFrozenHooks(mission, pawn)
+					else
+						modApiExt_internal.firePawnUnfrozenHooks(mission, pawn)
+					end
+					
+					pd.isFrozen = isFrozen
+				end
+				
+				local isGrappled = pawn:IsGrappled()
+				if pd.isGrappled ~= isGrappled then
+					if isGrappled then
+						modApiExt_internal.firePawnGrappledHooks(mission, pawn)
+					else
+						modApiExt_internal.firePawnUngrappledHooks(mission, pawn)
+					end
+					
+					pd.isGrappled = isGrappled
+				end
+				
+				local isShield = pawn:IsShield()
+				if pd.isShield ~= isShield then
+					if isShield then
+						modApiExt_internal.firePawnShieldedHooks(mission, pawn)
+					else
+						modApiExt_internal.firePawnUnshieldedHooks(mission, pawn)
+					end
+					
+					pd.isShield = isShield
 				end
 
 				-- Deselection

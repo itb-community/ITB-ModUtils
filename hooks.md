@@ -15,6 +15,11 @@
 * [pawnDamagedHook](#pawndamagedhook)
 * [pawnHealedHook](#pawnhealedhook)
 * [pawnKilledHook](#pawnkilledhook)
+* [pawnIsFireHook](#pawnisfirehook)
+* [pawnIsAcidHook](#pawnisacidhook)
+* [pawnIsFrozenHook](#pawnisfrozenhook)
+* [pawnIsGrappledHook](#pawnisgrappledhook)
+* [pawnIsShieldedHook](#pawnisshieldedhook)
 * [buildingDestroyedHook](#buildingdestroyedhook)
 * [skillStartHook](#skillstarthook)
 * [skillEndHook](#skillendhook)
@@ -315,6 +320,126 @@ local hook = function(mission, pawn)
 end
 
 modApiExt:addPawnKilledHook(hook)
+```
+
+
+## `pawnIsFireHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `mission` | table | A table holding information about the current mission |
+| `pawn` | userdata | The pawn whose Fire status has changed |
+| `isFire` | boolean | `true` if the Fire status was applied to the pawn, `false` if the status was removed |
+
+Fired when a pawn is affected by or loses Fire status.
+
+Example:
+```lua
+local hook = function(mission, pawn, isFire)
+	if isFire then
+		LOG(pawn:GetMechName() .. " has been set on fire.")
+	else
+		LOG(pawn:GetMechName() .. " has been extinguished.")
+	end
+end
+
+modApiExt:addPawnIsFireHook(hook)
+```
+
+
+## `pawnIsAcidHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `mission` | table | A table holding information about the current mission |
+| `pawn` | userdata | The pawn whose ACID status has changed |
+| `isAcid` | boolean | `true` if the ACID status was applied to the pawn, `false` if the status was removed |
+
+Fired when a pawn is affected by or loses ACID status.
+
+Example:
+```lua
+local hook = function(mission, pawn, isAcid)
+	if isAcid then
+		LOG(pawn:GetMechName() .. " has been affected by acid.")
+	else
+		LOG(pawn:GetMechName() .. " is no longer affected by acid.")
+	end
+end
+
+modApiExt:addPawnIsAcidHook(hook)
+```
+
+
+## `pawnIsFrozenHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `mission` | table | A table holding information about the current mission |
+| `pawn` | userdata | The pawn whose Frozen status has changed |
+| `isFrozen` | boolean | `true` if the Frozen status was applied to the pawn, `false` if the status was removed |
+
+Fired when a pawn is affected by or loses Frozen status.
+
+Example:
+```lua
+local hook = function(mission, pawn, isFrozen)
+	if isFrozen then
+		LOG(pawn:GetMechName() .. " has been frozen.")
+	else
+		LOG(pawn:GetMechName() .. " is no longer frozen.")
+	end
+end
+
+modApiExt:addPawnIsFrozenHook(hook)
+```
+
+
+## `pawnIsGrappledHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `mission` | table | A table holding information about the current mission |
+| `pawn` | userdata | The pawn whose Grappled/Webbed status has changed |
+| `isGrappled` | boolean | `true` if the Grappled/Webbed status was applied to the pawn, `false` if the status was removed |
+
+Fired when a pawn is affected by or loses Grappled/Webbed status.
+
+Example:
+```lua
+local hook = function(mission, pawn, isGrappled)
+	if isGrappled then
+		LOG(pawn:GetMechName() .. " has been grappled.")
+	else
+		LOG(pawn:GetMechName() .. " is no longer grappled.")
+	end
+end
+
+modApiExt:addPawnIsGrappledHook(hook)
+```
+
+
+## `pawnIsShieldHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `mission` | table | A table holding information about the current mission |
+| `pawn` | userdata | The pawn whose Shielded status has changed |
+| `isShield` | boolean | `true` if the Shielded status was applied to the pawn, `false` if the status was removed |
+
+Fired when a pawn is affected by or loses Shielded status.
+
+Example:
+```lua
+local hook = function(mission, pawn, isShield)
+	if isShield then
+		LOG(pawn:GetMechName() .. " has been shielded.")
+	else
+		LOG(pawn:GetMechName() .. " is no longer shielded.")
+	end
+end
+
+modApiExt:addPawnIsShieldHook(hook)
 ```
 
 

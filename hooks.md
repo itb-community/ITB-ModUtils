@@ -419,7 +419,7 @@ modApiExt:addPawnIsGrappledHook(hook)
 ```
 
 
-## `pawnIsShieldHook`
+## `pawnIsShieldedHook`
 
 | Argument name | Type | Description |
 |---------------|------|-------------|
@@ -439,7 +439,7 @@ local hook = function(mission, pawn, isShield)
 	end
 end
 
-modApiExt:addPawnIsShieldHook(hook)
+modApiExt:addPawnIsShieldedHook(hook)
 ```
 
 

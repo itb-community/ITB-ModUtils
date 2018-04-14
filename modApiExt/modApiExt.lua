@@ -255,7 +255,7 @@ end
 --]]
 function modApiExt:init(modulesDir)
 	self.__index = self
-	self.version = "1.6.1" -- also update in init.lua
+	self.version = "1.7.0" -- also update in init.lua
 	self.modulesDir = modulesDir
 	
 	self:internal_initGlobals()

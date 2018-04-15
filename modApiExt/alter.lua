@@ -218,18 +218,18 @@ end
 function modApiExtHooks:updateTiles()
 	if Board then
 		local mtile = mouseTile()
-		if self.currentTile ~= mtile then
-			if self.currentTile then -- could be nil
+		if modApiExt_internal.currentTile ~= mtile then
+			if modApiExt_internal.currentTile then -- could be nil
 				for i, hook in ipairs(self.tileUnhighlightedHooks) do
-					hook(mission, self.currentTile)
+					hook(mission, modApiExt_internal.currentTile)
 				end
 			end
 
-			self.currentTile = mtile
+			modApiExt_internal.currentTile = mtile
 
-			if self.currentTile then -- could be nil
+			if modApiExt_internal.currentTile then -- could be nil
 				for i, hook in ipairs(self.tileHighlightedHooks) do
-					hook(mission, self.currentTile)
+					hook(mission, modApiExt_internal.currentTile)
 				end
 			end
 		end
@@ -381,6 +381,7 @@ end
 function modApiExtHooks:reset()
 	GAME.trackedBuildings = nil
 	GAME.trackedPawns = nil
+	modApiExt_internal.currentTile = nil
 	modApiExt_internal.pawns = nil
 	modApiExt_internal.mission = nil
 	modApiExt_internal.runLaterQueue = nil

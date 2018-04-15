@@ -289,21 +289,20 @@ function modApiExt:load(mod, options, version)
 	if self:isModuleAvailable(self.modulesDir.."alter") then
 		local hooks = self:loadModule(self.modulesDir.."alter")
 
-		if hooks.missionStart then
-			modApi:addMissionStartHook(hooks.missionStart)
-		end
-		if hooks.missionEnd then
-			modApi:addMissionEndHook(hooks.missionEnd)
-		end
-		if hooks.missionUpdate then
-			modApi:addMissionUpdateHook(hooks.missionUpdate)
-		end
+		modApi:addMissionStartHook(hooks.missionStart)
+		modApi:addMissionEndHook(hooks.missionEnd)
 
 		self:scheduleHook(20, function()
 			-- Execute on roughly the next frame.
 			-- This allows us to reset the loaded flag after all other
 			-- mods are done loading.
 			self.loaded = false
+			
+			table.insert(
+				modApi.missionUpdateHooks,
+				list_indexof(modApiExt_internal.extObjects, self),
+				hooks.missionUpdate
+			)
 
 			if self:getMostRecent() == self then
 				if hooks.overrideMoveSkill then

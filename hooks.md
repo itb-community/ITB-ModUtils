@@ -477,7 +477,7 @@ Fired when the game begins executing a weapon's `SkillEffect`, ie. before any of
 Example:
 ```lua
 local hook = function(mission, pawn, weaponId, p1, p2)
-	LOG(string.format("%s is using %s at %s!"), pawn:GetMechName(), weaponId, p2:GetString())
+	LOG(string.format("%s is using %s at %s!", pawn:GetMechName(), weaponId, p2:GetString()))
 end
 
 modApiExt:addSkillStartHook(hook)
@@ -499,7 +499,7 @@ Fired when the game finishes executing a weapon's `SkillEffect`, ie. after all o
 Example:
 ```lua
 local hook = function(mission, pawn, weaponId, p1, p2)
-	LOG(string.format("%s has finished using %s at %s!"), pawn:GetMechName(), weaponId, p2:GetString())
+	LOG(string.format("%s has finished using %s at %s!", pawn:GetMechName(), weaponId, p2:GetString()))
 end
 
 modApiExt:addSkillEndHook(hook)
@@ -521,7 +521,7 @@ Same as `skillStartHook`, but for the queued part of `SkillEffect`.
 Example:
 ```lua
 local hook = function(mission, pawn, weaponId, p1, p2)
-	LOG(string.format("%s is using %s at %s!"), pawn:GetMechName(), weaponId, p2:GetString())
+	LOG(string.format("%s is using %s at %s!", pawn:GetMechName(), weaponId, p2:GetString()))
 end
 
 modApiExt:addQueuedSkillStartHook(hook)
@@ -543,7 +543,7 @@ Same as `skillEndHook`, but for the queued part of `SkillEffect`.
 Example:
 ```lua
 local hook = function(mission, pawn, weaponId, p1, p2)
-	LOG(string.format("%s has finished using %s at %s!"), pawn:GetMechName(), weaponId, p2:GetString())
+	LOG(string.format("%s has finished using %s at %s!", pawn:GetMechName(), weaponId, p2:GetString()))
 end
 
 modApiExt:addQueuedSkillEndHook(hook)

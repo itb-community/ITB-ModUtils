@@ -139,6 +139,10 @@ function modApiExt:buildBroadcastFunc(hooksField, argsFunc)
 	end
 end
 
+function modApiExt:createIfMissing(object, name)
+	object[name] = object[name] or {}
+end
+
 --[[
 	Initializes globals used by all instances of modApiExt.
 --]]
@@ -224,6 +228,7 @@ function modApiExt:internal_initGlobals()
 			elseif not modApiExt_internal.gameLoaded then
 				modApiExt_internal.gameLoaded = true
 				if Board and not Board.gameBoard then Board.gameBoard = true end
+				self.dialog:triggerRuledDialog("GameLoad")
 				modApiExt_internal.fireGameLoadedHooks(modApiExt_internal.mission)
 			end
 
@@ -240,6 +245,88 @@ function modApiExt:internal_initGlobals()
 			end
 			modApiExt_internal.tipMarkerVisible = modApiExt_internal.tipMarker:wasDrawn()
 		end)
+
+		-- dialogs
+		m.ruledDialogs = m.ruledDialogs or {}
+
+		-- default voiced (dialog) events
+		self:createIfMissing(m.ruledDialogs, "VekKilled")
+		self:createIfMissing(m.ruledDialogs, "BotKilled")
+		self:createIfMissing(m.ruledDialogs, "VekKilled_Enemy")
+		self:createIfMissing(m.ruledDialogs, "DoubleVekKill")
+		self:createIfMissing(m.ruledDialogs, "DoubleVekKill_Enemy")
+		self:createIfMissing(m.ruledDialogs, "Vek_Drown")
+		self:createIfMissing(m.ruledDialogs, "Vek_Fall")
+		self:createIfMissing(m.ruledDialogs, "Vek_Smoke")
+		self:createIfMissing(m.ruledDialogs, "Vek_Frozen")
+		self:createIfMissing(m.ruledDialogs, "Emerge_Detected")
+		self:createIfMissing(m.ruledDialogs, "Emerge_FailedMech")
+		self:createIfMissing(m.ruledDialogs, "Emerge_FailedVek")
+		self:createIfMissing(m.ruledDialogs, "Emerge_Success")
+		self:createIfMissing(m.ruledDialogs, "BldgDamaged")
+		self:createIfMissing(m.ruledDialogs, "Bldg_Resisted")
+		self:createIfMissing(m.ruledDialogs, "BldgDamaged_Enemy")
+		self:createIfMissing(m.ruledDialogs, "MntDestroyed")
+		self:createIfMissing(m.ruledDialogs, "MntDestroyed_Enemy")
+		self:createIfMissing(m.ruledDialogs, "PowerCritical")
+		self:createIfMissing(m.ruledDialogs, "Mech_WebBlocked")
+		self:createIfMissing(m.ruledDialogs, "Mech_Webbed")
+		self:createIfMissing(m.ruledDialogs, "Mech_Shielded")
+		self:createIfMissing(m.ruledDialogs, "Mech_Repaired")
+		self:createIfMissing(m.ruledDialogs, "Mech_ShieldDown")
+		self:createIfMissing(m.ruledDialogs, "Pilot_Selected")
+		self:createIfMissing(m.ruledDialogs, "Pilot_Undo")
+		self:createIfMissing(m.ruledDialogs, "Pilot_Moved")
+		self:createIfMissing(m.ruledDialogs, "Pilot_Level")
+		self:createIfMissing(m.ruledDialogs, "PilotDeath")
+		self:createIfMissing(m.ruledDialogs, "PilotDeath_Hospital")
+		self:createIfMissing(m.ruledDialogs, "PilotDeath_AI")
+		self:createIfMissing(m.ruledDialogs, "Gamestart")
+		self:createIfMissing(m.ruledDialogs, "Gamestart_Alien")
+		self:createIfMissing(m.ruledDialogs, "Gameover")
+		self:createIfMissing(m.ruledDialogs, "PodDetected")
+		self:createIfMissing(m.ruledDialogs, "PodDestroyed")
+		self:createIfMissing(m.ruledDialogs, "PodCollected")
+		self:createIfMissing(m.ruledDialogs, "MissionStart")
+		self:createIfMissing(m.ruledDialogs, "MissionEnd_Retreat")
+		self:createIfMissing(m.ruledDialogs, "MissionEnd_Dead")
+		self:createIfMissing(m.ruledDialogs, "Mission_Freeze_Mines_Vek")
+		self:createIfMissing(m.ruledDialogs, "Mission_Mines_Vek")
+		self:createIfMissing(m.ruledDialogs, "Mission_Satellite_Imminent")
+		self:createIfMissing(m.ruledDialogs, "Mission_Satellite_Launch")
+		self:createIfMissing(m.ruledDialogs, "Mission_Cataclysm_Falling")
+		self:createIfMissing(m.ruledDialogs, "Mission_Terraform_Attacks")
+		self:createIfMissing(m.ruledDialogs, "Mission_Airstrike_Incoming")
+		self:createIfMissing(m.ruledDialogs, "Mission_Lightning_Strike_Vek")
+		self:createIfMissing(m.ruledDialogs, "Mission_Factory_Spawning")
+		self:createIfMissing(m.ruledDialogs, "Mission_Reactivation_Thawed")
+		self:createIfMissing(m.ruledDialogs, "Mission_SnowStorm_FrozenVek")
+		self:createIfMissing(m.ruledDialogs, "Mission_SnowStorm_FrozenMech")
+		self:createIfMissing(m.ruledDialogs, "Mission_Disposal_Activated")
+		self:createIfMissing(m.ruledDialogs, "Mission_Barrels_Destroyed")
+		self:createIfMissing(m.ruledDialogs, "Mission_Teleporter_Mech")
+		self:createIfMissing(m.ruledDialogs, "Mission_Belt_Mech")
+
+		-- modApiExt dialog events
+		self:createIfMissing(m.ruledDialogs, "GameLoad")
+		self:createIfMissing(m.ruledDialogs, "MoveStart")
+		self:createIfMissing(m.ruledDialogs, "MoveEnd")
+		self:createIfMissing(m.ruledDialogs, "MoveUndo")
+		self:createIfMissing(m.ruledDialogs, "PawnDamaged")
+		self:createIfMissing(m.ruledDialogs, "PawnHealed")
+		self:createIfMissing(m.ruledDialogs, "PawnKilled")
+		self:createIfMissing(m.ruledDialogs, "PawnFire")
+		self:createIfMissing(m.ruledDialogs, "PawnExtinguished")
+		self:createIfMissing(m.ruledDialogs, "PawnAcided")
+		self:createIfMissing(m.ruledDialogs, "PawnUnacided")
+		self:createIfMissing(m.ruledDialogs, "PawnFrozen")
+		self:createIfMissing(m.ruledDialogs, "PawnUnfrozen")
+		self:createIfMissing(m.ruledDialogs, "PawnGrappled")
+		self:createIfMissing(m.ruledDialogs, "PawnUngrappled")
+		self:createIfMissing(m.ruledDialogs, "PawnShielded")
+		self:createIfMissing(m.ruledDialogs, "PawnUnshielded")
+		self:createIfMissing(m.ruledDialogs, "PawnSelected")
+		self:createIfMissing(m.ruledDialogs, "PawnDeselected")
 	end
 end
 
@@ -280,6 +367,7 @@ function modApiExt:init(modulesDir)
 	self.board =    self:loadModuleIfAvailable(modulesDir.."board")
 	self.weapon =   self:loadModuleIfAvailable(modulesDir.."weapon")
 	self.pawn =     self:loadModuleIfAvailable(modulesDir.."pawn")
+	self.dialog =   self:loadModuleIfAvailable(modulesDir.."dialog")
 end
 
 function modApiExt:load(mod, options, version)
@@ -314,11 +402,13 @@ function modApiExt:load(mod, options, version)
 					-- Ensure backwards compatibility
 					self:addSkillStartHook(function(mission, pawn, skill, p1, p2)
 						if skill == "Move" then
+							self.dialog:triggerRuledDialog("MoveStart")
 							modApiExt_internal.fireMoveStartHooks(mission, pawn, p1, p2)
 						end
 					end)
 					self:addSkillEndHook(function(mission, pawn, skill, p1, p2)
 						if skill == "Move" then
+							self.dialog:triggerRuledDialog("MoveEnd")
 							modApiExt_internal.fireMoveEndHooks(mission, pawn, p1, p2)
 						end
 					end)

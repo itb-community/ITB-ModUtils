@@ -73,6 +73,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					-- undo state AND pawn position in a single update if that were
 					-- the case. So it has to be the 'undo move' option.
 					if pd.undoPossible and not undo and pd.loc ~= p then
+						self.dialog:triggerRuledDialog("MoveUndo", { main = id })
 						modApiExt_internal.firePawnUndoMoveHooks(mission, pawn, pd.loc)
 					end
 
@@ -91,9 +92,11 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 
 					if diff < 0 then
 						-- took damage
+						self.dialog:triggerRuledDialog("PawnDamaged", { target = id })
 						modApiExt_internal.firePawnDamagedHooks(mission, pawn, -diff)
 					else
 						-- healed
+						self.dialog:triggerRuledDialog("PawnHealed", { target = id })
 						modApiExt_internal.firePawnHealedHooks(mission, pawn, diff)
 					end
 
@@ -102,6 +105,11 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				
 				local isFire = pawn:IsFire()
 				if pd.isFire ~= isFire then
+					if isFire then
+						self.dialog:triggerRuledDialog("PawnFire", { target = id })
+					else
+						self.dialog:triggerRuledDialog("PawnExtinguished", { target = id })
+					end
 					modApiExt_internal.firePawnIsFireHooks(mission, pawn, isFire)
 					
 					pd.isFire = isFire
@@ -109,6 +117,11 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				
 				local isAcid = pawn:IsAcid()
 				if pd.isAcid ~= isAcid then
+					if isAcid then
+						self.dialog:triggerRuledDialog("PawnAcided", { target = id })
+					else
+						self.dialog:triggerRuledDialog("PawnUnacided", { target = id })
+					end
 					modApiExt_internal.firePawnIsAcidHooks(mission, pawn, isAcid)
 					
 					pd.isAcid = isAcid
@@ -116,6 +129,11 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				
 				local isFrozen = pawn:IsFrozen()
 				if pd.isFrozen ~= isFrozen then
+					if isFrozen then
+						self.dialog:triggerRuledDialog("PawnFrozen", { target = id })
+					else
+						self.dialog:triggerRuledDialog("PawnUnfrozen", { target = id })
+					end
 					modApiExt_internal.firePawnIsFrozenHooks(mission, pawn, isFrozen)
 					
 					pd.isFrozen = isFrozen
@@ -123,6 +141,11 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				
 				local isGrappled = pawn:IsGrappled()
 				if pd.isGrappled ~= isGrappled then
+					if isGrappled then
+						self.dialog:triggerRuledDialog("PawnGrappled", { target = id })
+					else
+						self.dialog:triggerRuledDialog("PawnUngrappled", { target = id })
+					end
 					modApiExt_internal.firePawnIsGrappledHooks(mission, pawn, isGrappled)
 					
 					pd.isGrappled = isGrappled
@@ -130,6 +153,11 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				
 				local isShield = pawn:IsShield()
 				if pd.isShield ~= isShield then
+					if isShield then
+						self.dialog:triggerRuledDialog("PawnShielded", { target = id })
+					else
+						self.dialog:triggerRuledDialog("PawnUnshielded", { target = id })
+					end
 					modApiExt_internal.firePawnIsShieldedHooks(mission, pawn, isShield)
 					
 					pd.isShield = isShield
@@ -137,6 +165,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 
 				-- Deselection
 				if pd.selected and not pawn:IsSelected() then
+					self.dialog:triggerRuledDialog("PawnDeselected", { target = id })
 					modApiExt_internal.firePawnDeselectedHooks(mission, pawn)
 
 					pd.selected = false
@@ -155,11 +184,13 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				-- Deselection -> Selection, instead of relying on pawn order in table
 				if not pd.selected and pawn:IsSelected() then
 					pd.selected = true
+					self.dialog:triggerRuledDialog("PawnSelected", { target = id })
 					modApiExt_internal.firePawnSelectedHooks(mission, pawn)
 				end
 
 				if not pd.dead and pd.curHealth == 0 then
 					pd.dead = true
+					self.dialog:triggerRuledDialog("PawnKilled", { target = id })
 					modApiExt_internal.firePawnKilledHooks(mission, pawn)
 				end
 
@@ -208,6 +239,7 @@ function modApiExtHooks:trackAndUpdateBuildings(mission)
 				if not Board:IsBuilding(bld.loc) then
 					bld.destroyed = true
 
+					self.dialog:triggerRuledDialog("BldgDestroyed")
 					modApiExt_internal.fireBuildingDestroyedHooks(mission, bld)
 				end
 			end
@@ -418,6 +450,21 @@ modApiExtHooks.voiceEvent = function(event, customOdds)
 	elseif event.id == "PodCollected" then
 		modApiExt_internal.firePodCollectedHooks()
 	end
+
+	-- use the voice event's cast data if it has any
+	local cast = nil
+	if event.pawn1 ~= -1 then
+		cast = cast or {}
+		cast.main = event.pawn1
+	end
+	if event.pawn2 ~= -1 then
+		cast = cast or {}
+		cast.target = event.pawn2
+	end
+	
+	-- dialog already broadcasts the event to all registered extObjects
+	-- via shared dialogs table
+	modApiExtHooks.dialog:triggerRuledDialog(event.id, cast, customOdds)
 end
 
 return modApiExtHooks

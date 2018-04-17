@@ -259,34 +259,6 @@ function modApiExtHooks:processRunLater(mission)
 	end
 end
 
---[[
-	Overrides the default Move skill to implement pawnMoveStart/End hooks.
-	Can optionally provide your own Move skill as argument to this function
-	in case some non-standard Move skill chaining is required.
---]]
-function modApiExtHooks:overrideMoveSkill(oldMoveSkill)
-	if not modApiExt_internal.oldMoveEffect or oldMoveSkill then
-		modApiExt_internal.oldMoveEffect = (oldMoveSkill and oldMoveSkill.GetSkillEffect)
-			or Move.GetSkillEffect
-
-		Move.GetSkillEffect = function(slf, p1, p2)
-			local tmp = SkillEffect()
-
-			tmp:AddScript("modApiExt_internal.fireMoveStartHooks(modApiExt_internal.mission, Pawn)")
-
-			local moveFx = modApiExt_internal.oldMoveEffect(slf, p1, p2)
-			for i, e in pairs(extract_table(moveFx.effect)) do
-				tmp.effect:push_back(e)
-			end
-
-			tmp:AddScript("modApiExt_internal.fireMoveEndHooks(modApiExt_internal.mission, Pawn)")
-
-			moveFx.effect = tmp.effect
-			return moveFx
-		end
-	end
-end
-
 function modApiExtHooks:overrideSkill(id, skill)
 	assert(skill.GetSkillEffect)
 	assert(_G[id] == skill) -- no fun allowed
@@ -370,9 +342,7 @@ function modApiExtHooks:overrideAllSkills()
 
 		for k, v in pairs(_G) do
 			if type(v) == "table" and v.GetSkillEffect then
-				if not list_contains(modApiExt_internal.skillBlacklist, k) then
-					self:overrideSkill(k, v)
-				end
+				self:overrideSkill(k, v)
 			end
 		end
 	end

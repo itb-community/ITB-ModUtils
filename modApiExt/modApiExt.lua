@@ -169,7 +169,7 @@ function modApiExt:internal_initGlobals()
 			Loop = true
 		})
 
-		-- current mission, for passing as arg to move hooks
+		-- current mission, for passing as arg to hooks
 		m.mission = nil
 		-- table of pawn userdata, kept only at runtime to help
 		-- with pawn hooks
@@ -177,13 +177,6 @@ function modApiExt:internal_initGlobals()
 
 		m.timer = sdl.timer()
 		m.elapsedTime = nil
-
-		-- reference to the original Move's GetSkillEffect, used
-		-- for chaining and implementation of move hooks
-		m.oldMoveEffect = nil
-		-- list of skills that will not be overridden to have
-		-- skillStart/End etc hooks implemented
-		m.skillBlacklist = { "Move" }
 
 		m.firePawnTrackedHooks =       self:buildBroadcastFunc("pawnTrackedHooks")
 		m.firePawnUntrackedHooks =     self:buildBroadcastFunc("pawnUntrackedHooks")
@@ -309,15 +302,20 @@ function modApiExt:load(mod, options, version)
 			)
 
 			if self:getMostRecent() == self then
-				if hooks.overrideMoveSkill then
-					-- Make sure we are the last ones to modify the Move skill.
-					-- Could do that in preMissionStartHook, but then we won't
-					-- override the skill when the player loads the game.
-					-- And there's no preLoadGameHook() available in base modApi.
-					hooks:overrideMoveSkill()
-				end
 				if hooks.overrideAllSkills then
 					hooks:overrideAllSkills()
+
+					-- Ensure backwards compatibility
+					self:addSkillStartHook(function(mission, pawn, skill, p1, p2)
+						if skill == "Move" then
+							modApiExt_internal.fireMoveStartHooks(mission, pawn, p1, p2)
+						end
+					end)
+					self:addSkillEndHook(function(mission, pawn, skill, p1, p2)
+						if skill == "Move" then
+							modApiExt_internal.fireMoveEndHooks(mission, pawn, p1, p2)
+						end
+					end)
 				end
 				if hooks.voiceEvent then
 					modApi:addVoiceEventHook(hooks.voiceEvent)

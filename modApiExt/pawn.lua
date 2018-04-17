@@ -146,4 +146,47 @@ function pawn:getHighlighted()
 	return Board:GetPawn(mouseTile())
 end
 
+function pawn:getSavedataTable(pawnId, sourceTable)
+	if sourceTable then
+		for k, v in pairs(sourceTable) do
+			if type(v) == "table" and v.id and self.string:startsWith(k, "pawn") then
+				if v.id == pawnId then return v end
+			end
+		end	
+	else
+		local region = self.board:getCurrentRegion()
+		local ptable = self:getSavedataTable(pawnId, SquadData)
+		if not ptable and region then
+			ptable = self:getSavedataTable(pawnId, region.player.map_data)
+		end
+
+		return ptable
+	end
+
+	return nil
+end
+
+function pawn:getWeaponData(ptable, field)
+	assert(type(field) == "string")
+	assert(field == "primary" or field == "secondary")
+	local t = {}
+
+	t.id = ptable[field]
+	t.power = ptable[field.."_power"]
+	t.upgrade1 = ptable[field.."_mod1"]
+	t.upgrade2 = ptable[field.."_mod2"]
+
+	return t
+end
+
+function pawn:getWeapons(pawnId)
+	local ptable = self:getSavedataTable(pawnId)
+	local t = {}
+
+	t[1] = self:getWeaponData(ptable, "primary").id
+	t[2] = self:getWeaponData(ptable, "secondary").id
+
+	return t
+end
+
 return pawn

@@ -282,7 +282,7 @@ function modApiExtHooks:overrideSkill(id, skill)
 				-- but I can't reproduce the bug.
 				-- For now use a board size check and log the message to try
 				-- to figure it out.
-				LOG("Was in game board, but Board.gameBoard was not set! " .. tostring(modApiExt_internal.version))
+				--LOG("Was in game board, but Board.gameBoard was not set! " .. tostring(modApiExt_internal.version))
 			end
 		end
 

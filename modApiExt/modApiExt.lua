@@ -286,7 +286,7 @@ function modApiExt:load(mod, options, version)
 	-- We're already loaded. Bail.
 	if self.loaded then return end
 
-	-- clear out previously registered hooks, since we're relaoding.
+	-- clear out previously registered hooks, since we're reloading.
 	if self.clearHooks then self:clearHooks() end
 
 	if self:isModuleAvailable(self.modulesDir.."alter") then

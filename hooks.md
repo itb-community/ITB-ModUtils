@@ -6,8 +6,6 @@
 * [tileUnhighlightedHook](#tileunhighlightedhook)
 * [pawnTrackedHook](#pawntrackedhook)
 * [pawnUntrackedHook](#pawnuntrackedhook)
-* [pawnMoveStartHook](#pawnmovestarthook)
-* [pawnMoveEndHook](#pawnmoveendhook)
 * [pawnPositionChangedHook](#pawnpositionchangedhook)
 * [pawnUndoMoveHook](#pawnundomovehook)
 * [pawnSelectedHook](#pawnselectedhook)
@@ -28,6 +26,13 @@
 * [skillBuildHook](#skillbuildhook)
 * [tipImageShownHook](#tipimageshownhook)
 * [tipImageHiddenHook](#tipimagehiddenhook)
+* [podDetectedHook](#poddetectedhook)
+* [podDestroyedHook](#poddestroyedhook)
+* [podCollectedHook](#podcollectedhook)
+
+Deprecated:
+* [pawnMoveStartHook](#pawnmovestarthook)
+* [pawnMoveEndHook](#pawnmoveendhook)
 
 
 # Hooks
@@ -157,6 +162,8 @@ modApiExt:addPawnUntrackedHook(hook)
 
 Fired when a pawn begins moving. **ONLY WORKS FOR PLAYER MECHS**
 
+**DEPRECATED**: Use `skillStartHook` instead.
+
 Example:
 ```lua
 local hook = function(mission, pawn)
@@ -175,6 +182,8 @@ modApiExt:addPawnMoveStartHook(hook)
 | `pawn` | userdata | The pawn that has finished moving |
 
 Fired when a pawn finishes moving. **ONLY WORKS FOR PLAYER MECHS**
+
+**DEPRECATED**: Use `skillEndHook` instead.
 
 Example:
 ```lua
@@ -603,6 +612,48 @@ local hook = function()
 end
 
 modApiExt:addTipImageHiddenHook(hook)
+```
+
+
+## `podDetectedHook`
+
+Fired when a time pod enters the game board.
+
+Example:
+```lua
+local hook = function()
+	LOG("Time pod detected!")
+end
+
+modApiExt:addPodDetectedHook(hook)
+```
+
+
+## `podDestroyedHook`
+
+Fired when the time pod is destroyed.
+
+Example:
+```lua
+local hook = function()
+	LOG("Time pod has been destroyed!")
+end
+
+modApiExt:addPodDestroyedHook(hook)
+```
+
+
+## `podCollectedHook`
+
+Fired when the time pod is collected.
+
+Example:
+```lua
+local hook = function()
+	LOG("Time pod has been collected!")
+end
+
+modApiExt:addPodCollectedHook(hook)
 ```
 
 

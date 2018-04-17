@@ -440,4 +440,14 @@ modApiExtHooks.missionUpdate = function(mission)
 	modApiExtHooks:trackAndUpdatePawns(mission)
 end
 
+modApiExtHooks.voiceEvent = function(event, customOdds)
+	if event.id == "PodDetected" then
+		modApiExt_internal.firePodDetectedHooks()
+	elseif event.id == "PodDestroyed" then
+		modApiExt_internal.firePodDestroyedHooks()
+	elseif event.id == "PodCollected" then
+		modApiExt_internal.firePodCollectedHooks()
+	end
+end
+
 return modApiExtHooks

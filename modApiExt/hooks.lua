@@ -180,6 +180,24 @@ function hooks:addTipImageHiddenHook(fn)
 	table.insert(self.tipImageHiddenHooks,fn)
 end
 
+hooks.podDetectedHooks = {}
+function hooks:addPodDetectedHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.podDetectedHooks,fn)
+end
+
+hooks.podDestroyedHooks = {}
+function hooks:addPodDestroyedHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.podDestroyedHooks,fn)
+end
+
+hooks.podCollectedHooks = {}
+function hooks:addPodCollectedHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.podCollectedHooks,fn)
+end
+
 --[[
 	Executes the function on the game's next update step. Only works during missions.
 	

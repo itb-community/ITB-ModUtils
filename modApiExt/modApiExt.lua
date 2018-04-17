@@ -219,6 +219,10 @@ function modApiExt:internal_initGlobals()
 		m.fireTipImageShownHooks =     self:buildBroadcastFunc("tipImageShownHooks")
 		m.fireTipImageHiddenHooks =    self:buildBroadcastFunc("tipImageHiddenHooks")
 
+		m.firePodDetectedHooks =       self:buildBroadcastFunc("podDetectedHooks")
+		m.firePodDestroyedHooks =      self:buildBroadcastFunc("podDestroyedHooks")
+		m.firePodCollectedHooks =      self:buildBroadcastFunc("podCollectedHooks")
+
 		m.drawHook = sdl.drawHook(function(screen)
 			if not Game then
 				modApiExt_internal.gameLoaded = false
@@ -314,6 +318,9 @@ function modApiExt:load(mod, options, version)
 				end
 				if hooks.overrideAllSkills then
 					hooks:overrideAllSkills()
+				end
+				if hooks.voiceEvent then
+					modApi:addVoiceEventHook(hooks.voiceEvent)
 				end
 			end
 		end)

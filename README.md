@@ -82,6 +82,7 @@ Some useful functions added by this library:
 At the moment, the library consists of the following modules:
 
 - [Global](https://github.com/kartoFlane/ITB-ModUtils/blob/master/modApiExt/global.lua) - various assorted functions which didn't fit anywhere else
+- [Dialog](https://github.com/kartoFlane/ITB-ModUtils/blob/master/modApiExt/dialog.lua) - system for dialogs with cast rules, accessible via `modApiExt.dialog`.
 - [Vector](https://github.com/kartoFlane/ITB-ModUtils/blob/master/modApiExt/vector.lua) - functions useful for vector/point manipulation, accessible via `modApiExt.vector`.
 - [Pawn](https://github.com/kartoFlane/ITB-ModUtils/blob/master/modApiExt/pawn.lua) - functions useful when manipulating pawns, accessible via `modApiExt.pawn`.
 - [Board](https://github.com/kartoFlane/ITB-ModUtils/blob/master/modApiExt/board.lua) - functions useful when dealing with the game board, accessible via `modApiExt.board`.

@@ -59,7 +59,7 @@ function pawn:safeDamage(pawn, spaceDamage)
 	Board:DamageSpace(spaceDamage)
 
 	pawn:SetSpace(pawnSpace)
-	self.board:RestoreTerrain(safeSpace, terrainData)
+	self.board:restoreTerrain(safeSpace, terrainData)
 
 	if not wasOnBoard then Board:RemovePawn(pawn) end
 end

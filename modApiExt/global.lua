@@ -17,6 +17,9 @@ function list_indexof(list, element)
 	return -1
 end
 
+---------------------------------------------------------------
+-- Screenpoint to tile conversion
+
 --[[
 	Returns currently highlighted board tile (Point), or nil.
 --]]
@@ -92,6 +95,65 @@ if not screenPointToTile then
 		return nil
 	end
 end
+
+---------------------------------------------------------------
+-- Hasing functions
+
+local function hash_table(tbl)
+	local hash = 79
+	local salt = 43
+
+	for k, v in pairs(tbl) do
+		hash = salt * hash + hash_o(k)
+		hash = salt * hash + hash_o(v)
+	end
+
+	for i, v in ipairs(tbl) do
+		hash = salt * hash + i
+		hash = salt * hash + hash_o(v)
+	end
+
+	return hash
+end
+
+local function hash_string(str)
+	local hash = 129
+	local salt = 29
+
+	local l = string.len(str)
+	for i = 1, l do
+		hash = salt * hash + string.byte(str, i)
+	end
+
+	return hash
+end
+
+function hash_o(o)
+	local hash = 89
+	local salt = 31
+	local nullCode = 13
+
+	if type(o) == "table" then
+		hash = salt * hash + hash_table(o)
+	elseif type(o) == "userdata" then
+		hash = salt * hash + 8137
+	elseif type(o) == "function" then
+		hash = salt * hash + 7979
+	elseif type(o) == "number" then
+		hash = salt * hash + o
+	elseif type(o) == "string" then
+		hash = salt * hash + hash_string(o)
+	elseif type(o) == "boolean" then
+		hash = salt * hash + (o and 23 or 17)
+	elseif type(o) == "nil" then
+		hash = salt * hash + nullCode
+	end
+
+	return hash
+end
+
+---------------------------------------------------------------
+-- Deque list object (queue/stack)
 
 if not List then
 	--[[

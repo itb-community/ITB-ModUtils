@@ -44,12 +44,19 @@ function dialog:buildRuledDialogCast(pawnIds, castRules, protoCast)
 			end
 		else
 			for i, id in ipairs(pawnIds) do
-				-- don't cast a pawn into more than one role
-				local hasRole = self:hasRuledDialogRole(id, cast)
+				local p = Game:GetPawn(id)
+				if p then
+					-- don't cast a pawn into more than one role
+					local hasRole = self:hasRuledDialogRole(id, cast)
 
-				if not hasRole and not Game:GetPawn(id):IsDead() and rule(id, castCopy) then
-					cast[castRole] = id
-					break
+					if
+						not hasRole     and
+						not p:IsDead()  and
+						rule(id, castCopy)
+					then
+						cast[castRole] = id
+						break
+					end
 				end
 			end
 		end

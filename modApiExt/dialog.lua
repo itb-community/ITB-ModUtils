@@ -118,16 +118,22 @@ function dialog:triggerRuledDialog(dialogEvent, protoCast, customOdds)
 		assert(customOdds <= 100)
 	end
 
+	-- No dialogs registered for this event, so just ignore it.
+	if not modApiExt_internal.ruledDialogs[dialogEvent] then
+		LOG("Had no table defined for " .. dialogEvent .. ". Please tell kartoFlane.")
+		return
+	end
+
 	if not GAME.uniqueRuledDialogs then
 		GAME.uniqueRuledDialogs = {}
 	end
-	if not modApiExt_internal.ruledDialogs[dialogEvent] then
-		LOG("Had no table defined for dialog event: " .. dialogEvent ..". Please tell kartoFlane")
-		modApiExt_internal.ruledDialogs[dialogEvent] = {}
-	end
 
-	local pawns = {0, 1, 2} -- hardcoded ids for mech pawns
-	-- TODO: maybe add other pawns under players control when in a mission?
+	local pawns = nil
+	if Board then
+		pawns = extract_table(Board:GetPawns(TEAM_ANY))
+	else
+		pawns = {0, 1, 2} -- hardcoded ids for mech pawns
+	end
 
 	local candidates = {}
 

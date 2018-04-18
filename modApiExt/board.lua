@@ -80,7 +80,11 @@ end
 
 function board:getCurrentRegion()
 	if RegionData and RegionData.iBattleRegion then
-		return RegionData["region"..RegionData.iBattleRegion]
+		if RegionData.iBattleRegion == 20 then
+			return RegionData["final_region"]
+		else
+			return RegionData["region"..RegionData.iBattleRegion]
+		end
 	end
 
 	return nil

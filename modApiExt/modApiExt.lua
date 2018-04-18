@@ -412,13 +412,13 @@ function modApiExt:load(mod, options, version)
 					-- Ensure backwards compatibility
 					self:addSkillStartHook(function(mission, pawn, skill, p1, p2)
 						if skill == "Move" then
-							self.dialog:triggerRuledDialog("MoveStart")
+							self.dialog:triggerRuledDialog("MoveStart", { main = pawn:GetId() })
 							modApiExt_internal.fireMoveStartHooks(mission, pawn, p1, p2)
 						end
 					end)
 					self:addSkillEndHook(function(mission, pawn, skill, p1, p2)
 						if skill == "Move" then
-							self.dialog:triggerRuledDialog("MoveEnd")
+							self.dialog:triggerRuledDialog("MoveEnd", { main = pawn:GetId() })
 							modApiExt_internal.fireMoveEndHooks(mission, pawn, p1, p2)
 						end
 					end)

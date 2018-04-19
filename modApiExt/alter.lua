@@ -442,7 +442,7 @@ modApiExtHooks.missionUpdate = function(mission)
 	modApiExtHooks:trackAndUpdatePawns(mission)
 end
 
-modApiExtHooks.voiceEvent = function(event, customOdds)
+modApiExtHooks.voiceEvent = function(event, customOdds, suppress)
 	if event.id == "PodDetected" then
 		modApiExt_internal.firePodDetectedHooks()
 	elseif event.id == "PodDestroyed" then
@@ -451,20 +451,24 @@ modApiExtHooks.voiceEvent = function(event, customOdds)
 		modApiExt_internal.firePodCollectedHooks()
 	end
 
-	-- use the voice event's cast data if it has any
-	local cast = nil
-	if event.pawn1 ~= -1 then
-		cast = cast or {}
-		cast.main = event.pawn1
+	if not suppress then
+		-- use the voice event's cast data if it has any
+		local cast = nil
+		if event.pawn1 ~= -1 then
+			cast = cast or {}
+			cast.main = event.pawn1
+		end
+		if event.pawn2 ~= -1 then
+			cast = cast or {}
+			cast.target = event.pawn2
+		end
+		
+		-- dialog already broadcasts the event to all registered extObjects
+		-- via shared dialogs table
+		return modApiExtHooks.dialog:triggerRuledDialog(event.id, cast, customOdds)
 	end
-	if event.pawn2 ~= -1 then
-		cast = cast or {}
-		cast.target = event.pawn2
-	end
-	
-	-- dialog already broadcasts the event to all registered extObjects
-	-- via shared dialogs table
-	modApiExtHooks.dialog:triggerRuledDialog(event.id, cast, customOdds)
+
+	return false
 end
 
 return modApiExtHooks

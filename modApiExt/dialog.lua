@@ -121,7 +121,7 @@ function dialog:triggerRuledDialog(dialogEvent, protoCast, customOdds)
 	-- No dialogs registered for this event, so just ignore it.
 	if not modApiExt_internal.ruledDialogs[dialogEvent] then
 		LOG("Had no table defined for " .. dialogEvent .. ". Please tell kartoFlane.")
-		return
+		return false
 	end
 
 	if not GAME.uniqueRuledDialogs then
@@ -213,7 +213,15 @@ function dialog:triggerRuledDialog(dialogEvent, protoCast, customOdds)
 				self:addRuledDialogVoicePopup(segment, cast)
 			end
 		end
+
+		if eventInfo.Suppress == nil then
+			return true
+		else
+			return eventInfo.Suppress
+		end
 	end
+
+	return false
 end
 
 function dialog:addRuledDialog(dialogEvent, ruledDialog)

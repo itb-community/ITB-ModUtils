@@ -27,6 +27,8 @@
 * [tipImageShownHook](#tipimageshownhook)
 * [tipImageHiddenHook](#tipimagehiddenhook)
 * [podDetectedHook](#poddetectedhook)
+* [podLandedHook](#podlandedhook)
+* [podTrampledHook](#podtrampledhook)
 * [podDestroyedHook](#poddestroyedhook)
 * [podCollectedHook](#podcollectedhook)
 
@@ -629,14 +631,47 @@ modApiExt:addPodDetectedHook(hook)
 ```
 
 
-## `podDestroyedHook`
+## `podLandedHook`
 
-Fired when the time pod is destroyed.
+Fired when a time pod lands on the game board.
 
 Example:
 ```lua
-local hook = function()
-	LOG("Time pod has been destroyed!")
+local hook = function(point)
+	LOG("Time pod landed at " .. point:GetString())
+end
+
+modApiExt:addPodLandedHook(hook)
+```
+
+
+## `podTrampledHook`
+
+Fired when the time pod is trampled (destroyed by a Vek moving/being pushed on top of it).
+
+Example:
+```lua
+local hook = function(pawn)
+	LOG("Time pod has been trampled by " .. pawn:GetMechName())
+end
+
+modApiExt:addPodTrampledHook(hook)
+```
+
+
+## `podDestroyedHook`
+
+Fired when the time pod is destroyed by dealing damage to its tile.
+
+Example:
+```lua
+local hook = function(pawn)
+	if pawn then
+		LOG("Time pod has been destroyed by " .. pawn:GetMechName())
+	else
+		-- could have been destroyed by the environment
+		LOG("Time pod has been destroyed!")
+	end
 end
 
 modApiExt:addPodDestroyedHook(hook)
@@ -649,8 +684,8 @@ Fired when the time pod is collected.
 
 Example:
 ```lua
-local hook = function()
-	LOG("Time pod has been collected!")
+local hook = function(pawn)
+	LOG("Time pod has been collected by " .. pawn:GetMechName())
 end
 
 modApiExt:addPodCollectedHook(hook)

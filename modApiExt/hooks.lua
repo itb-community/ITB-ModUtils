@@ -186,6 +186,18 @@ function hooks:addPodDetectedHook(fn)
 	table.insert(self.podDetectedHooks,fn)
 end
 
+hooks.podLandedHooks = {}
+function hooks:addPodLandedHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.podLandedHooks,fn)
+end
+
+hooks.podTrampledHooks = {}
+function hooks:addPodTrampledHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.podTrampledHooks,fn)
+end
+
 hooks.podDestroyedHooks = {}
 function hooks:addPodDestroyedHook(fn)
 	assert(type(fn) == "function")

@@ -217,6 +217,8 @@ function modApiExt:internal_initGlobals()
 		m.fireTipImageHiddenHooks =    self:buildBroadcastFunc("tipImageHiddenHooks")
 
 		m.firePodDetectedHooks =       self:buildBroadcastFunc("podDetectedHooks")
+		m.firePodLandedHooks =         self:buildBroadcastFunc("podLandedHooks")
+		m.firePodTrampledHooks =       self:buildBroadcastFunc("podTrampledHooks")
 		m.firePodDestroyedHooks =      self:buildBroadcastFunc("podDestroyedHooks")
 		m.firePodCollectedHooks =      self:buildBroadcastFunc("podCollectedHooks")
 

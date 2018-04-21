@@ -249,6 +249,8 @@ end
 
 function modApiExtHooks:updateTiles()
 	if Board then
+		if not GAME.trackedPods then GAME.trackedPods = {} end
+
 		local mtile = mouseTile()
 		if modApiExt_internal.currentTile ~= mtile then
 			if modApiExt_internal.currentTile then -- could be nil
@@ -262,6 +264,40 @@ function modApiExtHooks:updateTiles()
 			if modApiExt_internal.currentTile then -- could be nil
 				for i, hook in ipairs(self.tileHighlightedHooks) do
 					hook(mission, modApiExt_internal.currentTile)
+				end
+			end
+		end
+
+		self:findAndTrackPods()
+
+		for i, p in ipairs(GAME.trackedPods) do
+			if
+				not Board:IsPod(p) and
+				Board:IsPawnSpace(p) and
+				Board:GetPawn(p):GetTeam() ~= TEAM_PLAYER
+			then
+				table.remove(GAME.trackedPods, i)
+				modApiExt_internal.firePodTrampledHooks(Board:GetPawn(p):GetId())
+			elseif not Board:IsPod(p) then
+				table.remove(GAME.trackedPods, i)
+			end
+		end
+	end
+end
+
+function modApiExtHooks:findAndTrackPods()
+	if Board and GAME.pendingPods and GAME.pendingPods > 0 then
+		local size = Board:GetSize()
+		for y = 0, size.y - 1 do
+			for x = 0, size.x - 1 do
+				local p = Point(x, y)
+				if
+					Board:IsPod(p) and
+					not list_contains(GAME.trackedPods, p)
+				then
+					GAME.pendingPods = GAME.pendingPods - 1
+					table.insert(GAME.trackedPods, p)
+					modApiExt_internal.firePodLandedHooks(p)
 				end
 			end
 		end
@@ -383,6 +419,8 @@ end
 function modApiExtHooks:reset()
 	GAME.trackedBuildings = nil
 	GAME.trackedPawns = nil
+	GAME.trackedPods = nil
+	GAME.pendingPods = nil
 	modApiExt_internal.currentTile = nil
 	modApiExt_internal.pawns = nil
 	modApiExt_internal.mission = nil
@@ -444,6 +482,7 @@ end
 
 modApiExtHooks.voiceEvent = function(event, customOdds, suppress)
 	if event.id == "PodDetected" then
+		GAME.pendingPods = (GAME.pendingPods or 0) + 1
 		modApiExt_internal.firePodDetectedHooks()
 	elseif event.id == "PodDestroyed" then
 		if event.pawn1 == -1 then

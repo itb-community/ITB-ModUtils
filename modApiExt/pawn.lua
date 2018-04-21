@@ -53,6 +53,11 @@ function pawn:safeDamage(pawn, spaceDamage)
 	if not wasOnBoard then
 		Board:AddPawn(pawn, safeSpace)
 	end
+
+	-- change it to basic terrain so we don't trigger sounds if it's
+	-- sand or forest tile or other.
+	Board:SetTerrain(safeSpace, TERRAIN_ROAD)
+
 	pawn:SetSpace(safeSpace)
 
 	spaceDamage.loc = safeSpace

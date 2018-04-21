@@ -20,7 +20,7 @@ function board:getSpace(predicate)
 		end
 	end
 
-	return nil
+	error("Could not find a Board space satisfying the given condition.\n" .. debug.traceback())
 end
 
 --[[
@@ -34,7 +34,9 @@ end
 
 function board:getUnoccupiedRestorableSpace()
 	return self:getSpace(function(point)
-		return not Board:IsBlocked(point, PATH_GROUND) and self:isRestorableTerrain(point)
+		-- We can put non-massive pawns over water, as long as we move
+		-- them back to solid ground in the same game tick.
+		return not Board:IsPawnSpace(point) and self:isRestorableTerrain(point)
 	end)
 end
 
@@ -47,8 +49,13 @@ function board:isRestorableTerrain(point)
 
 	-- Mountains and ice can be broken
 	-- Buildings can be damaged or destroyed
-	return terrain ~= TERRAIN_MOUNTAIN  and terrain ~= TERRAIN_ICE
-		and terrain ~= TERRAIN_BUILDING
+	return terrain ~= TERRAIN_MOUNTAIN  and
+	       terrain ~= TERRAIN_ICE       and
+	       terrain ~= TERRAIN_BUILDING  and
+	       not Board:IsPod(point)       and
+	       not Board:IsFrozen(point)    and
+	       not Board:IsDangerous(point) and
+	       not Board:IsDangerousItem(point)
 end
 
 function board:getRestorableTerrainData(point)
@@ -56,6 +63,7 @@ function board:getRestorableTerrainData(point)
 	data.type = Board:GetTerrain(point)
 	data.smoke = Board:IsSmoke(point)
 	data.acid = Board:IsAcid(point)
+	data.fire = Board:IsFire(point)
 
 	return data
 end
@@ -67,6 +75,11 @@ function board:restoreTerrain(point, terrainData)
 	-- maybe normal smoke vs sand smoke?
 	Board:SetSmoke(point, terrainData.smoke, false)
 	Board:SetAcid(point, terrainData.acid)
+	if terrainData.fire then
+		local d = SpaceDamage(point)
+		d.iFire = EFFECT_CREATE
+		Board:DamageSpace(d)
+	end
 end
 
 function board:isWaterTerrain(point)

@@ -277,7 +277,7 @@ function modApiExtHooks:updateTiles()
 				Board:GetPawn(p):GetTeam() ~= TEAM_PLAYER
 			then
 				table.remove(GAME.trackedPods, i)
-				modApiExt_internal.firePodTrampledHooks(Board:GetPawn(p):GetId())
+				modApiExt_internal.firePodTrampledHooks(Board:GetPawn(p))
 			elseif not Board:IsPod(p) then
 				table.remove(GAME.trackedPods, i)
 			end
@@ -488,9 +488,10 @@ modApiExtHooks.voiceEvent = function(event, customOdds, suppress)
 		if event.pawn1 == -1 then
 			event.pawn1 = Pawn:GetId()
 		end
-		modApiExt_internal.firePodDestroyedHooks(event.pawn1)
+
+		modApiExt_internal.firePodDestroyedHooks(Game:GetPawn(event.pawn1))
 	elseif event.id == "PodCollected" then
-		modApiExt_internal.firePodCollectedHooks(event.pawn1)
+		modApiExt_internal.firePodCollectedHooks(Game:GetPawn(event.pawn1))
 	end
 
 	if not suppress then

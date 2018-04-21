@@ -446,9 +446,12 @@ modApiExtHooks.voiceEvent = function(event, customOdds, suppress)
 	if event.id == "PodDetected" then
 		modApiExt_internal.firePodDetectedHooks()
 	elseif event.id == "PodDestroyed" then
-		modApiExt_internal.firePodDestroyedHooks()
+		if event.pawn1 == -1 then
+			event.pawn1 = Pawn:GetId()
+		end
+		modApiExt_internal.firePodDestroyedHooks(event.pawn1)
 	elseif event.id == "PodCollected" then
-		modApiExt_internal.firePodCollectedHooks()
+		modApiExt_internal.firePodCollectedHooks(event.pawn1)
 	end
 
 	if not suppress then

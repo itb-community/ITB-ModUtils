@@ -485,7 +485,7 @@ modApiExtHooks.voiceEvent = function(event, customOdds, suppress)
 		GAME.pendingPods = (GAME.pendingPods or 0) + 1
 		modApiExt_internal.firePodDetectedHooks()
 	elseif event.id == "PodDestroyed" then
-		if event.pawn1 == -1 then
+		if event.pawn1 == -1 and Pawn and Pawn:IsSelected() then
 			event.pawn1 = Pawn:GetId()
 		end
 

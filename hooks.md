@@ -633,6 +633,10 @@ modApiExt:addPodDetectedHook(hook)
 
 ## `podLandedHook`
 
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `point` | Point | The location the pod landed on |
+
 Fired when a time pod lands on the game board.
 
 Example:
@@ -647,6 +651,10 @@ modApiExt:addPodLandedHook(hook)
 
 ## `podTrampledHook`
 
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `pawn` | userdata | The pawn that trampled the pod |
+
 Fired when the time pod is trampled (destroyed by a Vek moving/being pushed on top of it).
 
 Example:
@@ -660,6 +668,10 @@ modApiExt:addPodTrampledHook(hook)
 
 
 ## `podDestroyedHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `pawn` | userdata | The pawn that destroyed the pod, or nil if it was destroyed by damage not associated with any pawn (eg. environment) |
 
 Fired when the time pod is destroyed by dealing damage to its tile.
 
@@ -679,6 +691,10 @@ modApiExt:addPodDestroyedHook(hook)
 
 
 ## `podCollectedHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `pawn` | userdata | The pawn that collected the pod |
 
 Fired when the time pod is collected.
 

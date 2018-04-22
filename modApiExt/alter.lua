@@ -50,7 +50,9 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 				pawn = modApiExt_internal.pawns[id]
 			end
 
-			if pawn then
+			-- Make sure we didn't get a pawn that was already deleted,
+			-- in which case the userdata points to an invalid block of memory
+			if pawn and pawn:GetId() == id then
 				if not pd then
 					-- Pawn is not tracked yet
 					-- Create an empty table for its tracked fields
@@ -171,8 +173,9 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					pd.selected = false
 				end
 			else
-				-- Pawn was nil? Some bizarre edge case.
-				-- Can't do anything with this, ignore.
+				-- pawn was nil or invalid, remove this entry
+				GAME.trackedPawns[id] = nil
+				modApiExt_internal.pawns[id] = nil
 			end
 		end
 

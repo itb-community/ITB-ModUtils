@@ -354,6 +354,16 @@ function modApiExtHooks:overrideSkill(id, skill)
 			end
 		end
 
+		if not Pawn then
+			-- PAWN is missing, this happens when loading into a game
+			-- in progress in combat. Attempt to fix this by getting the
+			-- pawn at p1.
+			-- This seems to be used only for constructing weapon previews
+			-- for enemies, so even if this is wrong (it shouldn't), it
+			-- should be pretty harmless.
+			Pawn = Board:GetPawn(p1)
+		end
+
 		modApiExt_internal.fireSkillBuildHooks(
 			modApiExt_internal.mission,
 			Pawn, id, p1, p2, skillFx

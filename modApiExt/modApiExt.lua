@@ -34,26 +34,11 @@ function modApiExt:loadModuleIfAvailable(path)
 	end
 end
 
-modApiExt.scheduledHooks = {}
 function modApiExt:scheduleHook(msTime, fn)
 	assert(type(msTime) == "number")
 	assert(type(fn) == "function")
 
-	table.insert(self.scheduledHooks, {
-		triggerTime = modApiExt_internal.timer:elapsed() + msTime,
-		hook = fn
-	})
-end
-
-function modApiExt:updateScheduledHooks()
-	local t = modApiExt_internal.timer:elapsed()
-
-	for i, tbl in ipairs(self.scheduledHooks) do
-		if tbl.triggerTime <= t then
-			table.remove(self.scheduledHooks, i)
-			tbl.hook()
-		end
-	end
+	modApi:scheduleHook(msTime, fn)
 end
 
 --[[
@@ -136,12 +121,12 @@ function modApiExt:load(mod, options, version)
 		modApi:addMissionStartHook(hooks.missionStart)
 		modApi:addMissionEndHook(hooks.missionEnd)
 
-		self:scheduleHook(20, function()
+		modApi:scheduleHook(20, function()
 			-- Execute on roughly the next frame.
 			-- This allows us to reset the loaded flag after all other
 			-- mods are done loading.
 			self.loaded = false
-			
+
 			table.insert(
 				modApi.missionUpdateHooks,
 				list_indexof(modApiExt_internal.extObjects, self),

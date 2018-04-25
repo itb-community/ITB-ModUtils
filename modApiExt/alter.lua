@@ -483,7 +483,7 @@ modApiExtHooks.missionUpdate = function(mission)
 		Board.gameBoard = true
 		modApiExt_internal.fireResetTurnHooks(mission)
 	end
-	local t = modApiExt_internal.timer:elapsed()
+	local t = modApi:elapsedTime()
 	GAME.elapsedTime = t
 	modApiExt_internal.elapsedTime = t
 

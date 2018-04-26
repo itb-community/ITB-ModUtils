@@ -108,11 +108,6 @@ local function hash_table(tbl)
 		hash = salt * hash + hash_o(v)
 	end
 
-	for i, v in ipairs(tbl) do
-		hash = salt * hash + i
-		hash = salt * hash + hash_o(v)
-	end
-
 	return hash
 end
 

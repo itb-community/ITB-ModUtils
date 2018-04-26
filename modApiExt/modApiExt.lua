@@ -100,16 +100,13 @@ function modApiExt:init(modulesDir)
 	end
 
 	require(modulesDir.."internal"):init(self)
-	
 	table.insert(modApiExt_internal.extObjects, self)
 
-	if self:isModuleAvailable(modulesDir.."global") then
-		require(modulesDir.."global")
-	end
+	require(modulesDir.."global")
 	
 	if self:isModuleAvailable(modulesDir.."hooks") then
 		local hooks = require(modulesDir.."hooks")
-		for k,v in pairs(hooks) do
+		for k, v in pairs(hooks) do
 			self[k] = v
 		end
 	end
@@ -149,6 +146,8 @@ function modApiExt:load(mod, options, version)
 
 			if self:getMostRecent() == self then
 				if hooks.overrideAllSkills then
+					-- Make sure the most recent version overwrites all others
+					dofile(self.modulesDir.."global.lua")
 					hooks:overrideAllSkills()
 
 					-- Ensure backwards compatibility

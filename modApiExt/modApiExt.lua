@@ -35,10 +35,11 @@ function modApiExt:loadModuleIfAvailable(path)
 end
 
 function modApiExt:scheduleHook(msTime, fn)
-	assert(type(msTime) == "number")
-	assert(type(fn) == "function")
-
 	modApi:scheduleHook(msTime, fn)
+end
+
+function modApiExt:runLater(f)
+	modApi:runLater(f)
 end
 
 --[[

@@ -210,23 +210,6 @@ function hooks:addPodCollectedHook(fn)
 	table.insert(self.podCollectedHooks,fn)
 end
 
---[[
-	Executes the function on the game's next update step. Only works during missions.
-	
-	Calling this while during game loop (either in a function called from missionUpdate,
-	or as a result of previous runLater) will correctly schedule the function to be
-	invoked during the next update step (not the current one).
---]]
-function hooks:runLater(f)
-	assert(type(f) == "function")
-
-	if not modApiExt_internal.runLaterQueue then
-		modApiExt_internal.runLaterQueue = {}
-	end
-
-	table.insert(modApiExt_internal.runLaterQueue, f)
-end
-
 function hooks:clearHooks()
 	local endswith = function(str, suffix)
 		return suffix == "" or string.sub(str,-string.len(suffix)) == suffix

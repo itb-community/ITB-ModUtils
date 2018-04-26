@@ -307,29 +307,6 @@ function modApiExtHooks:findAndTrackPods()
 	end
 end
 
-function modApiExtHooks:processRunLater(mission)
-	if modApiExt_internal.runLaterQueue then
-		local q = modApiExt_internal.runLaterQueue
-		local n = #q
-		for i = 1, n do
-			q[i](mission)
-			q[i] = nil
-		end
-
-		-- compact the table, if processed hooks also scheduled
-		-- their own runLater functions (but we will process those
-		-- on the next update step)
-		local i = n + 1
-		local j = 0
-		while q[i] do
-			j = j + 1
-			q[j] = q[i]
-			q[i] = nil
-			i = i + 1
-		end
-	end
-end
-
 function modApiExtHooks:overrideSkill(id, skill)
 	assert(skill.GetSkillEffect)
 	assert(_G[id] == skill) -- no fun allowed
@@ -487,7 +464,6 @@ modApiExtHooks.missionUpdate = function(mission)
 	GAME.elapsedTime = t
 	modApiExt_internal.elapsedTime = t
 
-	modApiExtHooks:processRunLater(mission)
 	modApiExtHooks:updateTiles()
 	modApiExtHooks:trackAndUpdateBuildings(mission)
 	modApiExtHooks:trackAndUpdatePawns(mission)

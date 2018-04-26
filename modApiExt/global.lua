@@ -162,15 +162,21 @@ if not List then
 		pushright() and popright()
 	--]]
 	List = Class.new()
-	function List:new()
-		self.first = 0
-		self.last = -1
+	function List:new(tbl)
+		if tbl then
+			for _, v in ipairs(tbl) do
+				self:pushRight(v)
+			end
+		else
+			self.first = 0
+			self.last = -1
+		end
 	end
 
 	--[[
-		Pushes the element onto the left side of the dequeue (beginning)
+		Pushes the element onto the left side of the dequeue (start)
 	--]]
-	function List:pushleft(value)
+	function List:pushLeft(value)
 		local first = self.first - 1
 		self.first = first
 		self[first] = value
@@ -179,16 +185,16 @@ if not List then
 	--[[
 		Pushes the element onto the right side of the dequeue (end)
 	--]]
-	function List:pushright(value)
+	function List:pushRight(value)
 		local last = self.last + 1
 		self.last = last
 		self[last] = value
 	end
 
 	--[[
-		Removes and returns an element from the left side of the dequeue (beginning)
+		Removes and returns an element from the left side of the dequeue (start)
 	--]]
-	function List:popleft()
+	function List:popLeft()
 		local first = self.first
 		if first > self.last then error("list is empty") end
 		local value = self[first]
@@ -200,7 +206,7 @@ if not List then
 	--[[
 		Removes and returns an element from the right side of the dequeue (end)
 	--]]
-	function List:popright()
+	function List:popRight()
 		local last = self.last
 		if self.first > last then error("list is empty") end
 		local value = self[last]
@@ -212,7 +218,7 @@ if not List then
 	--[[
 		Returns true if this dequeue is empty
 	--]]
-	function List:isempty()
+	function List:isEmpty()
 		return self.first > self.last
 	end
 end

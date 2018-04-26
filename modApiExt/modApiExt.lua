@@ -80,7 +80,7 @@ function modApiExt:init(modulesDir)
 	self.version = "1.9" -- also update in init.lua
 	self.modulesDir = modulesDir
 
-	local minv = "2.1.3"
+	local minv = "2.1.5"
 	if not modApi:isVersion(minv) then
 		error("modApiExt could not be loaded because version of the mod loader is out of date. "
 			..string.format("Installed version: %s, required: %s", modApi.version, minv))

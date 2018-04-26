@@ -210,17 +210,4 @@ function hooks:addPodCollectedHook(fn)
 	table.insert(self.podCollectedHooks,fn)
 end
 
-function hooks:clearHooks()
-	local endswith = function(str, suffix)
-		return suffix == "" or string.sub(str,-string.len(suffix)) == suffix
-	end
-
-	-- too lazy to update this function with new hooks every time
-	for k, v in pairs(self) do
-		if type(v) == "table" and endswith(k, "Hooks") then
-			self[k] = {}
-		end
-	end
-end
-
 return hooks

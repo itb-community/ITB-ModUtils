@@ -103,14 +103,18 @@ local function hash_table(tbl)
 
 	for k, v in pairs(tbl) do
 		hash = salt * hash + hash_o(k)
-		hash = salt * hash + hash_o(v)
+		if v ~= tbl.__index then
+			hash = salt * hash + hash_o(v)
+		else
+			hash = salt * hash
+		end
 	end
 
 	return hash
 end
 
 local function hash_string(str)
-	local hash = 129
+	local hash = 127
 	local salt = 29
 
 	local l = string.len(str)
@@ -131,7 +135,9 @@ function hash_o(o)
 	elseif type(o) == "userdata" then
 		hash = salt * hash + 8137
 	elseif type(o) == "function" then
-		hash = salt * hash + 7979
+		hash = salt * hash + 7993
+	elseif type(o) == "thread" then
+		hash = salt * hash + 7681
 	elseif type(o) == "number" then
 		hash = salt * hash + o
 	elseif type(o) == "string" then

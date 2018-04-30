@@ -14,14 +14,13 @@ vector.VEC_UL = vector.VEC_UP_LEFT
 
 vector.DIR_VECTORS_8 =
 {
-	vector.VEC_RIGHT,
-	vector.VEC_DOWN,
-	vector.VEC_LEFT,
 	vector.VEC_UP,
-	
-	vector.VEC_DOWN_RIGHT,
-	vector.VEC_DOWN_LEFT,
 	vector.VEC_UP_RIGHT,
+	vector.VEC_RIGHT,
+	vector.VEC_DOWN_RIGHT,
+	vector.VEC_DOWN,
+	vector.VEC_DOWN_LEFT,
+	vector.VEC_LEFT,
 	vector.VEC_UP_LEFT
 }
 

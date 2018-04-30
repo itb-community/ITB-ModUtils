@@ -95,7 +95,34 @@ function screenPointToTile(screenPoint)
 end
 
 ---------------------------------------------------------------
--- Hasing functions
+-- Hashing functions
+
+function is_prime(n)
+	if (n > 2 and n % 2 == 0) or n == 1 then
+		return false
+	end
+
+	local div = 3
+	local sqrt = math.sqrt(n)
+
+	while div <= sqrt do
+		if n % div == 0 then
+			return false
+		end
+
+		div = div + 2
+	end
+
+	return true
+end
+
+function next_prime(n)
+	while not is_prime(n) do
+		n = n + 1
+	end
+
+	return n
+end
 
 local function hash_table(tbl)
 	local hash = 79

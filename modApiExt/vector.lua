@@ -63,7 +63,7 @@ end
 --]]
 function vector:normal(vec)
 	assert_point(vec)
-	return Point(vec.y, vec.x)
+	return Point(-vec.y, vec.x)
 end
 
 --[[

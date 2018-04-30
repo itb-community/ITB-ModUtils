@@ -194,4 +194,27 @@ function pawn:getWeapons(pawnId)
 	return t
 end
 
+--[[
+	Returns a table holding information about the pilot of the pawn.
+	Returns nil if the pawn is not piloted (eg. vek, mechs whose pilot is dead, etc.)
+--]]
+function pawn:getPilotTable(pawnId)
+	local ptable = self:getSavedataTable(pawnId)
+
+	return ptable.pilot
+end
+
+--[[
+	Returns id of the pilot piloting this pawn, or "Pilot_Artificial" if
+	it's not piloted.
+--]]
+function pawn:getPilotId(pawnId)
+	local pilot = self:getPilotTable(pawnId)
+	if pilot then
+		return pilot.id
+	else
+		return "Pilot_Artificial"
+	end
+end
+
 return pawn

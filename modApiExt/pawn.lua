@@ -154,7 +154,7 @@ end
 function pawn:getSavedataTable(pawnId, sourceTable)
 	if sourceTable then
 		for k, v in pairs(sourceTable) do
-			if type(v) == "table" and v.id and self.string:startsWith(k, "pawn") then
+			if type(v) == "table" and v.id and modApi:stringStartsWith(k, "pawn") then
 				if v.id == pawnId then return v end
 			end
 		end	

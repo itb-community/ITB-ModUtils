@@ -603,7 +603,7 @@ Returns a vector normal to the one provided in argument. Normal in this context 
 Example:
 ```lua
 local vec = Point(2, 1)
-LOG(modApiExt.vector:normal(vec):getString()) -- prints Point(2, -1)
+LOG(modApiExt.vector:normal(vec):getString()) -- prints Point(-1, 2)
 ```
 
 

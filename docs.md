@@ -236,6 +236,9 @@ Checks all instances of modApiExt registered by currently loaded mods, and retur
 
 ## Board
 
+Functions useful when dealing with the game board, accesible via `modApiExt.board`.
+
+
 ### `board:getSpace`
 
 | Argument name | Type | Description |
@@ -345,10 +348,15 @@ Returns a savedata table holding complete information about the specified board 
 
 ## Dialog
 
+System for dialogs with pawn cast rules, accessible via `modApiExt.dialog`.
+
 TODO
 
 
 ## Pawn
+
+Functions useful when manipulating pawns, accessible via `modApiExt.pawn`.
+
 
 ### `pawn:setFire`
 
@@ -470,6 +478,9 @@ Returns id of the pilot piloting this pawn, or `"Pilot_Artificial"` if it's not 
 
 
 ## Vector
+
+Functions useful for vector/point manipulation, accessible via `modApiExt.vector`.
+
 
 ### Vector Constants
 
@@ -652,6 +663,9 @@ Converts the specified vector into a unit vector (using [`unitI`](#vectoruniti))
 
 
 ## Weapon
+
+Functions useful for weapons and targeting, accessible via `modApiExt.weapon`.
+
 
 ### `weapon:plusTarget`
 

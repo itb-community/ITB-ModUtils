@@ -39,6 +39,9 @@ Deprecated:
 
 # Hooks
 
+New hooks are added exactly the same way as in the base mod loader's `modApi`, except you have to reference the extended API object (`modApiExt`) instead, using whatever name you have decided to give it in your `init.lua`.
+
+
 ## `resetTurnHook`
 
 | Argument name | Type | Description |

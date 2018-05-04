@@ -315,79 +315,85 @@ function modApiExtHooks:overrideSkill(id, skill)
 		error(id .. " is already overridden!")
 	end
 
+	-- Some skills don't define GetSkillEffect, and instead inherit
+	-- the function from their parent skill -- in this case, we need
+	-- to stop the hooks from firing for inherited functions
+	local hasSkillEffect = rawget(skill, "GetSkillEffect") ~= nil
 	modApiExt_internal.oldSkills[id] = skill.GetSkillEffect
 
-	skill.GetSkillEffect = function(slf, p1, p2)
-		local skillFx = modApiExt_internal.oldSkills[id](slf, p1, p2)
+	skill.GetSkillEffect = function(slf, p1, p2, stopHooks)
+		local skillFx = modApiExt_internal.oldSkills[id](slf, p1, p2, not hasSkillEffect)
 
-		if not Board.gameBoard then
-			if Board:GetSize() == Point(6, 6) then
-				-- Hacky AF solution to detect when tip image is visible
-				local d = Board:GetPawn(Board:AddPawn("kf_ModApiExt_Dummy", Point(0, 0)))
-				d:SetCustomAnim("kf_ModApiExt_TipMarker")
-			else
-				-- It seems that sometimes Board.gameBoard is not set,
-				-- but I can't reproduce the bug.
-				-- For now use a board size check and log the message to try
-				-- to figure it out.
-				--LOG("Was in game board, but Board.gameBoard was not set! " .. tostring(modApiExt_internal.version))
-			end
-		end
-
-		if not Pawn then
-			-- PAWN is missing, this happens when loading into a game
-			-- in progress in combat. Attempt to fix this by getting the
-			-- pawn at p1.
-			-- This seems to be used only for constructing weapon previews
-			-- for enemies, so even if this is wrong (it shouldn't), it
-			-- should be pretty harmless.
-			Pawn = Board:GetPawn(p1)
-		end
-
-		modApiExt_internal.fireSkillBuildHooks(
-			modApiExt_internal.mission,
-			Pawn, id, p1, p2, skillFx
-		)
-
-		if not skillFx.effect:empty() then
-			local tmp = SkillEffect()
-
-			tmp:AddScript(
-				"modApiExt_internal.fireSkillStartHooks("
-				.."modApiExt_internal.mission, Pawn,"
-				.."unpack("..save_table({id, p1, p2}).."))"
-			)
-
-			for _, e in pairs(extract_table(skillFx.effect)) do
-				tmp.effect:push_back(e)
+		if not stopHooks then
+			if not Board.gameBoard then
+				if Board:GetSize() == Point(6, 6) then
+					-- Hacky AF solution to detect when tip image is visible
+					local d = Board:GetPawn(Board:AddPawn("kf_ModApiExt_Dummy", Point(0, 0)))
+					d:SetCustomAnim("kf_ModApiExt_TipMarker")
+				else
+					-- It seems that sometimes Board.gameBoard is not set,
+					-- but I can't reproduce the bug.
+					-- For now use a board size check and log the message to try
+					-- to figure it out.
+					--LOG("Was in game board, but Board.gameBoard was not set! " .. tostring(modApiExt_internal.version))
+				end
 			end
 
-			tmp:AddScript(
-				"modApiExt_internal.fireSkillEndHooks("
-				.."modApiExt_internal.mission, Pawn,"
-				.."unpack("..save_table({id, p1, p2}).."))"
-			)
-			skillFx.effect = tmp.effect
-		end
-
-		if not skillFx.q_effect:empty() then
-			local tmp = SkillEffect()
-			tmp:AddScript(
-				"modApiExt_internal.fireQueuedSkillStartHooks("
-				.."modApiExt_internal.mission, Pawn,"
-				.."unpack("..save_table({id, p1, p2}).."))"
-			)
-
-			for _, e in pairs(extract_table(skillFx.q_effect)) do
-				tmp.effect:push_back(e)
+			if not Pawn then
+				-- PAWN is missing, this happens when loading into a game
+				-- in progress in combat. Attempt to fix this by getting the
+				-- pawn at p1.
+				-- This seems to be used only for constructing weapon previews
+				-- for enemies, so even if this is wrong (it shouldn't), it
+				-- should be pretty harmless.
+				Pawn = Board:GetPawn(p1)
 			end
 
-			tmp:AddScript(
-				"modApiExt_internal.fireQueuedSkillEndHooks("
-				.."modApiExt_internal.mission, Pawn,"
-				.."unpack("..save_table({id, p1, p2}).."))"
+			modApiExt_internal.fireSkillBuildHooks(
+				modApiExt_internal.mission,
+				Pawn, id, p1, p2, skillFx
 			)
-			skillFx.q_effect = tmp.effect
+
+			if not skillFx.effect:empty() then
+				local tmp = SkillEffect()
+
+				tmp:AddScript(
+					"modApiExt_internal.fireSkillStartHooks("
+					.."modApiExt_internal.mission, Pawn,"
+					.."unpack("..save_table({id, p1, p2}).."))"
+				)
+
+				for _, e in pairs(extract_table(skillFx.effect)) do
+					tmp.effect:push_back(e)
+				end
+
+				tmp:AddScript(
+					"modApiExt_internal.fireSkillEndHooks("
+					.."modApiExt_internal.mission, Pawn,"
+					.."unpack("..save_table({id, p1, p2}).."))"
+				)
+				skillFx.effect = tmp.effect
+			end
+
+			if not skillFx.q_effect:empty() then
+				local tmp = SkillEffect()
+				tmp:AddScript(
+					"modApiExt_internal.fireQueuedSkillStartHooks("
+					.."modApiExt_internal.mission, Pawn,"
+					.."unpack("..save_table({id, p1, p2}).."))"
+				)
+
+				for _, e in pairs(extract_table(skillFx.q_effect)) do
+					tmp.effect:push_back(e)
+				end
+
+				tmp:AddScript(
+					"modApiExt_internal.fireQueuedSkillEndHooks("
+					.."modApiExt_internal.mission, Pawn,"
+					.."unpack("..save_table({id, p1, p2}).."))"
+				)
+				skillFx.q_effect = tmp.effect
+			end
 		end
 
 		return skillFx

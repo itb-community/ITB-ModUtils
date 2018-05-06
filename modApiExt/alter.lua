@@ -315,14 +315,14 @@ function modApiExtHooks:overrideSkill(id, skill)
 		error(id .. " is already overridden!")
 	end
 
-	-- Some skills don't define GetSkillEffect, and instead inherit
-	-- the function from their parent skill -- in this case, we need
-	-- to stop the hooks from firing for inherited functions
-	local hasSkillEffect = rawget(skill, "GetSkillEffect") ~= nil
 	modApiExt_internal.oldSkills[id] = skill.GetSkillEffect
 
 	skill.GetSkillEffect = function(slf, p1, p2, stopHooks)
-		local skillFx = modApiExt_internal.oldSkills[id](slf, p1, p2, not hasSkillEffect)
+		-- If it's a secondary call to the GetSkillEffect, then we don't
+		-- want it to fire hooks.
+		-- For vanilla skills, the additional argument will be ignored, but
+		-- for our modded skills, it will tell them not to fire the hooks.
+		local skillFx = modApiExt_internal.oldSkills[id](slf, p1, p2, true)
 
 		if not stopHooks then
 			if not Board.gameBoard then

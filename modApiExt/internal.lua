@@ -66,6 +66,9 @@ function internal:initBroadcastHooks(tbl)
 	tbl.firePawnSelectedHooks =      self:buildBroadcastFunc("pawnSelectedHooks")
 	tbl.firePawnDeselectedHooks =    self:buildBroadcastFunc("pawnDeselectedHooks")
 
+	tbl.fireTileHighlightedHooks =   self:buildBroadcastFunc("tileHighlightedHooks")
+	tbl.fireTileUnhighlightedHooks = self:buildBroadcastFunc("tileUnhighlightedHooks")
+
 	tbl.fireBuildingDamagedHooks =   self:buildBroadcastFunc("buildingDamagedHooks")
 	tbl.fireBuildingResistHooks =    self:buildBroadcastFunc("buildingResistHooks")
 	tbl.fireBuildingDestroyedHooks = self:buildBroadcastFunc("buildingDestroyedHooks")

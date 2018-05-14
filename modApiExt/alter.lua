@@ -257,17 +257,13 @@ function modApiExtHooks:updateTiles()
 		local mtile = mouseTile()
 		if modApiExt_internal.currentTile ~= mtile then
 			if modApiExt_internal.currentTile then -- could be nil
-				for i, hook in ipairs(self.tileUnhighlightedHooks) do
-					hook(mission, modApiExt_internal.currentTile)
-				end
+				modApiExt_internal.fireTileUnhighlightedHooks(mission, modApiExt_internal.currentTile)
 			end
 
 			modApiExt_internal.currentTile = mtile
 
 			if modApiExt_internal.currentTile then -- could be nil
-				for i, hook in ipairs(self.tileHighlightedHooks) do
-					hook(mission, modApiExt_internal.currentTile)
-				end
+				modApiExt_internal.fireTileHighlightedHooks(mission, modApiExt_internal.currentTile)
 			end
 		end
 

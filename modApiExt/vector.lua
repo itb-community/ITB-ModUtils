@@ -30,19 +30,11 @@ vector.AXIS_ANY = 2
 
 --------------------------------------------------------------------------
 
-function vector:assert_point(o)
-	assert(type(o) == "userdata")
-	assert(type(o.x) == "number")
-	assert(type(o.y) == "number")
-end
-
 --[[
 	Tests whether two points form a line colinear to the specified axis
 	(ie. have the same value for that axis' coordinate)
 --]]
 function vector:isColinear(refPoint, testPoint, axis)
-	assert_point(refPoint)
-	assert_point(testPoint)
 	axis = axis or self.AXIS_ANY
 
 	if axis == self.AXIS_X then
@@ -61,7 +53,6 @@ end
 	Normal in this context means perpendicular.
 --]]
 function vector:normal(vec)
-	assert_point(vec)
 	return Point(-vec.y, vec.x)
 end
 
@@ -69,7 +60,6 @@ end
 	Returns length of the vector.
 --]]
 function vector:length(vec)
-	assert_point(vec)
 	return math.sqrt(vec.x * vec.x + vec.y * vec.y)
 end
 
@@ -92,6 +82,9 @@ end
 --[[
 	Returns a unit vector constructed from the vector provided in argument.
 	Unit vector is a vector with length of 1.
+
+	Note that other functions in the vector module use Point internally,
+	so values held by the table returned by this function will be rounded.
 --]]
 function vector:unitF(vec)
 	local l = self:length(vec)
@@ -111,7 +104,6 @@ end
 	Returns nil otherwise.
 --]]
 function vector:toAxis(vec)
-	assert_point(vec)
 	if vec == Point(0, 0) then return nil end
 
 	if vec.y == 0 then

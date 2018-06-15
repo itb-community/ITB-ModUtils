@@ -20,6 +20,11 @@
 		* [List:isEmpty](#listisempty)
 		* [List:size](#listsize)
 * [ModApiExt](#modApiExt)
+	* [modApiExt:isMostRecent](#modapiextismostrecent)
+	* [modApiExt:getMostRecent](#modapiextgetmostrecent)
+	* [modApiExt:scheduleHook](#modapiextschedulehook)
+	* [modApiExt:runLater](#modapiextrunlater)
+	* [modApiExt:getParentPath](#modapiextgetparentpath)
 	* [Board](#board)
 		* [getSpace](#boardgetspace)
 		* [getUnoccupiedSpace](#boardgetunoccupiedspace)
@@ -214,24 +219,44 @@ Returns size of the dequeue.
 
 ## ModApiExt
 
-### `isMostRecent`
+### `modApiExt:isMostRecent`
 
 Checks all instances of modApiExt registered by currently loaded mods, and returns `true` if this one is the most recent of them all. `false` otherwise.
 
 
-### `getMostRecent`
+### `modApiExt:getMostRecent`
 
 Checks all instances of modApiExt registered by currently loaded mods, and returns the most recent one of them all.
 
 
-### `scheduleHook`
+### `modApiExt:scheduleHook`
 
 **Deprecated**. Use [the mod loader's own implementation](https://github.com/kartoFlane/ITB-ModLoader/blob/master/api.md#modapischedulehook).
 
 
-### `runLater`
+### `modApiExt:runLater`
 
 **Deprecated**. Use [the mod loader's own implementation](https://github.com/kartoFlane/ITB-ModLoader/blob/master/api.md#modapirunlater).
+
+
+### `modApiExt:getParentPath`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `path` | string | A path whose parent directory is to be returned. |
+
+Takes the specified path (either a file or directory), and returns the parent directory.
+
+Example:
+```lua
+LOG(modApiExt:getParentPath("some_mod/cool_path/my_module"))
+-- Prints 'some_mod/cool_path/'
+
+-- The ellipsis (...), when outside of any function and in a file loaded via require(),
+-- returns the path to the file that is being loaded
+local dir = modApiExt:getParentPath(...)
+require(path .. "another_module")
+```
 
 
 ## Board

@@ -81,6 +81,10 @@ function modApiExt:getMostRecent()
 	return modApiExt_internal:getMostRecent()
 end
 
+function modApiExt:getParentPath(path)
+	return path:sub(0, path:find("/[^/]*$"))
+end
+
 --[[
 	Initializes the modApiExt object by loading available modules and setting
 	up hooks.

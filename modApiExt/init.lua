@@ -6,7 +6,7 @@ local function init(self)
 			.. "one is not following API protocol correctly.")
 	else
 		modApiExt = require(self.scriptPath.."modApiExt")
-		modApiExt:init(self.scriptPath)
+		modApiExt:init()
 	end
 end
 

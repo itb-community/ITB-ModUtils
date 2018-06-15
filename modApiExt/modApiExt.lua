@@ -95,7 +95,7 @@ end
 function modApiExt:init(modulesDir)
 	self.__index = self
 	self.version = "1.10" -- also update in init.lua
-	self.modulesDir = modulesDir
+	self.modulesDir = modulesDir or self.modulesDir
 
 	local minv = "2.1.5"
 	if not modApi:isVersion(minv) then
@@ -103,24 +103,24 @@ function modApiExt:init(modulesDir)
 			..string.format("Installed version: %s, required: %s", modApi.version, minv))
 	end
 
-	require(modulesDir.."internal"):init(self)
+	require(self.modulesDir.."internal"):init(self)
 	table.insert(modApiExt_internal.extObjects, self)
 
-	require(modulesDir.."global")
-	
-	if self:isModuleAvailable(modulesDir.."hooks") then
-		local hooks = require(modulesDir.."hooks")
+	require(self.modulesDir.."global")
+
+	if self:isModuleAvailable(self.modulesDir.."hooks") then
+		local hooks = require(self.modulesDir.."hooks")
 		for k, v in pairs(hooks) do
 			self[k] = v
 		end
 	end
 
-	self.vector =   self:loadModuleIfAvailable(modulesDir.."vector")
-	self.string =   self:loadModuleIfAvailable(modulesDir.."string")
-	self.board =    self:loadModuleIfAvailable(modulesDir.."board")
-	self.weapon =   self:loadModuleIfAvailable(modulesDir.."weapon")
-	self.pawn =     self:loadModuleIfAvailable(modulesDir.."pawn")
-	self.dialog =   self:loadModuleIfAvailable(modulesDir.."dialog")
+	self.vector =   self:loadModuleIfAvailable(self.modulesDir.."vector")
+	self.string =   self:loadModuleIfAvailable(self.modulesDir.."string")
+	self.board =    self:loadModuleIfAvailable(self.modulesDir.."board")
+	self.weapon =   self:loadModuleIfAvailable(self.modulesDir.."weapon")
+	self.pawn =     self:loadModuleIfAvailable(self.modulesDir.."pawn")
+	self.dialog =   self:loadModuleIfAvailable(self.modulesDir.."dialog")
 end
 
 function modApiExt:load(mod, options, version)
@@ -177,5 +177,7 @@ function modApiExt:load(mod, options, version)
 
 	self.loaded = true
 end
+
+modApiExt.modulesDir = modApiExt:getParentPath(...)
 
 return modApiExt

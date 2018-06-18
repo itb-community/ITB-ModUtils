@@ -1,6 +1,6 @@
 # ItB Mod Utilities
 
-This is a collection of various Lua modules useful for creators of mods for the game [Into the Breach](https://www.subsetgames.com/itb.html). This library is added in the form of a mod installed via the [mod loader](http://www.subsetgames.com/forum/viewtopic.php?f=26&t=32833).
+This is a collection of various Lua modules useful for creators of mods for the game [Into the Breach](https://www.subsetgames.com/itb.html).
 
 
 ## Features
@@ -40,9 +40,8 @@ return {
 
 ```lua
 local function init(self)
-	local extDir = self.scriptPath.."modApiExt/"
-	myname_modApiExt = require(extDir.."modApiExt")
-	myname_modApiExt:init(extDir)
+	myname_modApiExt = require(self.scriptPath.."modApiExt/modApiExt")
+	myname_modApiExt:init()
 
 	-- Rest of your init function
 end
@@ -56,8 +55,8 @@ end
 -- Rest of your init.lua file
 ```
 
-...Where the `myname` in `myname_modApiExt` should be changed to some unique identifier that is very unlikely to be used by other mods. A good convention is first using a short of your nickname, followed by name of the mod you're working on. For example, when I (kartoFlane) was working on a snake vek enemy mod, I named this variable `kf_snake_modApiExt`.
+...Where the `myname` in `myname_modApiExt` should be changed to some unique identifier that is very unlikely to be used by other mods. A good convention is first using a short of your nickname, followed by name of the mod you're working on. For example, when I (kartoFlane) was working on a snake Vek enemy mod, I named this variable `kf_snake_modApiExt`.
 
 Now in your mod, you can use the `myname_modApiExt` variable to access any ModUtils functions you may need.
 
-If you ever need to check whether the version you're running is the most recent one available to the player, or want to get the most recent version, you can use `myname_modApiExt:isMostRecent()` and `myname_modApiExt:getMostRecent()` respectively.
+If you ever need to check whether the version you're running is the most recent one available to the player, or want to get the most recent version, you can use [`myname_modApiExt:isMostRecent()`](https://github.com/kartoFlane/ITB-ModUtils/blob/master/docs.md#modapiextismostrecent) and [`myname_modApiExt:getMostRecent()`](https://github.com/kartoFlane/ITB-ModUtils/blob/master/docs.md#modapiextgetmostrecent) respectively.

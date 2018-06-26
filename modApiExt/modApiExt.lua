@@ -121,6 +121,8 @@ function modApiExt:init(modulesDir)
 	self.weapon =   self:loadModuleIfAvailable(self.modulesDir.."weapon")
 	self.pawn =     self:loadModuleIfAvailable(self.modulesDir.."pawn")
 	self.dialog =   self:loadModuleIfAvailable(self.modulesDir.."dialog")
+
+	return self
 end
 
 function modApiExt:load(mod, options, version)

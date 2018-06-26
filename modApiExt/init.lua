@@ -5,8 +5,7 @@ local function init(self)
 		error("`modApiExt` object is already defined! A mod loaded before this "
 			.. "one is not following API protocol correctly.")
 	else
-		modApiExt = require(self.scriptPath.."modApiExt")
-		modApiExt:init()
+		modApiExt = require(self.scriptPath.."modApiExt"):init()
 	end
 end
 

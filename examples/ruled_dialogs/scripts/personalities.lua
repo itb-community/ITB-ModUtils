@@ -12,8 +12,11 @@ for k, v in pairs(Personality) do
 end
 
 --[[
-	{id} is either main, self, target, or other
-	self always refers to the Personality speaking
+	{id} is either 'main', 'self', 'target', or 'other'
+	'main' is the first pilot / time traveler (I think)
+	'self' always refers to the Personality speaking
+	'target' refers to the target of an action (eg. when damaging a friendly)
+	'other' is another pilot that wasn't picked for either 'self' or 'target' (could maybe be CEO?)
 
 	#{id}_mech    -- inserts name of the mech
 	#{id}_reverse -- reverse name of the pilot?
@@ -26,7 +29,7 @@ end
 	#ceo_first    -- first name of the CEO
 	#ceo_last     -- last name of the CEO
 	#ceo_second   -- last name of the CEO
-	#corporation  -- name of the corp
-	#corp         -- name of the corp
+	#corporation  -- name of the corp?
+	#corp         -- name of the corp?
 	#saved_corp   -- ??
 --]]

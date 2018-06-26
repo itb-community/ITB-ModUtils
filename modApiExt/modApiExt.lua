@@ -94,8 +94,8 @@ end
 --]]
 function modApiExt:init(modulesDir)
 	self.__index = self
-	self.version = "1.11" -- also update in init.lua
 	self.modulesDir = modulesDir or self.modulesDir
+	self.version = require(self.modulesDir.."init").version
 
 	local minv = "2.2.3"
 	if not modApi:isVersion(minv) then

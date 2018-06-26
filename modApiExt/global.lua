@@ -29,15 +29,9 @@ function mouseTile()
 	return screenPointToTile({ x = sdl.mouse.x(), y = sdl.mouse.y() })
 end
 
---[[
-	Returns a board tile at the specified point on the screen, or nil.
---]]
-function screenPointToTile(screenPoint)
-	if not Board then return nil end
-	
-	local screen = sdl.screen()
-	local scale = GetBoardScale()
-	
+function modApiExt_internal.getScreenRefs(screen, scale)
+	scale = scale or GetBoardScale()
+
 	local tw = 28
 	local th = 21
 
@@ -51,20 +45,34 @@ function screenPointToTile(screenPoint)
 		tile00.y = tile00.y + 5 * scale + 0.5
 	end
 
+	local lineX = function(x) return x * th/tw end
+	local lineY = function(x) return -lineX(x) end
+
+	return tile00, lineX, lineY
+end
+
+--[[
+	Returns a board tile at the specified point on the screen, or nil.
+--]]
+function screenPointToTile(screenPoint)
+	if not Board then return nil end
+
+	local screen = sdl.screen()
+	local scale = GetBoardScale()
+
+	local tw = 28
+	local th = 21
+
+	local tile00, lineX, lineY = modApiExt_internal.getScreenRefs(screen, scale)
+
 	-- Change screenPoint to be relative to the (0, 0) tile
 	-- and move to unscaled space.
 	local relPoint = {}
 	relPoint.x = (screenPoint.x - tile00.x) / scale
 	relPoint.y = (screenPoint.y - tile00.y) / scale
 
-	local lineX = function(x) return x * th/tw end
-	local lineY = function(x) return -lineX(x) end
-
-	-- round to nearest integer
-	local round = function(a) return math.floor(a + 0.5) end
-
 	local isPointAboveLine = function(point, lineFn)
-		return round(point.y) >= round(lineFn(point.x))
+		return point.y >= lineFn(point.x)
 	end
 
 	local tileContains = function(tilex, tiley, point)
@@ -77,7 +85,9 @@ function screenPointToTile(screenPoint)
 	end
 
 	-- Start at the end of the board and move backwards.
-	-- That way we only need to check 2 lines instead of 4.
+	-- That way we only need to check 2 lines instead of 4 on each tile.
+	-- The tradeoff is that we need to check an additional row and column
+	-- of tiles outside of the board.
 	local bsize = Board:GetSize()
 	for tileY = bsize.y, 0, -1 do
 		for tileX = bsize.x, 0, -1 do

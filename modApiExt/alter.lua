@@ -303,6 +303,24 @@ function modApiExtHooks:findAndTrackPods()
 	end
 end
 
+--[[
+	Fix for skill hooks override automatically granting 'Ramming Speed'
+	achievement. This achievement is granted if a skill effect's
+	DamageList (.effect field) contains a SpaceDamage instance whose
+	.loc field is further away than 5 tiles from the target.
+
+	Since scripts added via AddScript() function have their .loc
+	automatically set to (-1, -1), we need to build the script instances
+	ourselves to properly set their location.
+--]]
+local function SpaceScript(loc, script)
+	local d = SpaceDamage(loc)
+	d.sScript = script
+	d.bHide = true
+	d.bHidePath = true
+	return d
+end
+
 function modApiExtHooks:overrideSkill(id, skill)
 	assert(skill.GetSkillEffect)
 	assert(_G[id] == skill) -- no fun allowed
@@ -351,44 +369,51 @@ function modApiExtHooks:overrideSkill(id, skill)
 			)
 
 			if not skillFx.effect:empty() then
-				local tmp = SkillEffect()
+				local dlist = DamageList()
 
-				tmp:AddScript(
+				dlist:push_back(SpaceScript(
+					p1,
 					"modApiExt_internal.fireSkillStartHooks("
 					.."modApiExt_internal.mission, Pawn,"
 					.."unpack("..save_table({id, p1, p2}).."))"
-				)
+				))
 
 				for _, e in pairs(extract_table(skillFx.effect)) do
-					tmp.effect:push_back(e)
+					dlist:push_back(e)
 				end
 
-				tmp:AddScript(
+				dlist:push_back(SpaceScript(
+					p1,
 					"modApiExt_internal.fireSkillEndHooks("
 					.."modApiExt_internal.mission, Pawn,"
 					.."unpack("..save_table({id, p1, p2}).."))"
-				)
-				skillFx.effect = tmp.effect
+				))
+
+				skillFx.effect = dlist
 			end
 
 			if not skillFx.q_effect:empty() then
-				local tmp = SkillEffect()
-				tmp:AddScript(
+				local dlist = DamageList()
+
+				dlist:push_back(SpaceScript(
+					p1,
 					"modApiExt_internal.fireQueuedSkillStartHooks("
 					.."modApiExt_internal.mission, Pawn,"
 					.."unpack("..save_table({id, p1, p2}).."))"
-				)
+				))
 
 				for _, e in pairs(extract_table(skillFx.q_effect)) do
-					tmp.effect:push_back(e)
+					dlist:push_back(e)
 				end
 
-				tmp:AddScript(
+				dlist:push_back(SpaceScript(
+					p1,
 					"modApiExt_internal.fireQueuedSkillEndHooks("
 					.."modApiExt_internal.mission, Pawn,"
 					.."unpack("..save_table({id, p1, p2}).."))"
-				)
-				skillFx.q_effect = tmp.effect
+				))
+
+				skillFx.q_effect = dlist
 			end
 		end
 

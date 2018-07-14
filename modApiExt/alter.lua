@@ -316,6 +316,9 @@ end
 local function SpaceScript(loc, script)
 	local d = SpaceDamage(loc)
 	d.sScript = script
+	-- Scripts with location set on the board, and added as queued
+	-- damage put a gray stripe pattern on their tile. Setting these
+	-- (or one of them?) to true prevents it from showing up.
 	d.bHide = true
 	d.bHidePath = true
 	return d

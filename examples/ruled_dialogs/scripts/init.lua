@@ -37,7 +37,8 @@ local function load(self, options, version)
 	--[[
 		This code fetches the most recent version of modApiExt available among
 		currently installed mods. This is not part of the example, and generally
-		you should NOT be doing this in your mod.
+		you should NOT be doing this in your mod (because it assumes that there's
+		another modApiExt mod which finished loading before us)
 	--]]
 	kf_RDE_modApiExt = modApiExt_internal.extObjects[1]
 	if kf_RDE_modApiExt then

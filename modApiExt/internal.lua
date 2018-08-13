@@ -282,19 +282,10 @@ function internal:init(extObj)
 
 		m.drawHook = sdl.drawHook(function(screen)
 			if not Game then
-				modApiExt_internal.gameLoaded = false
 				modApiExt_internal.elapsedTime = nil
 				modApiExt_internal.mission = nil
-			elseif not modApiExt_internal.gameLoaded then
-				if Board and not Board.gameBoard then
-					Board.gameBoard = true
-				end
-				
-				modApiExt_internal.gameLoaded = true
-				modApiExt_internal.fireGameLoadedHooks(modApiExt_internal.mission)
-				extObj.dialog:triggerRuledDialog("GameLoad")
 			end
-			
+
 			if modApiExt_internal.tipMarkerVisible ~= modApiExt_internal.tipMarker:wasDrawn() then
 				if modApiExt_internal.tipMarkerVisible then
 					modApiExt_internal.fireTipImageHiddenHooks()

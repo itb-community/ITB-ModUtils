@@ -111,6 +111,25 @@ function modApiExt:load(mod, options, version)
 	modApi:addMissionStartHook(hooks.missionStart)
 	modApi:addMissionEndHook(hooks.missionEnd)
 
+	modApi:addPostLoadGameHook(function()
+		if self:getMostRecent() == self then
+			if Board then
+				Board.gameBoard = true
+			end
+
+			if modApiExt_internal.mission then
+				-- modApiExt_internal.mission is only updated in missionUpdateHook,
+				-- and reset back to nil when we're not in-game.
+				-- So if it's available, we must be loading from inside of a mission,
+				-- which only happens when the player uses reset turn.
+				modApiExt_internal.fireResetTurnHooks(modApiExt_internal.mission)
+			else
+				modApiExt_internal.fireGameLoadedHooks(GetCurrentMission())
+				self.dialog:triggerRuledDialog("GameLoad")
+			end
+		end
+	end)
+
 	modApi:scheduleHook(20, function()
 		-- Execute on roughly the next frame.
 		-- This allows us to reset the loaded flag after all other

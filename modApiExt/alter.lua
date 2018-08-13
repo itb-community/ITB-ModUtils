@@ -224,7 +224,7 @@ function modApiExtHooks:trackAndUpdateBuildings(mission)
 
 		local w = Board:GetSize().x
 		for i, point in pairs(tbl) do
-			local idx = point.y * w + point.x
+			local idx = p2idx(point, w)
 			if not GAME.trackedBuildings[idx] then
 				-- Building not tracked yet
 				GAME.trackedBuildings[idx] = {

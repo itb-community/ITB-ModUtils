@@ -17,6 +17,10 @@ function list_indexof(list, element)
 	return -1
 end
 
+if not GetUiScale then
+	GetUiScale = function() return 1 end
+end
+
 ---------------------------------------------------------------
 -- Screenpoint to tile conversion
 
@@ -31,9 +35,10 @@ end
 
 function modApiExt_internal.getScreenRefs(screen, scale)
 	scale = scale or GetBoardScale()
+	local uiScale = GetUiScale()
 
-	local tw = 28
-	local th = 21
+	local tw = 28 * uiScale
+	local th = 21 * uiScale
 
 	-- Top corner of the (0, 0) tile
 	local tile00 = {
@@ -42,7 +47,7 @@ function modApiExt_internal.getScreenRefs(screen, scale)
 	}
 
 	if scale == 2 then
-		tile00.y = tile00.y + 5 * scale + 0.5
+		tile00.y = tile00.y + 5 * scale * uiScale + 0.5
 	end
 
 	local lineX = function(x) return x * th/tw end
@@ -59,9 +64,10 @@ function screenPointToTile(screenPoint)
 
 	local screen = sdl.screen()
 	local scale = GetBoardScale()
+	local uiScale = GetUiScale()
 
-	local tw = 28
-	local th = 21
+	local tw = 28 * uiScale
+	local th = 21 * uiScale
 
 	local tile00, lineX, lineY = modApiExt_internal.getScreenRefs(screen, scale)
 

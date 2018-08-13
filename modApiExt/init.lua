@@ -16,8 +16,9 @@ local function createDebugUi(screen)
 			return
 		end
 
-		local tw = 28
-		local th = 21
+		local uiScale = GetUiScale()
+		local tw = 28 * uiScale
+		local th = 21 * uiScale
 
 		local scale = GetBoardScale()
 		local tws = tw * scale

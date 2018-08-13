@@ -105,20 +105,30 @@ end
 
 function board:getMapTable()
 	local region = self:getCurrentRegion()
-	assert(region, "Battle region could not be found - not in battle mode!")
+	if not region then return nil end
 	return region.player.map_data.map
 end
 
 function board:getTileTable(point)
-	assert(point)
 	local region = self:getCurrentRegion()
-	assert(region, "Battle region could not be found - not in battle mode!")
+	if not region then return nil end
 
 	for i, entry in ipairs(region.player.map_data.map) do
 		if entry.loc == point then
 			return entry
 		end
 	end
+end
+
+function board:getTileHealth(point)
+	local tileTable = self:getTileTable(point)
+	return tileTable.health_min or self:getTileMaxHealth(point)
+end
+
+function board:getTileMaxHealth(point)
+	local tileTable = self:getTileTable(point)
+	-- empty tiles appear to have max health of 2 by default
+	return tileTable.health_max or 2
 end
 
 return board

@@ -313,7 +313,7 @@ end
 	automatically set to (-1, -1), we need to build the script instances
 	ourselves to properly set their location.
 --]]
-local function SpaceScript(loc, script)
+function SpaceScript(loc, script)
 	local d = SpaceDamage(loc)
 	d.sScript = script
 	-- Scripts with location set on the board, and added as queued
@@ -322,6 +322,105 @@ local function SpaceScript(loc, script)
 	d.bHide = true
 	d.bHidePath = true
 	return d
+end
+
+local function modApiExtGetSkillEffect(self, p1, p2, parentSkill)
+	-- Dereference to weapon object
+	if type(self) == "string" then
+		self = _G[self]
+	end
+
+	local skillFx = nil
+	if parentSkill == nil then
+		skillFx = modApiExt_internal.oldSkills[self.__Id](self, p1, p2, getmetatable(self))
+	else
+		-- Defer to parent skill's GetSkillEffect.
+		skillFx = modApiExt_internal.oldSkills[parentSkill.__Id](self, p1, p2, getmetatable(parentSkill))
+	end
+
+	-- If it's a secondary call to the GetSkillEffect, then we don't
+	-- want it to fire hooks (since the primary call already fired them).
+	-- For vanilla skills, the additional argument will be ignored.
+	if parentSkill == nil then
+		if not Board.gameBoard then
+			if Board:GetSize() == Point(6, 6) then
+				-- Hacky AF solution to detect when tip image is visible
+				local d = Board:GetPawn(Board:AddPawn("kf_ModApiExt_Dummy", Point(0, 0)))
+				d:SetCustomAnim("kf_ModApiExt_TipMarker")
+			else
+				-- It seems that sometimes Board.gameBoard is not set,
+				-- but I can't reproduce the bug.
+				-- For now use a board size check and log the message to try
+				-- to figure it out.
+				--LOG("Was in game board, but Board.gameBoard was not set! " .. tostring(modApiExt_internal.version))
+			end
+		end
+
+		if not Pawn then
+			-- PAWN is missing, this happens when loading into a game
+			-- in progress in combat. Attempt to fix this by getting the
+			-- pawn at p1.
+			-- This seems to be used only for constructing weapon previews
+			-- for enemies, so even if this is wrong (it shouldn't), it
+			-- should be pretty harmless.
+			Pawn = Board:GetPawn(p1)
+		end
+
+		modApiExt_internal.fireSkillBuildHooks(
+			modApiExt_internal.mission,
+			Pawn, self.__Id, p1, p2, skillFx
+		)
+
+		if not skillFx.effect:empty() then
+			local dlist = DamageList()
+
+			dlist:push_back(SpaceScript(
+				p1,
+				"modApiExt_internal.fireSkillStartHooks("
+				.."modApiExt_internal.mission, Pawn,"
+				.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
+			))
+
+			for _, e in pairs(extract_table(skillFx.effect)) do
+				dlist:push_back(e)
+			end
+
+			dlist:push_back(SpaceScript(
+				p1,
+				"modApiExt_internal.fireSkillEndHooks("
+				.."modApiExt_internal.mission, Pawn,"
+				.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
+			))
+
+			skillFx.effect = dlist
+		end
+
+		if not skillFx.q_effect:empty() then
+			local dlist = DamageList()
+
+			dlist:push_back(SpaceScript(
+				p1,
+				"modApiExt_internal.fireQueuedSkillStartHooks("
+				.."modApiExt_internal.mission, Pawn,"
+				.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
+			))
+
+			for _, e in pairs(extract_table(skillFx.q_effect)) do
+				dlist:push_back(e)
+			end
+
+			dlist:push_back(SpaceScript(
+				p1,
+				"modApiExt_internal.fireQueuedSkillEndHooks("
+				.."modApiExt_internal.mission, Pawn,"
+				.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
+			))
+
+			skillFx.q_effect = dlist
+		end
+	end
+
+	return skillFx
 end
 
 function modApiExtHooks:overrideSkill(id, skill)
@@ -334,94 +433,9 @@ function modApiExtHooks:overrideSkill(id, skill)
 
 	modApiExt_internal.oldSkills[id] = skill.GetSkillEffect
 
-	skill.GetSkillEffect = function(slf, p1, p2, stopHooks)
-		-- If it's a secondary call to the GetSkillEffect, then we don't
-		-- want it to fire hooks.
-		-- For vanilla skills, the additional argument will be ignored, but
-		-- for our modded skills, it will tell them not to fire the hooks.
-		local skillFx = modApiExt_internal.oldSkills[id](slf, p1, p2, true)
-
-		if not stopHooks then
-			if not Board.gameBoard then
-				if Board:GetSize() == Point(6, 6) then
-					-- Hacky AF solution to detect when tip image is visible
-					local d = Board:GetPawn(Board:AddPawn("kf_ModApiExt_Dummy", Point(0, 0)))
-					d:SetCustomAnim("kf_ModApiExt_TipMarker")
-				else
-					-- It seems that sometimes Board.gameBoard is not set,
-					-- but I can't reproduce the bug.
-					-- For now use a board size check and log the message to try
-					-- to figure it out.
-					--LOG("Was in game board, but Board.gameBoard was not set! " .. tostring(modApiExt_internal.version))
-				end
-			end
-
-			if not Pawn then
-				-- PAWN is missing, this happens when loading into a game
-				-- in progress in combat. Attempt to fix this by getting the
-				-- pawn at p1.
-				-- This seems to be used only for constructing weapon previews
-				-- for enemies, so even if this is wrong (it shouldn't), it
-				-- should be pretty harmless.
-				Pawn = Board:GetPawn(p1)
-			end
-
-			modApiExt_internal.fireSkillBuildHooks(
-				modApiExt_internal.mission,
-				Pawn, id, p1, p2, skillFx
-			)
-
-			if not skillFx.effect:empty() then
-				local dlist = DamageList()
-
-				dlist:push_back(SpaceScript(
-					p1,
-					"modApiExt_internal.fireSkillStartHooks("
-					.."modApiExt_internal.mission, Pawn,"
-					.."unpack("..save_table({id, p1, p2}).."))"
-				))
-
-				for _, e in pairs(extract_table(skillFx.effect)) do
-					dlist:push_back(e)
-				end
-
-				dlist:push_back(SpaceScript(
-					p1,
-					"modApiExt_internal.fireSkillEndHooks("
-					.."modApiExt_internal.mission, Pawn,"
-					.."unpack("..save_table({id, p1, p2}).."))"
-				))
-
-				skillFx.effect = dlist
-			end
-
-			if not skillFx.q_effect:empty() then
-				local dlist = DamageList()
-
-				dlist:push_back(SpaceScript(
-					p1,
-					"modApiExt_internal.fireQueuedSkillStartHooks("
-					.."modApiExt_internal.mission, Pawn,"
-					.."unpack("..save_table({id, p1, p2}).."))"
-				))
-
-				for _, e in pairs(extract_table(skillFx.q_effect)) do
-					dlist:push_back(e)
-				end
-
-				dlist:push_back(SpaceScript(
-					p1,
-					"modApiExt_internal.fireQueuedSkillEndHooks("
-					.."modApiExt_internal.mission, Pawn,"
-					.."unpack("..save_table({id, p1, p2}).."))"
-				))
-
-				skillFx.q_effect = dlist
-			end
-		end
-
-		return skillFx
-	end
+	-- Make it possible to identify skills with no ambiguity
+	skill.__Id = id
+	skill.GetSkillEffect = modApiExtGetSkillEffect
 end
 
 function modApiExtHooks:overrideAllSkills()

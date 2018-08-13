@@ -176,20 +176,44 @@ function pawn:getWeaponData(ptable, field)
 	assert(field == "primary" or field == "secondary")
 	local t = {}
 
-	t.id = ptable[field]
-	t.power = ptable[field.."_power"]
-	t.upgrade1 = ptable[field.."_mod1"]
-	t.upgrade2 = ptable[field.."_mod2"]
+	if ptable then
+		t.id = ptable[field]
+		t.power = ptable[field.."_power"]
+		t.upgrade1 = ptable[field.."_mod1"]
+		t.upgrade2 = ptable[field.."_mod2"]
+	end
 
 	return t
+end
+
+local function getUpgradeSuffix(wtable)
+	if
+		wtable.upgrade1 and wtable.upgrade1[1] == 1 and
+		wtable.upgrade2 and wtable.upgrade2[1] == 1
+	then
+		return "_AB"
+	elseif wtable.upgrade1 and wtable.upgrade1[1] == 1 then
+		return "_A"
+	elseif wtable.upgrade2 and wtable.upgrade2[1] == 1 then
+		return "_B"
+	end
+
+	return ""
 end
 
 function pawn:getWeapons(pawnId)
 	local ptable = self:getSavedataTable(pawnId)
 	local t = {}
 
-	t[1] = self:getWeaponData(ptable, "primary").id
-	t[2] = self:getWeaponData(ptable, "secondary").id
+	local primary = self:getWeaponData(ptable, "primary")
+	local secondary = self:getWeaponData(ptable, "secondary")
+
+	if primary.id then
+		t[1] = primary.id .. getUpgradeSuffix(primary)
+	end
+	if secondary.id then
+		t[2] = secondary.id .. getUpgradeSuffix(secondary)
+	end
 
 	return t
 end

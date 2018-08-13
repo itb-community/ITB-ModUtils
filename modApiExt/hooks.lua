@@ -138,6 +138,12 @@ function hooks:addBuildingDestroyedHook(fn)
 	table.insert(self.buildingDestroyedHooks,fn)
 end
 
+hooks.buildingShieldHooks = {}
+function hooks:addBuildingShieldHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.buildingShieldHooks,fn)
+end
+
 hooks.skillStartHooks = {}
 function hooks:addSkillStartHook(fn)
 	assert(type(fn) == "function")

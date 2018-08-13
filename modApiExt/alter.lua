@@ -229,7 +229,8 @@ function modApiExtHooks:trackAndUpdateBuildings(mission)
 				-- Building not tracked yet
 				GAME.trackedBuildings[idx] = {
 					loc = point,
-					destroyed = false
+					destroyed = false,
+					shield = false,
 				}
 			else
 				-- Already tracked, update its data...

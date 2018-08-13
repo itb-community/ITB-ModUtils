@@ -72,6 +72,7 @@ function internal:initBroadcastHooks(tbl)
 	tbl.fireBuildingDamagedHooks =   self:buildBroadcastFunc("buildingDamagedHooks")
 	tbl.fireBuildingResistHooks =    self:buildBroadcastFunc("buildingResistHooks")
 	tbl.fireBuildingDestroyedHooks = self:buildBroadcastFunc("buildingDestroyedHooks")
+	tbl.fireBuildingShieldHooks =    self:buildBroadcastFunc("buildingShieldHooks")
 
 	tbl.fireMoveStartHooks =         self:buildBroadcastFunc("pawnMoveStartHooks")
 	tbl.fireMoveEndHooks =           self:buildBroadcastFunc("pawnMoveEndHooks")

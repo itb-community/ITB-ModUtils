@@ -143,6 +143,8 @@ function modApiExt:load(mod, options, version)
 		)
 
 		if self:getMostRecent() == self then
+			self.board:__load()
+
 			if hooks.overrideAllSkills then
 				-- Make sure the most recent version overwrites all others
 				dofile(self.modulesDir.."global.lua")

@@ -131,4 +131,87 @@ function board:getTileMaxHealth(point)
 	return tileTable.health_max or 2
 end
 
+function board:isShield(point)
+	local w = Board:GetSize().x
+	return GAME.trackedBuildings[p2idx(point, w)].shield
+end
+
+local function updateShieldedBuildings(self)
+	if not GetCurrentMission() then return end
+
+	local tbl = extract_table(Board:GetBuildings())
+
+	local w = Board:GetSize().x
+	for i, point in pairs(tbl) do
+		local idx = p2idx(point, w)
+		GAME.trackedBuildings[idx] = self:getTileTable(point).shield or false
+	end
+end
+
+local function updateShieldedStatus(damageList)
+	local w = Board:GetSize().x
+	local dlist = DamageList()
+
+	for i, e in ipairs(extract_table(damageList)) do
+		dlist:push_back(e)
+
+		if e.loc and Board:IsBuilding(e.loc) then
+			local idx = p2idx(e.loc, w)
+
+			if e.iShield and e.iShield == EFFECT_CREATE then
+				dlist:push_back(SpaceScript(
+					e.loc,
+					[[
+					if GAME then
+						local bld = GAME.trackedBuildings[]]..idx..[[]
+						if not bld.shield then
+							bld.shield = true
+							modApiExt_internal.fireBuildingShieldHooks(
+								modApiExt_internal.mission, bld
+							)
+						end
+					end
+					]]
+				))
+			end
+			if
+				(e.iShield and e.iShield == EFFECT_REMOVE) or
+				(e.iDamage and e.iDamage > 0 and e.iDamage ~= DAMAGE_ZERO)
+			then
+				dlist:push_back(SpaceScript(
+					e.loc,
+					[[
+					if GAME then
+						local bld = GAME.trackedBuildings[]]..idx..[[]
+						if bld.shield then
+							bld.shield = false
+							modApiExt_internal.fireBuildingShieldHooks(
+								modApiExt_internal.mission, bld
+							)
+						end
+					end
+					]]
+				))
+			end
+		end
+	end
+
+	return dlist
+end
+
+board.__load = function(self)
+	modApi:addMissionStartHook(function()
+		updateShieldedBuildings(self)
+	end)
+
+	modApi:addPostLoadGameHook(function()
+		updateShieldedBuildings(self)
+	end)
+
+	self:addSkillBuildHook(function(mission, pawn, skillId, p1, p2, skillFx)
+		skillFx.effect = updateShieldedStatus(skillFx.effect)
+		skillFx.q_effect = updateShieldedStatus(skillFx.q_effect)
+	end)
+end
+
 return board

@@ -1,21 +1,5 @@
 local modApiExt = {}
 
-function modApiExt:isModuleAvailable(name)
-	if package.loaded[name] then
-		return true
-	else
-		for _, searcher in ipairs(package.searchers or package.loaders) do
-			local loader = searcher(name)
-			if type(loader) == 'function' then
-				package.preload[name] = loader
-				return true
-			end
-		end
-
-		return false
-	end
-end
-
 --[[
 	Load the ext API's modules through this function to ensure that they can
 	access other modules via self keyword.
@@ -24,14 +8,6 @@ function modApiExt:loadModule(path)
 	local m = require(path)
 	setmetatable(m, self)
 	return m
-end
-
-function modApiExt:loadModuleIfAvailable(path)
-	if self:isModuleAvailable(path) then
-		return self:loadModule(path)
-	else
-		return nil
-	end
 end
 
 function modApiExt:scheduleHook(msTime, fn)
@@ -108,19 +84,17 @@ function modApiExt:init(modulesDir)
 
 	require(self.modulesDir.."global")
 
-	if self:isModuleAvailable(self.modulesDir.."hooks") then
-		local hooks = require(self.modulesDir.."hooks")
-		for k, v in pairs(hooks) do
-			self[k] = v
-		end
+	local hooks = require(self.modulesDir.."hooks")
+	for k, v in pairs(hooks) do
+		self[k] = v
 	end
 
-	self.vector =   self:loadModuleIfAvailable(self.modulesDir.."vector")
-	self.string =   self:loadModuleIfAvailable(self.modulesDir.."string")
-	self.board =    self:loadModuleIfAvailable(self.modulesDir.."board")
-	self.weapon =   self:loadModuleIfAvailable(self.modulesDir.."weapon")
-	self.pawn =     self:loadModuleIfAvailable(self.modulesDir.."pawn")
-	self.dialog =   self:loadModuleIfAvailable(self.modulesDir.."dialog")
+	self.vector =   self:loadModule(self.modulesDir.."vector")
+	self.string =   self:loadModule(self.modulesDir.."string")
+	self.board =    self:loadModule(self.modulesDir.."board")
+	self.weapon =   self:loadModule(self.modulesDir.."weapon")
+	self.pawn =     self:loadModule(self.modulesDir.."pawn")
+	self.dialog =   self:loadModule(self.modulesDir.."dialog")
 
 	return self
 end
@@ -130,52 +104,49 @@ function modApiExt:load(mod, options, version)
 	if self.loaded then return end
 
 	-- clear out previously registered hooks, since we're reloading.
-	if self.clearHooks then self:clearHooks() end
+	self:clearHooks()
 
-	if self:isModuleAvailable(self.modulesDir.."alter") then
-		local hooks = self:loadModule(self.modulesDir.."alter")
+	local hooks = self:loadModule(self.modulesDir.."alter")
 
-		modApi:addMissionStartHook(hooks.missionStart)
-		modApi:addMissionEndHook(hooks.missionEnd)
+	modApi:addMissionStartHook(hooks.missionStart)
+	modApi:addMissionEndHook(hooks.missionEnd)
 
-		modApi:scheduleHook(20, function()
-			-- Execute on roughly the next frame.
-			-- This allows us to reset the loaded flag after all other
-			-- mods are done loading.
-			self.loaded = false
+	modApi:scheduleHook(20, function()
+		-- Execute on roughly the next frame.
+		-- This allows us to reset the loaded flag after all other
+		-- mods are done loading.
+		self.loaded = false
 
-			table.insert(
-				modApi.missionUpdateHooks,
-				list_indexof(modApiExt_internal.extObjects, self),
-				hooks.missionUpdate
-			)
+		table.insert(
+			modApi.missionUpdateHooks,
+			list_indexof(modApiExt_internal.extObjects, self),
+			hooks.missionUpdate
+		)
 
-			if self:getMostRecent() == self then
-				if hooks.overrideAllSkills then
-					-- Make sure the most recent version overwrites all others
-					dofile(self.modulesDir.."global.lua")
-					hooks:overrideAllSkills()
+		if self:getMostRecent() == self then
+			if hooks.overrideAllSkills then
+				-- Make sure the most recent version overwrites all others
+				dofile(self.modulesDir.."global.lua")
+				hooks:overrideAllSkills()
 
-					-- Ensure backwards compatibility
-					self:addSkillStartHook(function(mission, pawn, skill, p1, p2)
-						if skill == "Move" then
-							self.dialog:triggerRuledDialog("MoveStart", { main = pawn:GetId() })
-							modApiExt_internal.fireMoveStartHooks(mission, pawn, p1, p2)
-						end
-					end)
-					self:addSkillEndHook(function(mission, pawn, skill, p1, p2)
-						if skill == "Move" then
-							self.dialog:triggerRuledDialog("MoveEnd", { main = pawn:GetId() })
-							modApiExt_internal.fireMoveEndHooks(mission, pawn, p1, p2)
-						end
-					end)
-				end
-				if hooks.voiceEvent then
-					modApi:addVoiceEventHook(hooks.voiceEvent)
-				end
+				-- Ensure backwards compatibility
+				self:addSkillStartHook(function(mission, pawn, skill, p1, p2)
+					if skill == "Move" then
+						self.dialog:triggerRuledDialog("MoveStart", { main = pawn:GetId() })
+						modApiExt_internal.fireMoveStartHooks(mission, pawn, p1, p2)
+					end
+				end)
+				self:addSkillEndHook(function(mission, pawn, skill, p1, p2)
+					if skill == "Move" then
+						self.dialog:triggerRuledDialog("MoveEnd", { main = pawn:GetId() })
+						modApiExt_internal.fireMoveEndHooks(mission, pawn, p1, p2)
+					end
+				end)
 			end
-		end)
-	end
+
+			modApi:addVoiceEventHook(hooks.voiceEvent)
+		end
+	end)
 
 	self.loaded = true
 end

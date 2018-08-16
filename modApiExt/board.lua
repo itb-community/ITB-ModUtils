@@ -133,7 +133,8 @@ end
 
 function board:isShield(point)
 	local w = Board:GetSize().x
-	return GAME.trackedBuildings[p2idx(point, w)].shield
+	local bld = GAME.trackedBuildings[p2idx(point, w)]
+	return bld and bld.shield
 end
 
 local function updateShieldedBuildings(self)
@@ -144,7 +145,7 @@ local function updateShieldedBuildings(self)
 	local w = Board:GetSize().x
 	for i, point in pairs(tbl) do
 		local idx = p2idx(point, w)
-		GAME.trackedBuildings[idx] = self:getTileTable(point).shield or false
+		GAME.trackedBuildings[idx].shield = self:getTileTable(point).shield or false
 	end
 end
 

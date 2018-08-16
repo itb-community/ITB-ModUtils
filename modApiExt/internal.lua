@@ -51,6 +51,8 @@ function internal:createIfMissing(object, name)
 end
 
 function internal:initBroadcastHooks(tbl)
+	tbl.fireMostRecentResolvedHooks = self:buildBroadcastFunc("mostRecentResolvedHooks")
+
 	tbl.firePawnTrackedHooks =       self:buildBroadcastFunc("pawnTrackedHooks")
 	tbl.firePawnUntrackedHooks =     self:buildBroadcastFunc("pawnUntrackedHooks")
 	tbl.firePawnUndoMoveHooks =      self:buildBroadcastFunc("pawnUndoMoveHooks")

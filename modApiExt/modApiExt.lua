@@ -166,6 +166,8 @@ function modApiExt:load(mod, options, version)
 			end
 
 			modApi:addVoiceEventHook(hooks.voiceEvent)
+
+			modApiExt_internal.fireMostRecentResolvedHooks(self)
 		end
 	end)
 

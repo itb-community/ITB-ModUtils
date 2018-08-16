@@ -216,4 +216,10 @@ function hooks:addPodCollectedHook(fn)
 	table.insert(self.podCollectedHooks,fn)
 end
 
+hooks.mostRecentResolvedHooks = {}
+function hooks:addMostRecentResolvedHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.mostRecentResolvedHooks,fn)
+end
+
 return hooks

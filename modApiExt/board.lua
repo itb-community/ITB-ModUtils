@@ -205,9 +205,20 @@ board.__load = function(self)
 		updateShieldedBuildings(self)
 	end)
 
-	modApi:addPostLoadGameHook(function()
-		updateShieldedBuildings(self)
-	end)
+	modApi:conditionalHook(
+		function()
+			if GAME and GAME.trackedBuildings then
+				for i, bld in pairs(GAME.trackedBuildings) do
+					return Board ~= nil
+				end
+			end
+
+			return false
+		end,
+		function()
+			updateShieldedBuildings(self)
+		end
+	)
 
 	self:addSkillBuildHook(function(mission, pawn, skillId, p1, p2, skillFx)
 		skillFx.effect = updateShieldedStatus(skillFx.effect)

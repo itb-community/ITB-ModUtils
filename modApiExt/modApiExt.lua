@@ -103,6 +103,12 @@ function modApiExt:load(mod, options, version)
 	-- We're already loaded. Bail.
 	if self.loaded then return end
 
+	self.owner = {
+		id = mod.id,
+		name = mod.name,
+		version = mod.version
+	}
+
 	-- clear out previously registered hooks, since we're reloading.
 	self:clearHooks()
 

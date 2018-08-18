@@ -145,11 +145,21 @@ local function updateShieldedBuildings(self)
 	local w = Board:GetSize().x
 	for i, point in pairs(tbl) do
 		local idx = p2idx(point, w)
-		GAME.trackedBuildings[idx].shield = self:getTileTable(point).shield or false
+		local bld = GAME.trackedBuildings[idx]
+		local nshield = self:getTileTable(point).shield or false
+
+		if bld.shield ~= nshield then
+			bld.shield = nshield
+			modApiExt_internal.fireBuildingShieldHooks(
+				modApiExt_internal.mission, bld
+			)
+		end
 	end
 end
 
 local function updateShieldedStatus(damageList)
+	if not Board.gameBoard then return damageList end
+
 	local w = Board:GetSize().x
 	local dlist = DamageList()
 
@@ -175,6 +185,7 @@ local function updateShieldedStatus(damageList)
 					]]
 				))
 			end
+
 			if
 				(e.iShield and e.iShield == EFFECT_REMOVE) or
 				(e.iDamage and e.iDamage > 0 and e.iDamage ~= DAMAGE_ZERO)
@@ -200,25 +211,21 @@ local function updateShieldedStatus(damageList)
 	return dlist
 end
 
+board.__init = function(self)
+	modApi:addPostLoadGameHook(function()
+		if self:isMostRecent() then
+			modApi:conditionalHook(
+				function() return Board ~= nil end,
+				function() updateShieldedBuildings(self) end
+			)
+		end
+	end)
+end
+
 board.__load = function(self)
 	modApi:addMissionStartHook(function()
 		updateShieldedBuildings(self)
 	end)
-
-	modApi:conditionalHook(
-		function()
-			if GAME and GAME.trackedBuildings then
-				for i, bld in pairs(GAME.trackedBuildings) do
-					return Board ~= nil
-				end
-			end
-
-			return false
-		end,
-		function()
-			updateShieldedBuildings(self)
-		end
-	)
 
 	self:addSkillBuildHook(function(mission, pawn, skillId, p1, p2, skillFx)
 		skillFx.effect = updateShieldedStatus(skillFx.effect)

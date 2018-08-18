@@ -113,6 +113,7 @@ function modApiExt:load(mod, options, version)
 	self:clearHooks()
 
 	local hooks = self:loadModule(self.modulesDir.."alter")
+	self.board:__init()
 
 	modApi:addMissionStartHook(hooks.missionStart)
 	modApi:addMissionEndHook(hooks.missionEnd)

@@ -10,8 +10,9 @@ local internal = {}
 --]]
 function internal:buildBroadcastFunc(hooksField, argsFunc)
 	local errfunc = function(e)
-		return string.format( "A %s callback failed: %s, %s",
-			hooksField, e, debug.traceback()
+		return string.format(
+			"A '%s' callback has failed:\n%s",
+			hooksField, e
 		)
 	end
 
@@ -26,7 +27,7 @@ function internal:buildBroadcastFunc(hooksField, argsFunc)
 		end
 
 		for i, extObj in ipairs(modApiExt_internal.extObjects) do
-			if extObj[hooksField] then -- may have opted out of that hook
+			if extObj[hooksField] then
 				for j, hook in ipairs(extObj[hooksField]) do
 					-- invoke the hook in a xpcall, since errors in SkillEffect
 					-- scripts fail silently, making debugging a nightmare.
@@ -38,7 +39,8 @@ function internal:buildBroadcastFunc(hooksField, argsFunc)
 					)
 
 					if not ok then
-						LOG(err)
+						local owner = extObj.owner and extObj.owner.id or "<unknown>"
+						LOG("In mod id '" .. owner .. "', ", err)
 					end
 				end
 			end

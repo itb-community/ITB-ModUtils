@@ -317,11 +317,13 @@ end
 function SpaceScript(loc, script)
 	local d = SpaceDamage(loc)
 	d.sScript = script
+
 	-- Scripts with location set on the board, and added as queued
 	-- damage put a gray stripe pattern on their tile. Setting these
 	-- (or one of them?) to true prevents it from showing up.
 	d.bHide = true
 	d.bHidePath = true
+
 	return d
 end
 
@@ -397,27 +399,26 @@ local function modApiExtGetSkillEffect(self, p1, p2, parentSkill)
 		end
 
 		if not skillFx.q_effect:empty() then
-			local dlist = DamageList()
+			local fx = SkillEffect()
+			local effects = extract_table(skillFx.q_effect)
 
-			dlist:push_back(SpaceScript(
-				p1,
+			fx:AddScript(
 				"modApiExt_internal.fireQueuedSkillStartHooks("
 				.."modApiExt_internal.mission, Pawn,"
 				.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
-			))
+			)
 
-			for _, e in pairs(extract_table(skillFx.q_effect)) do
-				dlist:push_back(e)
+			for _, e in pairs(effects) do
+				fx.effect:push_back(e)
 			end
 
-			dlist:push_back(SpaceScript(
-				p1,
+			fx:AddScript(
 				"modApiExt_internal.fireQueuedSkillEndHooks("
 				.."modApiExt_internal.mission, Pawn,"
 				.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
-			))
+			)
 
-			skillFx.q_effect = dlist
+			skillFx.q_effect = fx.effect
 		end
 	end
 

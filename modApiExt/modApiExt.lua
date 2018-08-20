@@ -137,7 +137,7 @@ function modApiExt:load(mod, options, version)
 		end
 	end)
 
-	modApi:scheduleHook(20, function()
+	modApi:scheduleHook(50, function()
 		-- Execute on roughly the next frame.
 		-- This allows us to reset the loaded flag after all other
 		-- mods are done loading.

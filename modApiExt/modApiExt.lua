@@ -57,6 +57,34 @@ function modApiExt:getParentPath(path)
 	return path:sub(0, path:find("/[^/]*$"))
 end
 
+function modApiExt:forkMostRecent()
+	if not modApiExt_internal.mostRecent then
+		error("Most recent version of modApiExt has not been resolved yet!")
+	end
+
+	local proxy = setmetatable({}, modApiExt_internal.mostRecent)
+	proxy.owner = self.owner
+
+	-- Copy hook registration and hooks registered thus far
+	local hooks = require(self.modulesDir.."hooks")
+	for k, v in pairs(hooks) do
+		proxy[k] = v
+	end
+
+	for k, v in pairs(self) do
+		if type(v) == "table" and modApi:stringEndsWith(k, "Hooks") then
+			proxy[k] = v
+		end
+	end
+
+	self:clearHooks()
+
+	local index = list_indexof(modApiExt_internal.extObjects, self)
+	modApiExt_internal.extObjects[index] = proxy
+
+	return proxy
+end
+
 --[[
 	Initializes the modApiExt object by loading available modules and setting
 	up hooks.

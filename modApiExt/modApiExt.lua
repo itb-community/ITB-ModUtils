@@ -19,13 +19,9 @@ function modApiExt:runLater(f)
 end
 
 function modApiExt:clearHooks()
-	local endswith = function(str, suffix)
-		return suffix == "" or string.sub(str,-string.len(suffix)) == suffix
-	end
-
 	-- too lazy to update this function with new hooks every time
 	for k, v in pairs(self) do
-		if type(v) == "table" and endswith(k, "Hooks") then
+		if type(v) == "table" and modApi:stringEndsWith(k, "Hooks") then
 			self[k] = {}
 		end
 	end

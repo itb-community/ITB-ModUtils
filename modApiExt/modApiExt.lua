@@ -77,6 +77,9 @@ function modApiExt:forkMostRecent()
 		end
 	end
 
+	-- Update the metatable for the original hooks' table to the proxy object
+	setmetatable(self.hooks, proxy)
+
 	self:clearHooks()
 
 	local index = list_indexof(modApiExt_internal.extObjects, self)
@@ -136,11 +139,11 @@ function modApiExt:load(mod, options, version)
 	-- clear out previously registered hooks, since we're reloading.
 	self:clearHooks()
 
-	local hooks = self:loadModule(self.modulesDir.."alter")
+	self.hooks = self:loadModule(self.modulesDir.."alter")
 	self.board:__init()
 
-	modApi:addMissionStartHook(hooks.missionStart)
-	modApi:addMissionEndHook(hooks.missionEnd)
+	modApi:addMissionStartHook(self.hooks.missionStart)
+	modApi:addMissionEndHook(self.hooks.missionEnd)
 
 	modApi:addPostLoadGameHook(function()
 		if self:getMostRecent() == self then
@@ -170,16 +173,16 @@ function modApiExt:load(mod, options, version)
 		table.insert(
 			modApi.missionUpdateHooks,
 			list_indexof(modApiExt_internal.extObjects, self),
-			hooks.missionUpdate
+			self.hooks.missionUpdate
 		)
 
 		if self:getMostRecent() == self then
 			self.board:__load()
 
-			if hooks.overrideAllSkills then
+			if self.hooks.overrideAllSkills then
 				-- Make sure the most recent version overwrites all others
 				dofile(self.modulesDir.."global.lua")
-				hooks:overrideAllSkills()
+				self.hooks:overrideAllSkills()
 
 				-- Ensure backwards compatibility
 				self:addSkillStartHook(function(mission, pawn, skill, p1, p2)
@@ -196,7 +199,7 @@ function modApiExt:load(mod, options, version)
 				end)
 			end
 
-			modApi:addVoiceEventHook(hooks.voiceEvent)
+			modApi:addVoiceEventHook(self.hooks.voiceEvent)
 
 			if not modApiExt_internal.mostRecent then
 				modApiExt_internal.mostRecent = self

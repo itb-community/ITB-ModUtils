@@ -215,7 +215,7 @@ board.__init = function(self)
 	modApi:addPostLoadGameHook(function()
 		if self:isMostRecent() then
 			modApi:conditionalHook(
-				function() return Board ~= nil end,
+				function() return Board ~= nil and GAME.trackedBuildings end,
 				function() updateShieldedBuildings(self) end
 			)
 		end

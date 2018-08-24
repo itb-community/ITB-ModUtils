@@ -57,28 +57,24 @@ function modApiExt:getParentPath(path)
 	return path:sub(0, path:find("/[^/]*$"))
 end
 
-function modApiExt:forkMostRecent()
+function modApiExt:forkMostRecent(mod, options, version)
 	if not modApiExt_internal.mostRecent then
 		error("Most recent version of modApiExt has not been resolved yet!")
 	end
 
 	local proxy = setmetatable({}, modApiExt_internal.mostRecent)
+	proxy.modulesDir = self.modulesDir
+	proxy.version = self.version
 	proxy.owner = self.owner
+	proxy.isProxy = true
+	proxy.loaded = false
+	proxy.load = modApiExt.load
 
-	-- Copy hook registration and hooks registered thus far
 	local hooks = require(self.modulesDir.."hooks")
 	for k, v in pairs(hooks) do
 		proxy[k] = v
 	end
-
-	for k, v in pairs(self) do
-		if type(v) == "table" and modApi:stringEndsWith(k, "Hooks") then
-			proxy[k] = v
-		end
-	end
-
-	-- Update the metatable for the original hooks' table to the proxy object
-	setmetatable(self.hooks, proxy)
+	proxy:load(mod, options, version)
 
 	self:clearHooks()
 
@@ -99,6 +95,7 @@ function modApiExt:init(modulesDir)
 	self.__index = self
 	self.modulesDir = modulesDir or self.modulesDir
 	self.version = require(self.modulesDir.."init").version
+	self.isProxy = false
 
 	local minv = "2.2.3"
 	if not modApi:isVersion(minv) then
@@ -140,13 +137,16 @@ function modApiExt:load(mod, options, version)
 	self:clearHooks()
 
 	self.hooks = self:loadModule(self.modulesDir.."alter")
-	self.board:__init()
+
+	if not self.isProxy then
+		self.board:__init()
+	end
 
 	modApi:addMissionStartHook(self.hooks.missionStart)
 	modApi:addMissionEndHook(self.hooks.missionEnd)
 
 	modApi:addPostLoadGameHook(function()
-		if self:getMostRecent() == self then
+		if self:getMostRecent() == self and not self.isProxy then
 			if Board then
 				Board.gameBoard = true
 			end
@@ -176,7 +176,7 @@ function modApiExt:load(mod, options, version)
 			self.hooks.missionUpdate
 		)
 
-		if self:getMostRecent() == self then
+		if self:getMostRecent() == self and not self.isProxy then
 			self.board:__load()
 
 			if self.hooks.overrideAllSkills then

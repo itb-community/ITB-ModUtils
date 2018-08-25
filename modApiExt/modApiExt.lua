@@ -142,9 +142,6 @@ function modApiExt:load(mod, options, version)
 		self.board:__init()
 	end
 
-	modApi:addMissionStartHook(self.hooks.missionStart)
-	modApi:addMissionEndHook(self.hooks.missionEnd)
-
 	modApi:addPostLoadGameHook(function()
 		if self:getMostRecent() == self and not self.isProxy then
 			if Board then
@@ -170,13 +167,11 @@ function modApiExt:load(mod, options, version)
 		-- mods are done loading.
 		self.loaded = false
 
-		table.insert(
-			modApi.missionUpdateHooks,
-			list_indexof(modApiExt_internal.extObjects, self),
-			self.hooks.missionUpdate
-		)
-
 		if self:getMostRecent() == self and not self.isProxy then
+			modApi:addMissionStartHook(self.hooks.missionStart)
+			modApi:addMissionEndHook(self.hooks.missionEnd)
+			modApi:addMissionUpdateHook(self.hooks.missionUpdate)
+
 			self.board:__load()
 
 			if self.hooks.overrideAllSkills then

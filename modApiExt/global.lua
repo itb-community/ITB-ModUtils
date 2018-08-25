@@ -10,6 +10,7 @@ end
 	Converts a point to an index, given Board width
 --]]
 function p2idx(p, w)
+	if not w then w = Board:GetSize().x end
 	return p.y * w + p.x
 end
 
@@ -17,6 +18,7 @@ end
 	Converts index to a point on the Board, given Board width
 --]]
 function idx2p(idx, w)
+	if not w then w = Board:GetSize().x end
 	return Point(idx % w, math.floor(idx / w))
 end
 

@@ -63,10 +63,11 @@ function modApiExt:forkMostRecent(mod, options, version)
 	end
 
 	local proxy = setmetatable({}, modApiExt_internal.mostRecent)
+	proxy.__index = proxy
 	proxy.modulesDir = self.modulesDir
 	proxy.version = self.version
-	proxy.owner = self.owner
 	proxy.isProxy = true
+	proxy.owner = self.owner
 	proxy.loaded = false
 	proxy.load = modApiExt.load
 
@@ -75,6 +76,15 @@ function modApiExt:forkMostRecent(mod, options, version)
 		proxy[k] = v
 	end
 	proxy:load(mod, options, version)
+
+	-- Transplant already-registered hooks over to the proxy
+	for k, v in pairs(self) do
+		if type(v) == "table" and modApi:stringEndsWith(k, "Hooks") then
+			for _, hook in ipairs(v) do
+				table.insert(proxy[k], hook)
+			end
+		end
+	end
 
 	self:clearHooks()
 

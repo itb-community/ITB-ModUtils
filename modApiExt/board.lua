@@ -132,12 +132,14 @@ function board:getTileMaxHealth(point)
 end
 
 function board:isShield(point)
+	LOG("WIP - this function is not yet finished.")
 	local w = Board:GetSize().x
 	local bld = GAME.trackedBuildings[p2idx(point, w)]
 	return bld and bld.shield
 end
 
 local function updateShieldedBuildings(self)
+	LOG("WIP - this function is not yet finished.")
 	if not GetCurrentMission() then return end
 
 	local tbl = extract_table(Board:GetBuildings())
@@ -158,10 +160,13 @@ local function updateShieldedBuildings(self)
 end
 
 local function updateShieldedStatus(damageList)
+	LOG("WIP - this function is not yet finished.")
 	if not Board.gameBoard then return damageList end
 
 	local w = Board:GetSize().x
 	local dlist = DamageList()
+
+	-- TODO: damage via push, jeez.
 
 	for i, e in ipairs(extract_table(damageList)) do
 		dlist:push_back(e)
@@ -212,6 +217,9 @@ local function updateShieldedStatus(damageList)
 end
 
 board.__init = function(self)
+--[[
+	-- shield detection is WIP
+	
 	modApi:addPostLoadGameHook(function()
 		if self:isMostRecent() then
 			modApi:conditionalHook(
@@ -220,9 +228,13 @@ board.__init = function(self)
 			)
 		end
 	end)
+--]]
 end
 
 board.__load = function(self)
+--[[
+	-- shield detection is WIP
+
 	modApi:addMissionStartHook(function()
 		updateShieldedBuildings(self)
 	end)
@@ -231,6 +243,7 @@ board.__load = function(self)
 		skillFx.effect = updateShieldedStatus(skillFx.effect)
 		skillFx.q_effect = updateShieldedStatus(skillFx.q_effect)
 	end)
+--]]
 end
 
 return board

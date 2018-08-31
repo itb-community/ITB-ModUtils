@@ -4,6 +4,8 @@
 
 * [Global](#global)
 	* [p2s](#p2s)
+	* [p2idx](#p2idx)
+	* [idx2p](#idx2p)
 	* [list_indexof](#list_indexof)
 	* [mouseTile](#mousetile)
 	* [screenPointToTile](#screenpointtotile)
@@ -25,6 +27,7 @@
 	* [modApiExt:scheduleHook](#modapiextschedulehook)
 	* [modApiExt:runLater](#modapiextrunlater)
 	* [modApiExt:getParentPath](#modapiextgetparentpath)
+	* [modApiExt:forkMostRecent](#modapiextforkmostrecent)
 	* [Board](#board)
 		* [getSpace](#boardgetspace)
 		* [getUnoccupiedSpace](#boardgetunoccupiedspace)
@@ -37,6 +40,8 @@
 		* [getCurrentRegion](#boardgetcurrentregion)
 		* [getMapTable](#boardgetmaptable)
 		* [getTileTable](#boardgettiletable)
+		* [getTileHealth](#boardgettilehealth)
+		* [getTileMaxHealth](#boardgettilemaxhealth)
 	* [Dialog](#dialog) - TODO
 	* [Pawn](#pawn)
 		* [setFire](#pawnsetfire)
@@ -91,6 +96,33 @@ These are functions which are loaded directly into the global lua table, and are
 | `point` | Point | The point to print |
 
 A nullsafe shorthand for `point:GetString()`, cause I'm lazy.
+
+
+### `p2idx`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `point` | Point | The point to convert |
+| `w` | number | Width of the game Board (grabs the width by itself if omitted) |
+
+Converts the specified point to an index, using the formula:
+```
+p.y * w + p.x
+```
+
+
+### `idx2p`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `index` | number | The index to convert |
+| `w` | number | Width of the game Board (grabs the width by itself if omitted) |
+
+Converts the specified index to a point, using the formula:
+```
+x = index % w
+y = floor(index / w)
+```
 
 
 ### `list_indexof`
@@ -259,6 +291,36 @@ require(path .. "another_module")
 ```
 
 
+### `modApiExt:forkMostRecent`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `mod` | table | The mod table |
+| `options` | table | The mod's options table |
+| `version` | string | The mod's version string |
+
+Arguments are the same as your mod's `load()` function.
+
+'Forks' the most recent version of modApiExt, allowing your mod to use the most recent version the player has installed.
+
+Doing so is useful in case there's a bug with modApiExt that is fixed in some later version, thus also fixing your mod, as long as the player has the version with the fix installed.  
+A disadvantage of this is that if your mod relies on a quirky bug in modApiExt, it'll be broken. It might also potentially lead to some difficult-to-replicate bugs.
+
+Judge for yourself.
+
+Example:
+```lua
+local function load(self, options, version)
+	your_modApiExt:load(self, options, version)
+	your_modApiExt:addMostRecentResolvedHook(function()
+		your_modApiExt = your_modApiExt:forkMostRecent(self, options, version)
+	end)
+
+	-- ...
+end
+```
+
+
 ## Board
 
 Functions useful when dealing with the game board, accesible via `modApiExt.board`.
@@ -369,6 +431,24 @@ Returns a savedata table holding complete information about the specified board 
 - `.grappled` - 1 if this tile has a grapple (web) effect on it, 0 or nil (missing) if not.
 - `.grapple_targets` - a table of targets grappled from this tile. Entries are just numbers - maybe indices of `DIR_VECTORS` table?
 - `.undo_state` - table holding undoable information about this tile
+
+
+### `board:getTileHealth`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `point` | point | The point for which tile health is to be returned |
+
+Returns the current health of the specified tile, or value of `getTileMaxHealth` if the tile has no current health specified. This function uses save data, and will fail when used in test mech scenario.
+
+
+### `board:getTileMaxHealth`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `point` | point | The point for which max tile health is to be returned |
+
+Returns the max health of the specified tile, or 2 if the tile has no max health specified. This function uses save data, and will fail when used in test mech scenario.
 
 
 ## Dialog

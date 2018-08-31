@@ -31,6 +31,7 @@
 * [podTrampledHook](#podtrampledhook)
 * [podDestroyedHook](#poddestroyedhook)
 * [podCollectedHook](#podcollectedhook)
+* [mostRecentResolvedHook](#mostrecentresolvedhook)
 
 Deprecated:
 * [pawnMoveStartHook](#pawnmovestarthook)
@@ -709,6 +710,13 @@ end
 
 modApiExt:addPodCollectedHook(hook)
 ```
+
+
+## `mostRecentResolvedHook`
+
+Fired when the most recent version of modApiExt is resolved. This hook is fired only once at game startup.
+
+Example: see [`modApiExt:forkMostRecent`](//github.com/kartoFlane/ITB-ModUtils/blob/master/docs.md#modapiextforkmostrecent)
 
 
 # Data

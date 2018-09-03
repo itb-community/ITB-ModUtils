@@ -333,8 +333,11 @@ local function modApiExtGetSkillEffect(self, p1, p2, parentSkill)
 		self = _G[self]
 	end
 
+	local isPrimaryCall = not (parentSkill and type(parentSkill) == "table" and
+	                           parentSkill.GetSkillEffect ~= nil)
+
 	local skillFx = nil
-	if parentSkill == nil then
+	if isPrimaryCall then
 		skillFx = modApiExt_internal.oldSkills[self.__Id](self, p1, p2, getmetatable(self))
 	else
 		-- Defer to parent skill's GetSkillEffect.
@@ -344,7 +347,7 @@ local function modApiExtGetSkillEffect(self, p1, p2, parentSkill)
 	-- If it's a secondary call to the GetSkillEffect, then we don't
 	-- want it to fire hooks (since the primary call already fired them).
 	-- For vanilla skills, the additional argument will be ignored.
-	if parentSkill == nil then
+	if isPrimaryCall then
 		if not Board.gameBoard then
 			if Board:GetSize() == Point(6, 6) then
 				-- Hacky AF solution to detect when tip image is visible

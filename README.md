@@ -40,8 +40,7 @@ return {
 
 ```lua
 local function init(self)
-	myname_modApiExt = require(self.scriptPath.."modApiExt/modApiExt")
-	myname_modApiExt:init()
+	myname_modApiExt = require(self.scriptPath.."modApiExt/modApiExt"):init()
 
 	-- Rest of your init function
 end

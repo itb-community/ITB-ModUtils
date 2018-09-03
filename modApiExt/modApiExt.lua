@@ -179,7 +179,9 @@ function modApiExt:load(mod, options, version)
 
 		if self:getMostRecent() == self and not self.isProxy then
 			modApi:addMissionStartHook(self.hooks.missionStart)
+			modApi:addTestMechEnteredHook(self.hooks.missionStart)
 			modApi:addMissionEndHook(self.hooks.missionEnd)
+			modApi:addTestMechExitedHook(self.hooks.missionEnd)
 			modApi:addMissionUpdateHook(self.hooks.missionUpdate)
 
 			self.board:__load()

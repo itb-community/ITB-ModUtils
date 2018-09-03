@@ -333,8 +333,9 @@ local function modApiExtGetSkillEffect(self, p1, p2, parentSkill)
 		self = _G[self]
 	end
 
-	local isPrimaryCall = not (parentSkill and type(parentSkill) == "table" and
-	                           parentSkill.GetSkillEffect ~= nil)
+	local isValidSkillTable = parentSkill and type(parentSkill) == "table" and
+	                          type(parentSkill.GetSkillEffect) == "function"
+	local isPrimaryCall = not isValidSkillTable
 
 	local skillFx = nil
 	if isPrimaryCall then

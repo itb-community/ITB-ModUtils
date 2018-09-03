@@ -323,6 +323,7 @@ function internal:init(extObj)
 			local b = isTestMechScenario()
 			if b ~= modApiExt_internal.isTestMech then
 				modApiExt_internal.isTestMech = b
+				modApiExt_internal.pawns = nil
 
 				if b then
 					modApiExt_internal.fireTestMechEnteredHooks()

@@ -98,6 +98,9 @@ function internal:initBroadcastHooks(tbl)
 	tbl.firePodTrampledHooks =       self:buildBroadcastFunc("podTrampledHooks")
 	tbl.firePodDestroyedHooks =      self:buildBroadcastFunc("podDestroyedHooks")
 	tbl.firePodCollectedHooks =      self:buildBroadcastFunc("podCollectedHooks")
+
+	tbl.fireTestMechEnteredHooks =   self:buildBroadcastFunc("testMechEnteredHooks")
+	tbl.fireTestMechExitedHooks =    self:buildBroadcastFunc("testMechExitedHooks")
 end
 
 function internal:createDialogTables(tbl)
@@ -227,6 +230,20 @@ function internal:initCompat(tbl)
 	tbl.timer = modApi.timer
 end
 
+local function isTestMechScenario()
+	if not Game then return false end
+
+	local p0 = Game:GetPawn(0)
+	local p1 = Game:GetPawn(1)
+	local p2 = Game:GetPawn(2)
+
+	-- In test mech scenario, only one of the three
+	-- player mechs will not be nil.
+	return (    p0 and not p1 and not p2) or
+	       (not p0 and     p1 and not p2) or
+	       (not p0 and not p1 and     p2)
+end
+
 --[[
 	Initializes globals used by all instances of modApiExt.
 --]]
@@ -277,6 +294,7 @@ function internal:init(extObj)
 
 		-- current mission, for passing as arg to hooks
 		m.mission = nil
+		m.isTestMech = false
 		-- table of pawn userdata, kept only at runtime to help
 		-- with pawn hooks
 		m.pawns = nil
@@ -301,6 +319,17 @@ function internal:init(extObj)
 				end
 			end
 			modApiExt_internal.tipMarkerVisible = modApiExt_internal.tipMarker:wasDrawn()
+
+			local b = isTestMechScenario()
+			if b ~= modApiExt_internal.isTestMech then
+				modApiExt_internal.isTestMech = b
+
+				if b then
+					modApiExt_internal.fireTestMechEnteredHooks()
+				else
+					modApiExt_internal.fireTestMechExitedHooks()
+				end
+			end
 		end)
 
 		-- dialogs

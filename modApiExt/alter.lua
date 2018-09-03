@@ -104,7 +104,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 
 					pd.curHealth = hp
 				end
-				
+
 				local isFire = pawn:IsFire()
 				if pd.isFire ~= isFire then
 					if isFire then
@@ -116,7 +116,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					
 					pd.isFire = isFire
 				end
-				
+
 				local isAcid = pawn:IsAcid()
 				if pd.isAcid ~= isAcid then
 					if isAcid then
@@ -128,7 +128,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					
 					pd.isAcid = isAcid
 				end
-				
+
 				local isFrozen = pawn:IsFrozen()
 				if pd.isFrozen ~= isFrozen then
 					if isFrozen then
@@ -140,7 +140,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					
 					pd.isFrozen = isFrozen
 				end
-				
+
 				local isGrappled = pawn:IsGrappled()
 				if pd.isGrappled ~= isGrappled then
 					if isGrappled then
@@ -152,7 +152,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					
 					pd.isGrappled = isGrappled
 				end
-				
+
 				local isShield = pawn:IsShield()
 				if pd.isShield ~= isShield then
 					if isShield then
@@ -487,7 +487,7 @@ modApiExtHooks.missionUpdate = function(mission)
 		modApiExt_internal.mission = mission
 	end
 	if Board and not Board.gameBoard then
-		Board.gameBoard = true 
+		Board.gameBoard = true
 	end
 
 	local t = modApi:elapsedTime()

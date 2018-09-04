@@ -162,10 +162,7 @@ function modApiExt:load(mod, options, version)
 		end
 	end)
 
-	modApi:scheduleHook(50, function()
-		-- Execute on roughly the next frame.
-		-- This allows us to reset the loaded flag after all other
-		-- mods are done loading.
+	modApi:addModsLoadedHook(function()
 		self.loaded = false
 
 		if self:getMostRecent() == self and not self.isProxy then

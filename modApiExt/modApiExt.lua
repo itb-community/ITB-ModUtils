@@ -10,14 +10,6 @@ function modApiExt:loadModule(path)
 	return m
 end
 
-function modApiExt:scheduleHook(msTime, fn)
-	modApi:scheduleHook(msTime, fn)
-end
-
-function modApiExt:runLater(f)
-	modApi:runLater(f)
-end
-
 function modApiExt:clearHooks()
 	-- too lazy to update this function with new hooks every time
 	for k, v in pairs(self) do
@@ -51,10 +43,6 @@ end
 function modApiExt:getMostRecent()
 	assert(modApiExt_internal)
 	return modApiExt_internal:getMostRecent()
-end
-
-function modApiExt:getParentPath(path)
-	return path:sub(0, path:find("/[^/]*$"))
 end
 
 function modApiExt:forkMostRecent(mod, options, version)
@@ -113,6 +101,8 @@ function modApiExt:init(modulesDir)
 			..string.format("Installed version: %s, required: %s", modApi.version, minv))
 	end
 
+	self.compat = self:loadModule(self.modulesDir.."compat"):init(self)
+
 	require(self.modulesDir.."internal"):init(self)
 	table.insert(modApiExt_internal.extObjects, self)
 
@@ -149,7 +139,8 @@ function modApiExt:load(mod, options, version)
 	self.hooks = self:loadModule(self.modulesDir.."alter")
 
 	if not self.isProxy then
-		self.board:__init()
+		--self.board:__init()
+		self.compat:load(self, mod, options, version)
 	end
 
 	modApi:addPostLoadGameHook(function()
@@ -184,26 +175,14 @@ function modApiExt:load(mod, options, version)
 			modApi:addTestMechExitedHook(self.hooks.missionEnd)
 			modApi:addMissionUpdateHook(self.hooks.missionUpdate)
 
-			self.board:__load()
+			--self.board:__load()
 
 			if self.hooks.overrideAllSkills then
 				-- Make sure the most recent version overwrites all others
 				dofile(self.modulesDir.."global.lua")
 				self.hooks:overrideAllSkills()
 
-				-- Ensure backwards compatibility
-				self:addSkillStartHook(function(mission, pawn, skill, p1, p2)
-					if skill == "Move" then
-						self.dialog:triggerRuledDialog("MoveStart", { main = pawn:GetId() })
-						modApiExt_internal.fireMoveStartHooks(mission, pawn, p1, p2)
-					end
-				end)
-				self:addSkillEndHook(function(mission, pawn, skill, p1, p2)
-					if skill == "Move" then
-						self.dialog:triggerRuledDialog("MoveEnd", { main = pawn:GetId() })
-						modApiExt_internal.fireMoveEndHooks(mission, pawn, p1, p2)
-					end
-				end)
+				self.compat:registerMoveHooks(self)
 			end
 
 			modApi:addVoiceEventHook(self.hooks.voiceEvent)
@@ -218,6 +197,6 @@ function modApiExt:load(mod, options, version)
 	self.loaded = true
 end
 
-modApiExt.modulesDir = modApiExt:getParentPath(...)
+modApiExt.modulesDir = GetParentPath(...)
 
 return modApiExt

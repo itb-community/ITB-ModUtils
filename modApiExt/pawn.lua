@@ -57,6 +57,13 @@ function pawn:safeDamage(pawn, spaceDamage)
 	-- change it to basic terrain so we don't trigger sounds if it's
 	-- sand or forest tile or other.
 	Board:SetTerrain(safeSpace, TERRAIN_ROAD)
+	-- Pawns get affected by acid if moved onto an acid tile
+	-- (even though technically they shouldn't, since the pawn doesn't
+	-- stand on the tile during missionUpdate step?)
+	Board:SetAcid(safeSpace, false)
+	-- Similar to above, remove smoke so's not to cancel vek attacks.
+	-- Not sure if it actually happens, but doing it just in case.
+	Board:SetSmoke(safeSpace, false, false)
 
 	pawn:SetSpace(safeSpace)
 

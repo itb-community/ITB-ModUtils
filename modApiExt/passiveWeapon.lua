@@ -1,5 +1,5 @@
 --set this to true if you are having issues with running passive weapons to help determine what is going wrong
-local addPassiveEffectDebug = false
+local addPassiveEffectDebug = true
 
 local passiveWeapon = {}
 
@@ -56,7 +56,7 @@ function passiveWeapon:getAllMechsTables(sourceTable)
 			return mechsData
 		end
 	else
-		local region = self.selfModApiExt.board:getCurrentRegion()
+		local region = self.board:getCurrentRegion()
 		local ptable = self:getAllMechsTables(SquadData)
 		if not ptable and region then
 			ptable = self:getAllMechsTables(region.player.map_data)
@@ -72,7 +72,7 @@ function passiveWeapon:addPassiveWeapon(weapon, passiveEffect, hook)
 	hook = hook or "addPostEnvironmentHook"
 	assert(type(hook) == "string")
 	assert(modApi:stringStartsWith(hook, "add"))
-	assert(self.selfModApiExt[hook] or modApi[hook])
+	assert(self[hook] or modApi[hook])
 	
 	assert(type(weapon) == "string")
 	assert(type(passiveEffect) == "string")
@@ -84,7 +84,7 @@ function passiveWeapon:addPassiveWeapon(weapon, passiveEffect, hook)
 	local hookTable = self.possibleEffectsData[hook]
 	if not hookTable then
 		hookTable = {}
-		passiveWeapon.possibleEffectsData[hook] = hookTable
+		self.possibleEffectsData[hook] = hookTable
 	end
 	
 	local data = {}
@@ -93,10 +93,10 @@ function passiveWeapon:addPassiveWeapon(weapon, passiveEffect, hook)
 	table.insert(hookTable, data)
 end
 
-function passiveWeapon.checkAndAddIfPassive(weaponTable)
+function passiveWeapon:checkAndAddIfPassive(weaponTable)
 	--for each passive weapon registered, check the id and if it matched then add the effect to
 	--the list of effects to execute
-	for hook, possibleEffects in pairs(passiveWeapon.possibleEffectsData) do
+	for hook, possibleEffects in pairs(self.possibleEffectsData) do
 		if addPassiveEffectDebug then LOG("Checking passive weapons for hook: "..hook) end
 		for i, pEffectTable in pairs(possibleEffects) do
 			if addPassiveEffectDebug then LOG("Checking known passive weapon id: "..pEffectTable.weapon) end
@@ -108,10 +108,10 @@ function passiveWeapon.checkAndAddIfPassive(weaponTable)
 				
 				if isWeaponPowered(weaponTable) then
 					if addPassiveEffectDebug then LOG("And it is active/powered") end
-					local hookTable = passiveWeapon.activeEffectsData[hook]
+					local hookTable = self.activeEffectsData[hook]
 					if not hookTable then
 						hookTable = {}
-						passiveWeapon.activeEffectsData[hook] = hookTable
+						self.activeEffectsData[hook] = hookTable
 					end
 					
 					local data = {}
@@ -126,7 +126,7 @@ function passiveWeapon.checkAndAddIfPassive(weaponTable)
 	end
 end
 
-passiveWeapon.determineIfPassivesAreActive = function(mission)
+function passiveWeapon.determineIfPassivesAreActive(mission)
 	if addPassiveEffectDebug then LOG("Determining what Passive Effects are active(powered)...") end
 
 	--clear the previous list
@@ -137,48 +137,50 @@ passiveWeapon.determineIfPassivesAreActive = function(mission)
 	for _, mechData in pairs(mechsData) do
 		if addPassiveEffectDebug then LOG("Checking mech: "..mechData.type) end
 		--get the mech's weapon data
-		local primary = passiveWeapon.selfModApiExt.pawn:getWeaponData(mechData, "primary")
-		local secondary = passiveWeapon.selfModApiExt.pawn:getWeaponData(mechData, "secondary")
+		local primary = passiveWeapon.pawn:getWeaponData(mechData, "primary")
+		local secondary = passiveWeapon.pawn:getWeaponData(mechData, "secondary")
 	
 		--if it has a primary then check if it is in the passive effects list
 		if primary.id then
 			if addPassiveEffectDebug then LOG("Checking primary weapon: "..primary.id) end
-			passiveWeapon.checkAndAddIfPassive(primary)
+			passiveWeapon:checkAndAddIfPassive(primary)
 		end
 		
 		--if it has a secondary then check if it is in the passive effects list
 		if secondary.id then
 			if addPassiveEffectDebug then LOG("Checking secondary weapon: "..secondary.id) end
-			passiveWeapon.checkAndAddIfPassive(secondary)
+			passiveWeapon:checkAndAddIfPassive(secondary)
 		end
 	end
 end
 
-function passiveWeapon:load(modUtil)
-	self.selfModApiExt = modUtil
-	modApi:addMissionStartHook(self.determineIfPassivesAreActive)
-	modApi:addPostLoadGameHook(self.determineIfPassivesAreActive)
+function generatePassiveEffectHookFn(hook)
+	local genericHookObj = {}
+	genericHookObj.storedHook = hook
+	genericHookObj.storedPassiveWeapon = passiveWeapon
 	
-	--Add the needed hooks
+	genericHookObj.hookFunction = function(...)
+		LOG("Evaluating "..#genericHookObj.storedPassiveWeapon.activeEffectsData[genericHookObj.storedHook].." active(powered) passive effects for hook: "..hook)
+		for _,effectWeaponTable in pairs(genericHookObj.storedPassiveWeapon.activeEffectsData[genericHookObj.storedHook]) do
+			effectWeaponTable.effect(effectWeaponTable.weapon, ...)
+		end
+	end
+	
+	return genericHookObj
+end
+
+function passiveWeapon:load()
+	modApi:addMissionStartHook(self.determineIfPassivesAreActive) --covers starting a new mission
+	modApi:addPostLoadGameHook(self.determineIfPassivesAreActive) --covers loading into (continuing) a mission
+	
+	--Create the needed hooks
 	for hook,_ in pairs(self.possibleEffectsData) do 
-		local fnString = 		"return function(...)\n"
-		if addPassiveEffectDebug then
-			fnString = fnString..	"\tLOG(\"Evaluating \"..#passiveWeapon.activeEffectsData[\""..hook.."\"]..\" active(powered)passive effects for hook: "..hook.."\")\n"
-		end
-		fnString = fnString..		"\tfor _,effectWeaponTable in pairs(passiveWeapon.activeEffectsData[\""..hook.."\"]) do\n"..
-										"\t\teffectWeaponTable.effect(effectWeaponTable.weapon, ...)\n"..
-									"\tend\n"..
-								"end"
-		if addPassiveEffectDebug then 
-			LOG("Creating passive effect for hook "..hook.." -\n"..fnString)
-		end
+		local hookObj = generatePassiveEffectHookFn(hook)
 		
-		local hookFn = loadstring(fnString)()
-		
-		if self.selfModApiExt[hook] then
-			self.selfModApiExt[hook](self.selfModApiExt, hookFn)
+		if self[hook] then
+			self[hook](self, hookObj.hookFunction)
 		else --already asserted that its in one of the two
-			modApi[hook](modApi, hookFn)
+			modApi[hook](modApi, hookObj.hookFunction)
 		end
 	end
 end

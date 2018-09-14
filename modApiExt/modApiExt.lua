@@ -113,12 +113,13 @@ function modApiExt:init(modulesDir)
 		self[k] = v
 	end
 
-	self.vector =   self:loadModule(self.modulesDir.."vector")
-	self.string =   self:loadModule(self.modulesDir.."string")
-	self.board =    self:loadModule(self.modulesDir.."board")
-	self.weapon =   self:loadModule(self.modulesDir.."weapon")
-	self.pawn =     self:loadModule(self.modulesDir.."pawn")
-	self.dialog =   self:loadModule(self.modulesDir.."dialog")
+	self.vector =        self:loadModule(self.modulesDir.."vector")
+	self.string =        self:loadModule(self.modulesDir.."string")
+	self.board =         self:loadModule(self.modulesDir.."board")
+	self.weapon =        self:loadModule(self.modulesDir.."weapon")
+	self.pawn =          self:loadModule(self.modulesDir.."pawn")
+	self.dialog =        self:loadModule(self.modulesDir.."dialog")
+	self.passiveWeapon = self:loadModule(self.modulesDir.."passiveWeapon")
 
 	return self
 end
@@ -191,6 +192,8 @@ function modApiExt:load(mod, options, version)
 		end
 	end)
 
+	self.passiveWeapon:load()
+	
 	self.loaded = true
 end
 

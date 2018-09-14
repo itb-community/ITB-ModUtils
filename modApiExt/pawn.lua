@@ -192,21 +192,6 @@ function pawn:getWeaponData(ptable, field)
 	return t
 end
 
-local function getUpgradeSuffix(wtable)
-	if
-		wtable.upgrade1 and wtable.upgrade1[1] > 0 and
-		wtable.upgrade2 and wtable.upgrade2[1] > 0
-	then
-		return "_AB"
-	elseif wtable.upgrade1 and wtable.upgrade1[1] > 0 then
-		return "_A"
-	elseif wtable.upgrade2 and wtable.upgrade2[1] > 0 then
-		return "_B"
-	end
-
-	return ""
-end
-
 function pawn:getWeapons(pawnId)
 	local ptable = self:getSavedataTable(pawnId)
 	local t = {}
@@ -215,10 +200,10 @@ function pawn:getWeapons(pawnId)
 	local secondary = self:getWeaponData(ptable, "secondary")
 
 	if primary.id then
-		t[1] = primary.id .. getUpgradeSuffix(primary)
+		t[1] = primary.id .. self.weapon:getUpgradeSuffix(primary)
 	end
 	if secondary.id then
-		t[2] = secondary.id .. getUpgradeSuffix(secondary)
+		t[2] = secondary.id .. self.weapon:getUpgradeSuffix(secondary)
 	end
 
 	return t

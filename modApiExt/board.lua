@@ -228,6 +228,39 @@ local function updateShieldedStatus(damageList)
 	return dlist
 end
 
+--returns all the player mechs in the passed source table. If the table
+--is omitted it will determine the table to use.
+--This is a modified version of the pawn:getSavedataTable() function
+function board:getAllMechsTables(sourceTable)
+	mechsData = {}
+	if sourceTable then
+		--look through each item in the table for mechs
+		for k, v in pairs(sourceTable) do
+			--player mechs keys start with pawn and have the mech flag set to true
+			if type(v) == "table" and v.mech and modApi:stringStartsWith(k, "pawn") then
+				mechsData[#mechsData+1] = v
+			end
+		end	
+		
+		--if we found some mechs then return their data
+		if #mechsData > 0 then
+			return mechsData
+		end
+	else
+		--determine what table to use and call ourselves with that one
+		local region = self:getCurrentRegion()
+		local ptable = self:getAllMechsTables(SquadData)
+		if not ptable and region then
+			ptable = self:getAllMechsTables(region.player.map_data)
+		end
+
+		return ptable
+	end
+
+	--if we didn't find any mechs return nil
+	return nil
+end
+
 board.__init = function(self)
 --[[
 	-- shield detection is WIP

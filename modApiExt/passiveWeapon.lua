@@ -7,113 +7,77 @@ passiveWeapon.possibleEffectsData = {}
 passiveWeapon.activeEffectsData = {}
 passiveWeapon.selfModApiExt = {}
 
---pulled from pawn(?) modUtil - remove
-local function getUpgradeSuffix(wtable)
-	if
-		wtable.upgrade1 and wtable.upgrade1[1] > 0 and
-		wtable.upgrade2 and wtable.upgrade2[1] > 0
-	then
-		return "_AB"
-	elseif wtable.upgrade1 and wtable.upgrade1[1] > 0 then
-		return "_A"
-	elseif wtable.upgrade2 and wtable.upgrade2[1] > 0 then
-		return "_B"
-	end
-
-	return ""
-end
-
---useful wrapper function put in weapon
-local function getWeaponNameWithUpgrade(weaponTable)
-	return weaponTable.id..getUpgradeSuffix(weaponTable)
-end
-
---useful function put in weapon
-local function isWeaponPowered(weaponTable)
-	--Check that all numbers are greater than 0
-	--I think you really only need to check the first but just to be safe I check them all
-	for _,power in pairs(weaponTable.power) do
-		if power <= 0 then
-			return false
-		end
-	end
-	
-	--empty means it needs no power so its always on!
-	return true
-end
-
---Modification of the pawn:getData - put in board
-function passiveWeapon:getAllMechsTables(sourceTable)
-	mechsData = {}
-	if sourceTable then
-		for k, v in pairs(sourceTable) do
-			if type(v) == "table" and v.mech and modApi:stringStartsWith(k, "pawn") then
-				mechsData[#mechsData+1] = v
-			end
-		end	
-		
-		if #mechsData > 0 then
-			return mechsData
-		end
-	else
-		local region = self.board:getCurrentRegion()
-		local ptable = self:getAllMechsTables(SquadData)
-		if not ptable and region then
-			ptable = self:getAllMechsTables(region.player.map_data)
-		end
-
-		return ptable
-	end
-
-	return nil
-end
-
+--A function that adds the passive weapon to the game. The passive weapon
+--should be declared the same as other weapons but should have the additional
+--Passive field set to a string of the weapon name plus the extension 
+--(_A, _B, _AB) if applicable. The GetSkillEffect method that is generally used
+--for weapons will only be used to construct the tool tip animation. The method
+--passed to this function will be called each time the passed hook is fired if
+--a mech has the weapon equiped and it is powered on. The method passed as the
+--passive effect can use all the fields of the weapon via the self field and 
+--will be passed the arguements of whatever hook is specified. If the hook is 
+--omitted it defaults to addPostEnvironmentHook. This should support all hooks
+--in the ModLoader and the ModUtil.
 function passiveWeapon:addPassiveWeapon(weapon, passiveEffect, hook)
+	--ensure the hook is a valid "add" function for a hook
 	hook = hook or "addPostEnvironmentHook"
 	assert(type(hook) == "string")
 	assert(modApi:stringStartsWith(hook, "add"))
 	assert(self[hook] or modApi[hook])
 	
-	assert(type(weapon) == "string")
-	assert(type(passiveEffect) == "string")
-	
-	--ensure they are valid weapon/effect combo
+	--ensure they are valid weapon/effect combo to reduce user error	
 	assert(_G[weapon])
 	assert(_G[weapon][passiveEffect])
 	
+	--get the list of potential effects associated with the hook or create it
 	local hookTable = self.possibleEffectsData[hook]
 	if not hookTable then
 		hookTable = {}
 		self.possibleEffectsData[hook] = hookTable
 	end
 	
+	--add the weapon and effect to the list of possible passive effects
 	local data = {}
 	data.weapon = weapon
 	data.effect = passiveEffect
 	table.insert(hookTable, data)
 end
 
+--checks if the passed weapon data is in the list of potential passive weapons
+--and if it is construct the data needed and add it to the active passive 
+--weapons list
 function passiveWeapon:checkAndAddIfPassive(weaponTable)
-	--for each passive weapon registered, check the id and if it matched then add the effect to
-	--the list of effects to execute
+	--for each hook that has possible passive effects
 	for hook, possibleEffects in pairs(self.possibleEffectsData) do
 		if addPassiveEffectDebug then LOG("Checking passive weapons for hook: "..hook) end
+		
+		--for each passive weapon of this hook
 		for i, pEffectTable in pairs(possibleEffects) do
 			if addPassiveEffectDebug then LOG("Checking known passive weapon id: "..pEffectTable.weapon) end
+			
+			--check the id and if it matches then add the effect to the list of effects to execute for this hook
 			if weaponTable.id == pEffectTable.weapon then
-				local wName = getWeaponNameWithUpgrade(weaponTable)
+			
+				--get the name with extensions so we can find the right object to call the effect function on
+				local wName = self.weapon:getWeaponNameWithUpgrade(weaponTable)
 				if addPassiveEffectDebug then LOG("FOUND PASSIVE WEAPON!: "..wName) end
-				local wObj = _G[wName]
-				local wEffect = wObj[pEffectTable.effect]
 				
-				if isWeaponPowered(weaponTable) then
+				--if the weapon is powerd
+				if self.weapon:isWeaponPowered(weaponTable) then
 					if addPassiveEffectDebug then LOG("And it is active/powered") end
+					
+					--get the weapon object and the effect function to use when the hook is fired
+					local wObj = _G[wName]
+					local wEffect = wObj[pEffectTable.effect]
+					
+					--get the list of active effects associated with the hook or create it
 					local hookTable = self.activeEffectsData[hook]
 					if not hookTable then
 						hookTable = {}
 						self.activeEffectsData[hook] = hookTable
 					end
 					
+					--add the weapon and effect to the list of active passive effects for this hook
 					local data = {}
 					data.weapon = wObj
 					data.effect = wEffect
@@ -126,16 +90,19 @@ function passiveWeapon:checkAndAddIfPassive(weaponTable)
 	end
 end
 
+--function that is called on mission start or when continuing a mission to determine
+--which passive effects are required
 function passiveWeapon.determineIfPassivesAreActive(mission)
 	if addPassiveEffectDebug then LOG("Determining what Passive Effects are active(powered)...") end
 
-	--clear the previous list
+	--clear the previous list of active effects
 	passiveWeapon.activeEffectsData = {}
 	
 	--loop through the player mechs to see if they have one of the passive weapons equiped and powered
-	local mechsData = passiveWeapon:getAllMechsTables()
+	local mechsData = passiveWeapon.board:getAllMechsTables()
 	for _, mechData in pairs(mechsData) do
 		if addPassiveEffectDebug then LOG("Checking mech: "..mechData.type) end
+		
 		--get the mech's weapon data
 		local primary = passiveWeapon.pawn:getWeaponData(mechData, "primary")
 		local secondary = passiveWeapon.pawn:getWeaponData(mechData, "secondary")
@@ -154,11 +121,16 @@ function passiveWeapon.determineIfPassivesAreActive(mission)
 	end
 end
 
+--Function to generate the object to handle calling all passive effects registered 
+--for a specific hook when the hook is fired which contains the function to be added
+--to the hook. This should be called once per hook with possible passive effects
 function generatePassiveEffectHookFn(hook)
+	--create the object to hold some of the needed data
 	local genericHookObj = {}
 	genericHookObj.storedHook = hook
 	genericHookObj.storedPassiveWeapon = passiveWeapon
 	
+	--Function that should be added to the hook this object is for
 	genericHookObj.hookFunction = function(...)
 		LOG("Evaluating "..#genericHookObj.storedPassiveWeapon.activeEffectsData[genericHookObj.storedHook].." active(powered) passive effects for hook: "..hook)
 		for _,effectWeaponTable in pairs(genericHookObj.storedPassiveWeapon.activeEffectsData[genericHookObj.storedHook]) do
@@ -173,10 +145,12 @@ function passiveWeapon:load()
 	modApi:addMissionStartHook(self.determineIfPassivesAreActive) --covers starting a new mission
 	modApi:addPostLoadGameHook(self.determineIfPassivesAreActive) --covers loading into (continuing) a mission
 	
-	--Create the needed hooks
+	--Create the needed hook objects and add the functions that handle executing
+	--the active passive effects
 	for hook,_ in pairs(self.possibleEffectsData) do 
 		local hookObj = generatePassiveEffectHookFn(hook)
 		
+		--supports hooks in both the ModLoader and the ModUtils
 		if self[hook] then
 			self[hook](self, hookObj.hookFunction)
 		else --already asserted that its in one of the two

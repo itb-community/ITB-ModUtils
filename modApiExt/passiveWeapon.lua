@@ -1,5 +1,5 @@
 --set this to true if you are having issues with running passive weapons to help determine what is going wrong
-local addPassiveEffectDebug = true
+local addPassiveEffectDebug = false
 
 local passiveWeapon = {}
 

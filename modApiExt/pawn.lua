@@ -195,13 +195,13 @@ end
 
 local function getUpgradeSuffix(wtable)
 	if
-		wtable.upgrade1 and wtable.upgrade1[1] == 1 and
-		wtable.upgrade2 and wtable.upgrade2[1] == 1
+		wtable.upgrade1 and wtable.upgrade1[1] > 0 and
+		wtable.upgrade2 and wtable.upgrade2[1] > 0
 	then
 		return "_AB"
-	elseif wtable.upgrade1 and wtable.upgrade1[1] == 1 then
+	elseif wtable.upgrade1 and wtable.upgrade1[1] > 0 then
 		return "_A"
-	elseif wtable.upgrade2 and wtable.upgrade2[1] == 1 then
+	elseif wtable.upgrade2 and wtable.upgrade2[1] > 0 then
 		return "_B"
 	end
 

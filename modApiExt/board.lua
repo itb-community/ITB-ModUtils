@@ -32,10 +32,21 @@ function board:getUnoccupiedSpace()
 	end)
 end
 
-function board:getUnoccupiedRestorableSpace()
+function board:getSafeSpace()
 	return self:getSpace(function(point)
 		-- We can put non-massive pawns over water, as long as we move
-		-- them back to solid ground in the same game tick.
+		-- them back to solid ground in the same game tick...
+		return not Board:IsPawnSpace(point) and
+		       -- ...but if we do that, then dealing safe damage to a
+		       -- pawn that's about to drown will cause an additional
+		       -- splash effect on the safe space tile.
+		       Board:GetTerrain(point) ~= TERRAIN_WATER and
+		       self:isRestorableTerrain(point)
+	end)
+end
+
+function board:getUnoccupiedRestorableSpace()
+	return self:getSpace(function(point)
 		return not Board:IsPawnSpace(point) and self:isRestorableTerrain(point)
 	end)
 end

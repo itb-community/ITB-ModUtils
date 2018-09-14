@@ -46,7 +46,7 @@ function pawn:safeDamage(pawn, spaceDamage)
 	local wasOnBoard = self.board:isPawnOnBoard(pawn)
 
 	local pawnSpace = pawn:GetSpace()
-	local safeSpace = self.board:getUnoccupiedRestorableSpace()
+	local safeSpace = self.board:getSafeSpace()
 
 	local terrainData = self.board:getRestorableTerrainData(safeSpace)
 

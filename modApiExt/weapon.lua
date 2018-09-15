@@ -22,6 +22,18 @@ function weapon:plusTarget(center, size)
 	return ret
 end
 
+--Returns all the varieties of the past weapon name that are defined
+function weapon:getAllExistingNamesForWeapon(weaponBaseName)
+	local allExisting = {}
+	for _, possiblility in pairs({weaponBaseName, weaponBaseName.."_A", weaponBaseName.."_B", weaponBaseName.."_AB"}) do
+		if _G[possiblility] then
+			table.insert(allExisting, possiblility)
+		end
+	end
+	
+	return allExisting
+end
+
 --Returns the upgrade suffix of the weapon i.e. _A,_B,_AB, or empty
 function weapon:getUpgradeSuffix(wtable)
 	if

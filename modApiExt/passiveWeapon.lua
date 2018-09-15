@@ -6,6 +6,7 @@ local passiveWeapon = {}
 
 passiveWeapon.possibleEffectsData = {}
 passiveWeapon.activeEffectsData = {}
+passiveWeapon.autoPassivedWeapons = {}
 
 --A function that adds the passive weapon to the game. The passive weapon
 --should be declared the same as other weapons but should have the additional
@@ -20,12 +21,19 @@ passiveWeapon.activeEffectsData = {}
 --similar to how it is done in GetSkillEffect() If the hook is omitted it 
 --defaults to addPostEnvironmentHook. This should support all hooks in the
 --ModLoader and the ModUtil.
-function passiveWeapon:addPassiveEffect(weapon, hook)
+function passiveWeapon:addPassiveEffect(weapon, hook, weaponIsNotPassiveOnly)
 	--ensure they are valid weapon/effect combo upfront to reduce user error	
 	assert(type(weapon) == "string")
 	assert(_G[weapon])
 	assert(_G[weapon][PW_EFFECT_FN_NAME])
+	
+	--if its a passive weapon, we will auto set the Passive field
+	if not weaponIsNotPassiveOnly then
+		--key based on the weapon as an easy way to avoid duplicates
+		self.autoPassivedWeapons[weapon] = true 
+	end
 		
+	--if they pass a table, add it for each hook
 	if type(hook) == "table" then
 		for _,singleHook in pairs(hook) do
 			self:addPassiveEffect(weapon, singleHook)
@@ -133,6 +141,19 @@ function passiveWeapon.determineIfPassivesAreActive(mission)
 	end
 end
 
+--Function that is called after the modUtils are loaded that will set the passive
+--field of any passive weapons automagically so the modder doesn't have to worry 
+--about remembering to do this
+local function autoSetWeaponsPassiveFields()
+	for weapon,_ in pairs(passiveWeapon.autoPassivedWeapons) do
+		if addPassiveEffectDebug then LOG("Making weapon "..weapon.." passive...") end
+		for _, variety in pairs(passiveWeapon.weapon:getAllExistingNamesForWeapon(weapon)) do
+			_G[variety].Passive = variety
+			if addPassiveEffectDebug then LOG("   Made variety "..variety.." passive!") end
+		end
+	end
+end
+
 --Function to generate the object to handle calling all passive effects registered 
 --for a specific hook when the hook is fired which contains the function to be added
 --to the hook. This should be called once per hook with possible passive effects
@@ -158,6 +179,9 @@ function generatePassiveEffectHookFn(hook)
 end
 
 function passiveWeapon:load()
+	--the hook that is fired after modUtils have loaded
+	self:addMostRecentResolvedHook(autoSetWeaponsPassiveFields)
+
 	modApi:addMissionStartHook(self.determineIfPassivesAreActive) --covers starting a new mission
 	modApi:addPostLoadGameHook(self.determineIfPassivesAreActive) --covers loading into (continuing) a mission
 	

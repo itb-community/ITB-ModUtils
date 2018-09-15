@@ -21,32 +21,37 @@ passiveWeapon.activeEffectsData = {}
 --defaults to addPostEnvironmentHook. This should support all hooks in the
 --ModLoader and the ModUtil.
 function passiveWeapon:addPassiveEffect(weapon, hook)
-	hook = hook or "PostEnvironmentHook"
-	
-	--ensure the hook is a valid function for a hook
-	--can be either the "add" version or the hook name itself
-	if addPassiveEffectDebug then LOG("Recieved hook name: "..hook) end
-	assert(type(hook) == "string")
-	
-	--ensure its uppercase and then add the "add" to the front
-	hook  = hook:gsub("^%l", string.upper)
-	hook = "add"..hook
-	if addPassiveEffectDebug then LOG("Created the string corresponding to the add function for the hook:"..hook) end
-	assert(self[hook] or modApi[hook])
-	
-	--ensure they are valid weapon/effect combo to reduce user error	
+	--ensure they are valid weapon/effect combo upfront to reduce user error	
+	assert(type(weapon) == "string")
 	assert(_G[weapon])
 	assert(_G[weapon][PW_EFFECT_FN_NAME])
-	
-	--get the list of potential effects associated with the hook or create it
-	local hookTable = self.possibleEffectsData[hook]
-	if not hookTable then
-		hookTable = {}
-		self.possibleEffectsData[hook] = hookTable
+		
+	if type(hook) == "table" then
+		for _,singleHook in pairs(hook) do
+			self:addPassiveEffect(weapon, singleHook)
+		end
+	else
+		hook = hook or "PostEnvironmentHook" --default to Post environemnt since thats when most effects occur
+		
+		--ensure the hook is a valid function for a hook
+		--can be either the "add" version or the hook name itself
+		assert(type(hook) == "string")
+		
+		--ensure its uppercase and then add the "add" to the front
+		hook = hook:gsub("^%l", string.upper)
+		hook = "add"..hook
+		assert(self[hook] or modApi[hook])
+		
+		--get the list of potential effects associated with the hook or create it
+		local hookTable = self.possibleEffectsData[hook]
+		if not hookTable then
+			hookTable = {}
+			self.possibleEffectsData[hook] = hookTable
+		end
+		
+		--add the weapon to the list of possible passive effects
+		table.insert(hookTable, weapon)
 	end
-	
-	--add the weapon to the list of possible passive effects
-	table.insert(hookTable, weapon)
 end
 
 --checks if the passed weapon data is in the list of potential passive weapons

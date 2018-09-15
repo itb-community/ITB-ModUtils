@@ -1,5 +1,6 @@
 --set this to true if you are having issues with running passive weapons to help determine what is going wrong
-local addPassiveEffectDebug = false
+local addPassiveEffectDebug = true
+local PW_EFFECT_FN_NAME = "GetPassiveSkillEffect"
 
 local passiveWeapon = {}
 
@@ -19,16 +20,23 @@ passiveWeapon.activeEffectsData = {}
 --similar to how it is done in GetSkillEffect() If the hook is omitted it 
 --defaults to addPostEnvironmentHook. This should support all hooks in the
 --ModLoader and the ModUtil.
-function passiveWeapon:addPassiveEffect(weapon, passiveEffect, hook)
-	--ensure the hook is a valid "add" function for a hook
-	hook = hook or "addPostEnvironmentHook"
+function passiveWeapon:addPassiveEffect(weapon, hook)
+	hook = hook or "PostEnvironmentHook"
+	
+	--ensure the hook is a valid function for a hook
+	--can be either the "add" version or the hook name itself
+	if addPassiveEffectDebug then LOG("Recieved hook name: "..hook) end
 	assert(type(hook) == "string")
-	assert(modApi:stringStartsWith(hook, "add"))
+	
+	--ensure its uppercase and then add the "add" to the front
+	hook  = hook:gsub("^%l", string.upper)
+	hook = "add"..hook
+	if addPassiveEffectDebug then LOG("Created the string corresponding to the add function for the hook:"..hook) end
 	assert(self[hook] or modApi[hook])
 	
 	--ensure they are valid weapon/effect combo to reduce user error	
 	assert(_G[weapon])
-	assert(_G[weapon][passiveEffect])
+	assert(_G[weapon][PW_EFFECT_FN_NAME])
 	
 	--get the list of potential effects associated with the hook or create it
 	local hookTable = self.possibleEffectsData[hook]
@@ -37,11 +45,8 @@ function passiveWeapon:addPassiveEffect(weapon, passiveEffect, hook)
 		self.possibleEffectsData[hook] = hookTable
 	end
 	
-	--add the weapon and effect to the list of possible passive effects
-	local data = {}
-	data.weapon = weapon
-	data.effect = passiveEffect
-	table.insert(hookTable, data)
+	--add the weapon to the list of possible passive effects
+	table.insert(hookTable, weapon)
 end
 
 --checks if the passed weapon data is in the list of potential passive weapons
@@ -49,15 +54,15 @@ end
 --weapons list
 function passiveWeapon:checkAndAddIfPassive(weaponTable, owningPawnId)
 	--for each hook that has possible passive effects
-	for hook, possibleEffects in pairs(self.possibleEffectsData) do
+	for hook, weaponsWithPassives in pairs(self.possibleEffectsData) do
 		if addPassiveEffectDebug then LOG("Checking passive weapons for hook: "..hook) end
 		
 		--for each passive weapon of this hook
-		for i, pEffectTable in pairs(possibleEffects) do
-			if addPassiveEffectDebug then LOG("Checking known passive weapon id: "..pEffectTable.weapon) end
+		for i, weapon in pairs(weaponsWithPassives) do
+			if addPassiveEffectDebug then LOG("Checking known passive weapon id: "..weapon) end
 			
 			--check the id and if it matches then add the effect to the list of effects to execute for this hook
-			if weaponTable.id == pEffectTable.weapon then
+			if weaponTable.id == weapon then
 			
 				--get the name with extensions so we can find the right object to call the effect function on
 				local wName = self.weapon:getWeaponNameWithUpgrade(weaponTable)
@@ -69,7 +74,7 @@ function passiveWeapon:checkAndAddIfPassive(weaponTable, owningPawnId)
 					
 					--get the weapon object and the effect function to use when the hook is fired
 					local wObj = _G[wName]
-					local wEffect = wObj[pEffectTable.effect]
+					local wEffect = wObj[PW_EFFECT_FN_NAME]
 					
 					--get the list of active effects associated with the hook or create it
 					local hookTable = self.activeEffectsData[hook]
@@ -138,6 +143,7 @@ function generatePassiveEffectHookFn(hook)
 		local previousPawn = Pawn
 		for _,effectWeaponTable in pairs(genericHookObj.storedPassiveWeapon.activeEffectsData[genericHookObj.storedHook]) do
 			Pawn = Board:GetPawn(effectWeaponTable.pawnId)
+			effectWeaponTable.weapon.HookName = genericHookObj.storedHook
 			effectWeaponTable.effect(effectWeaponTable.weapon, ...)
 		end
 		Pawn = previousPawn

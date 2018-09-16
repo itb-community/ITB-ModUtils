@@ -189,10 +189,11 @@ function modApiExt:load(mod, options, version)
 				modApiExt_internal.mostRecent = self
 				modApiExt_internal.fireMostRecentResolvedHooks()
 			end
+			
+
+			self.passiveWeapon:addHooks()
 		end
 	end)
-
-	self.passiveWeapon:load()
 	
 	self.loaded = true
 end

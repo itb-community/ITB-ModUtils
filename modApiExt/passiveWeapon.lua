@@ -4,11 +4,6 @@ local PW_EFFECT_FN_NAME = "GetPassiveSkillEffect"
 
 local passiveWeapon = {}
 
-passiveWeapon.possibleEffectsData = {}
-passiveWeapon.activeEffectsData = {}
-passiveWeapon.autoPassivedWeapons = {}
-
-
 --creates a string for the add function corresponding to the passed hook
 local function getAddFunctionForHook(hook)
 	return "add"..hook:gsub("^%l", string.upper)
@@ -36,7 +31,7 @@ function passiveWeapon:addPassiveEffect(weapon, hook, weaponIsNotPassiveOnly)
 	--if its a passive weapon, we will auto set the Passive field
 	if not weaponIsNotPassiveOnly then
 		--key based on the weapon as an easy way to avoid duplicates
-		self.autoPassivedWeapons[weapon] = true 
+		modApiExt_internal.passiveWeaponData.autoPassivedWeapons[weapon] = true 
 	end
 		
 	--if they pass a table, add it for each hook
@@ -57,10 +52,10 @@ function passiveWeapon:addPassiveEffect(weapon, hook, weaponIsNotPassiveOnly)
 		assert(type(self[addHook]) == "function" or type(modApi[addHook]) == "function")
 		
 		--get the list of potential effects associated with the hook or create it
-		local hookTable = self.possibleEffectsData[hook]
+		local hookTable = modApiExt_internal.passiveWeaponData.possibleEffects[hook]
 		if not hookTable then
 			hookTable = {}
-			self.possibleEffectsData[hook] = hookTable
+			modApiExt_internal.passiveWeaponData.possibleEffects[hook] = hookTable
 		end
 		
 		--add the weapon to the list of possible passive effects
@@ -73,7 +68,7 @@ end
 --weapons list
 function passiveWeapon:checkAndAddIfPassive(weaponTable, owningPawnId)
 	--for each hook that has possible passive effects
-	for hook, weaponsWithPassives in pairs(self.possibleEffectsData) do
+	for hook, weaponsWithPassives in pairs(modApiExt_internal.passiveWeaponData.possibleEffects) do
 		if addPassiveEffectDebug then LOG("Checking passive weapons for hook: "..hook) end
 		
 		--for each passive weapon of this hook
@@ -96,10 +91,10 @@ function passiveWeapon:checkAndAddIfPassive(weaponTable, owningPawnId)
 					local wEffect = wObj[PW_EFFECT_FN_NAME]
 					
 					--get the list of active effects associated with the hook or create it
-					local hookTable = self.activeEffectsData[hook]
+					local hookTable = modApiExt_internal.passiveWeaponData.activeEffects[hook]
 					if not hookTable then
 						hookTable = {}
-						self.activeEffectsData[hook] = hookTable
+						modApiExt_internal.passiveWeaponData.activeEffects[hook] = hookTable
 					end
 					
 					--add the weapon and effect to the list of active passive effects for this hook
@@ -122,7 +117,7 @@ function passiveWeapon.determineIfPassivesAreActive(mission)
 	if addPassiveEffectDebug then LOG("Determining what Passive Effects are active(powered)...") end
 
 	--clear the previous list of active effects
-	passiveWeapon.activeEffectsData = {}
+	modApiExt_internal.passiveWeaponData.activeEffects = {}
 	
 	--loop through the player mechs to see if they have one of the passive weapons equiped and powered
 	local mechsData = passiveWeapon.board:getAllMechsTables()
@@ -151,7 +146,7 @@ end
 --field of any passive weapons automagically so the modder doesn't have to worry 
 --about remembering to do this
 local function autoSetWeaponsPassiveFields()
-	for weapon,_ in pairs(passiveWeapon.autoPassivedWeapons) do
+	for weapon,_ in pairs(modApiExt_internal.passiveWeaponData.autoPassivedWeapons) do
 		if addPassiveEffectDebug then LOG("Making weapon "..weapon.." passive...") end
 		for _, variety in pairs(passiveWeapon.weapon:getAllExistingNamesForWeapon(weapon)) do
 			_G[variety].Passive = variety
@@ -164,27 +159,19 @@ end
 --for a specific hook when the hook is fired which contains the function to be added
 --to the hook. This should be called once per hook with possible passive effects
 function generatePassiveEffectHookFn(hook)
-	--create the object to hold some of the needed data
-	local genericHookObj = {}
-	genericHookObj.storedHook = hook
-	genericHookObj.storedPassiveWeapon = passiveWeapon
-	
-	--Function that should be added to the hook this object is for
-	genericHookObj.hookFunction = function(...)
-		LOG("Evaluating "..#genericHookObj.storedPassiveWeapon.activeEffectsData[genericHookObj.storedHook].." active(powered) passive effects for hook: "..hook)
+	return function(...)
+		LOG("Evaluating "..#modApiExt_internal.passiveWeaponData.activeEffects[hook].." active(powered) passive effects for hook: "..hook)
 		local previousPawn = Pawn
-		for _,effectWeaponTable in pairs(genericHookObj.storedPassiveWeapon.activeEffectsData[genericHookObj.storedHook]) do
+		for _,effectWeaponTable in pairs(modApiExt_internal.passiveWeaponData.activeEffects[hook]) do
 			Pawn = Board:GetPawn(effectWeaponTable.pawnId)
-			effectWeaponTable.weapon.HookName = genericHookObj.storedHook
+			effectWeaponTable.weapon.HookName = hook
 			effectWeaponTable.effect(effectWeaponTable.weapon, ...)
 		end
 		Pawn = previousPawn
 	end
-	
-	return genericHookObj
 end
 
-function passiveWeapon:load()
+function passiveWeapon:addHooks()
 	--the hook that is fired after modUtils have loaded
 	self:addMostRecentResolvedHook(autoSetWeaponsPassiveFields)
 
@@ -193,15 +180,15 @@ function passiveWeapon:load()
 	
 	--Create the needed hook objects and add the functions that handle executing
 	--the active passive effects
-	for hook,_ in pairs(self.possibleEffectsData) do 
+	for hook,_ in pairs(modApiExt_internal.passiveWeaponData.possibleEffects) do 
 		local hookObj = generatePassiveEffectHookFn(hook)
 		local addHook = getAddFunctionForHook(hook)
 		
 		--supports hooks in both the ModLoader and the ModUtils
 		if self[addHook] then
-			self[addHook](self, hookObj.hookFunction)
+			self[addHook](self, hookObj)
 		else --already asserted that its in one of the two
-			modApi[addHook](modApi, hookObj.hookFunction)
+			modApi[addHook](modApi, hookObj)
 		end
 	end
 end

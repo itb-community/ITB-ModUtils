@@ -8,6 +8,12 @@ passiveWeapon.possibleEffectsData = {}
 passiveWeapon.activeEffectsData = {}
 passiveWeapon.autoPassivedWeapons = {}
 
+
+--creates a string for the add function corresponding to the passed hook
+local function getAddFunctionForHook(hook)
+	return "add"..hook:gsub("^%l", string.upper)
+end
+
 --A function that adds the passive weapon to the game. The passive weapon
 --should be declared the same as other weapons but should have the additional
 --Passive field set to a string of the weapon name plus the extension 
@@ -39,16 +45,16 @@ function passiveWeapon:addPassiveEffect(weapon, hook, weaponIsNotPassiveOnly)
 			self:addPassiveEffect(weapon, singleHook)
 		end
 	else
-		hook = hook or "PostEnvironmentHook" --default to Post environemnt since thats when most effects occur
+		hook = hook or "postEnvironmentHook" --default to Post environemnt since thats when most effects occur
 		
-		--ensure the hook is a valid function for a hook
-		--can be either the "add" version or the hook name itself
+		--ensure there is an add function for it
 		assert(type(hook) == "string")
-		
-		--ensure its uppercase and then add the "add" to the front
-		hook = hook:gsub("^%l", string.upper)
-		hook = "add"..hook
-		assert(self[hook] or modApi[hook])
+		--ensure the first character is lower case. This just makes things easier to have consistent format
+		assert(hook:sub(1,1):lower() == hook:sub(1,1)) 
+		--ensure the add function exists
+		local addHook = getAddFunctionForHook(hook)
+		assert(self[addHook] or modApi[addHook])
+		assert(type(self[addHook]) == "function" or type(modApi[addHook]) == "function")
 		
 		--get the list of potential effects associated with the hook or create it
 		local hookTable = self.possibleEffectsData[hook]
@@ -189,12 +195,13 @@ function passiveWeapon:load()
 	--the active passive effects
 	for hook,_ in pairs(self.possibleEffectsData) do 
 		local hookObj = generatePassiveEffectHookFn(hook)
+		local addHook = getAddFunctionForHook(hook)
 		
 		--supports hooks in both the ModLoader and the ModUtils
-		if self[hook] then
-			self[hook](self, hookObj.hookFunction)
+		if self[addHook] then
+			self[addHook](self, hookObj.hookFunction)
 		else --already asserted that its in one of the two
-			modApi[hook](modApi, hookObj.hookFunction)
+			modApi[addHook](modApi, hookObj.hookFunction)
 		end
 	end
 end

@@ -1,7 +1,7 @@
 local addPassiveEffectDebug = true --set this to true if you are having issues with running passive weapons to help determine what is going wrong
 local PW_EFFECT_FN_NAME = "GetPassiveSkillEffect" --shouldn't change this. Treat it as a constant. Changing in later version would cause incompatibility
 
-local passiveWeapon = {}
+local passiveEffect = {}
 
 --creates a string for the add function corresponding to the passed hook.
 --For now all the hook appear to follow the same format but any special cases
@@ -25,7 +25,7 @@ end
 --logic is required for different hooks. If the hook is omitted it 
 --defaults to postEnvironmentHook. This should support all hooks in the
 --ModLoader and the ModUtil.
-function passiveWeapon:addPassiveEffect(weapon, hook, weaponIsNotPassiveOnly)
+function passiveEffect:addPassiveEffect(weapon, hook, weaponIsNotPassiveOnly)
 	--ensure they are valid weapon/effect combo upfront to reduce user error	
 	assert(type(weapon) == "string")
 	assert(_G[weapon])
@@ -34,7 +34,7 @@ function passiveWeapon:addPassiveEffect(weapon, hook, weaponIsNotPassiveOnly)
 	--if its a passive weapon, we will auto set the Passive field
 	if not weaponIsNotPassiveOnly then
 		--key based on the weapon as an easy way to avoid duplicates
-		modApiExt_internal.passiveWeaponData.autoPassivedWeapons[weapon] = true 
+		modApiExt_internal.passiveEffectData.autoPassivedWeapons[weapon] = true 
 	end
 		
 	--if they pass a table, add it for each hook
@@ -55,10 +55,10 @@ function passiveWeapon:addPassiveEffect(weapon, hook, weaponIsNotPassiveOnly)
 		assert(type(self[addHook]) == "function" or type(modApi[addHook]) == "function")
 		
 		--get the list of potential effects associated with the hook or create it
-		local hookTable = modApiExt_internal.passiveWeaponData.possibleEffects[hook]
+		local hookTable = modApiExt_internal.passiveEffectData.possibleEffects[hook]
 		if not hookTable then
 			hookTable = {}
-			modApiExt_internal.passiveWeaponData.possibleEffects[hook] = hookTable
+			modApiExt_internal.passiveEffectData.possibleEffects[hook] = hookTable
 		end
 		
 		--add the weapon to the list of possible passive effects
@@ -69,9 +69,9 @@ end
 --checks if the passed weapon data is in the list of potential passive weapons
 --and if it is construct the data needed and add it to the active passive 
 --weapons list
-function passiveWeapon:checkAndAddIfPassive(weaponTable, owningPawnId)
+function passiveEffect:checkAndAddIfPassive(weaponTable, owningPawnId)
 	--for each hook that has possible passive effects
-	for hook, weaponsWithPassives in pairs(modApiExt_internal.passiveWeaponData.possibleEffects) do
+	for hook, weaponsWithPassives in pairs(modApiExt_internal.passiveEffectData.possibleEffects) do
 		if addPassiveEffectDebug then LOG("Checking passive weapons for hook: "..hook) end
 		
 		--for each passive weapon of this hook
@@ -94,10 +94,10 @@ function passiveWeapon:checkAndAddIfPassive(weaponTable, owningPawnId)
 					local wEffect = wObj[PW_EFFECT_FN_NAME]
 					
 					--get the list of active effects associated with the hook or create it
-					local hookTable = modApiExt_internal.passiveWeaponData.activeEffects[hook]
+					local hookTable = modApiExt_internal.passiveEffectData.activeEffects[hook]
 					if not hookTable then
 						hookTable = {}
-						modApiExt_internal.passiveWeaponData.activeEffects[hook] = hookTable
+						modApiExt_internal.passiveEffectData.activeEffects[hook] = hookTable
 					end
 					
 					--add the weapon and effect to the list of active passive effects for this hook
@@ -116,31 +116,31 @@ end
 
 --function that is called on mission start or when continuing a mission to determine
 --which passive effects are required
-function passiveWeapon.determineIfPassivesAreActive(mission)
+function passiveEffect.determineIfPassivesAreActive(mission)
 	if addPassiveEffectDebug then LOG("Determining what Passive Effects are active(powered)...") end
 
 	--clear the previous list of active effects
-	modApiExt_internal.passiveWeaponData.activeEffects = {}
+	modApiExt_internal.passiveEffectData.activeEffects = {}
 	
 	--loop through the player mechs to see if they have one of the passive weapons equiped and powered
-	local mechsData = passiveWeapon.board:getAllMechsTables()
+	local mechsData = passiveEffect.board:getAllMechsTables()
 	for _, mechData in pairs(mechsData) do
 		if addPassiveEffectDebug then LOG("Checking mech: "..mechData.type) end
 		
 		--get the mech's weapon data
-		local primary = passiveWeapon.pawn:getWeaponData(mechData, "primary")
-		local secondary = passiveWeapon.pawn:getWeaponData(mechData, "secondary")
+		local primary = passiveEffect.pawn:getWeaponData(mechData, "primary")
+		local secondary = passiveEffect.pawn:getWeaponData(mechData, "secondary")
 	
 		--if it has a primary then check if it is in the passive effects list
 		if primary.id then
 			if addPassiveEffectDebug then LOG("Checking primary weapon: "..primary.id) end
-			passiveWeapon:checkAndAddIfPassive(primary, mechData.id)
+			passiveEffect:checkAndAddIfPassive(primary, mechData.id)
 		end
 		
 		--if it has a secondary then check if it is in the passive effects list
 		if secondary.id then
 			if addPassiveEffectDebug then LOG("Checking secondary weapon: "..secondary.id) end
-			passiveWeapon:checkAndAddIfPassive(secondary, mechData.id)
+			passiveEffect:checkAndAddIfPassive(secondary, mechData.id)
 		end
 	end
 end
@@ -149,9 +149,9 @@ end
 --field of any passive weapons automagically so the modder doesn't have to worry 
 --about remembering to do this
 local function autoSetWeaponsPassiveFields()
-	for weapon,_ in pairs(modApiExt_internal.passiveWeaponData.autoPassivedWeapons) do
+	for weapon,_ in pairs(modApiExt_internal.passiveEffectData.autoPassivedWeapons) do
 		if addPassiveEffectDebug then LOG("Making weapon "..weapon.." passive...") end
-		for _, variety in pairs(passiveWeapon.weapon:getAllExistingNamesForWeapon(weapon)) do
+		for _, variety in pairs(passiveEffect.weapon:getAllExistingNamesForWeapon(weapon)) do
 			_G[variety].Passive = variety
 			if addPassiveEffectDebug then LOG("   Made variety "..variety.." passive!") end
 		end
@@ -163,9 +163,9 @@ end
 --passive effects
 function buildPassiveEffectHookFn(hook)
 	return function(...)
-		LOG("Evaluating "..#modApiExt_internal.passiveWeaponData.activeEffects[hook].." active(powered) passive effects for hook: "..hook)
+		LOG("Evaluating "..#modApiExt_internal.passiveEffectData.activeEffects[hook].." active(powered) passive effects for hook: "..hook)
 		local previousPawn = Pawn
-		for _,effectWeaponTable in pairs(modApiExt_internal.passiveWeaponData.activeEffects[hook]) do
+		for _,effectWeaponTable in pairs(modApiExt_internal.passiveEffectData.activeEffects[hook]) do
 			Pawn = Board:GetPawn(effectWeaponTable.pawnId)
 			effectWeaponTable.weapon.HookName = hook
 			effectWeaponTable.effect(effectWeaponTable.weapon, ...)
@@ -176,7 +176,7 @@ end
 
 --The function that adds the required hooks to the game for passive weapons
 --This should only be called once for all instances of ModUtils!
-function passiveWeapon:addHooks()
+function passiveEffect:addHooks()
 	--the hook that is fired after modUtils have loaded
 	self:addMostRecentResolvedHook(autoSetWeaponsPassiveFields)
 
@@ -185,8 +185,8 @@ function passiveWeapon:addHooks()
 	
 	--Create the needed hook objects and add the functions that handle executing
 	--the active passive effects
-	for hook,_ in pairs(modApiExt_internal.passiveWeaponData.possibleEffects) do 
-		local hookObj = generatePassiveEffectHookFn(hook)
+	for hook,_ in pairs(modApiExt_internal.passiveEffectData.possibleEffects) do 
+		local hookObj = buildPassiveEffectHookFn(hook)
 		local addHook = getAddFunctionForHook(hook)
 		
 		--supports hooks in both the ModLoader and the ModUtils
@@ -198,4 +198,4 @@ function passiveWeapon:addHooks()
 	end
 end
 		
-return passiveWeapon
+return passiveEffect

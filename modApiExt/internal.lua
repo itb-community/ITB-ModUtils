@@ -223,11 +223,11 @@ function internal:createDialogTables(tbl)
 	self:createIfMissing(tbl.ruledDialogs, "PawnDeselected")
 end
 
-function internal:initPassiveWeaponData(tbl)
-	tbl.passiveWeaponData = {}
-	tbl.passiveWeaponData.possibleEffects = {}
-	tbl.passiveWeaponData.activeEffects = {}
-	tbl.passiveWeaponData.autoPassivedWeapons = {}
+function internal:initPassiveEffectData(tbl)
+	tbl.passiveEffectData = {}
+	tbl.passiveEffectData.possibleEffects = {}
+	tbl.passiveEffectData.activeEffects = {}
+	tbl.passiveEffectData.autoPassivedWeapons = {}
 end
 
 function internal:initCompat(tbl)
@@ -295,7 +295,7 @@ function internal:init(extObj)
 
 		self:initBroadcastHooks(m)
 		
-		self:initPassiveWeaponData(m)
+		self:initPassiveEffectData(m)
 
 		m.drawHook = sdl.drawHook(function(screen)
 			if not Game then

@@ -119,7 +119,7 @@ function modApiExt:init(modulesDir)
 	self.weapon =        self:loadModule(self.modulesDir.."weapon")
 	self.pawn =          self:loadModule(self.modulesDir.."pawn")
 	self.dialog =        self:loadModule(self.modulesDir.."dialog")
-	self.passiveWeapon = self:loadModule(self.modulesDir.."passiveWeapon")
+	self.passiveEffect = self:loadModule(self.modulesDir.."passiveEffect")
 
 	return self
 end
@@ -191,7 +191,7 @@ function modApiExt:load(mod, options, version)
 			end
 			
 
-			self.passiveWeapon:addHooks()
+			self.passiveEffect:addHooks()
 		end
 	end)
 	

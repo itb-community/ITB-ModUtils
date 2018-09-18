@@ -1,26 +1,29 @@
---set this to true if you are having issues with running passive weapons to help determine what is going wrong
-local addPassiveEffectDebug = true
-local PW_EFFECT_FN_NAME = "GetPassiveSkillEffect"
+local addPassiveEffectDebug = true --set this to true if you are having issues with running passive weapons to help determine what is going wrong
+local PW_EFFECT_FN_NAME = "GetPassiveSkillEffect" --shouldn't change this. Treat it as a constant. Changing in later version would cause incompatibility
 
 local passiveWeapon = {}
 
---creates a string for the add function corresponding to the passed hook
+--creates a string for the add function corresponding to the passed hook.
+--For now all the hook appear to follow the same format but any special cases
+--can be addressed in this function as needed
 local function getAddFunctionForHook(hook)
 	return "add"..hook:gsub("^%l", string.upper)
 end
 
---A function that adds the passive weapon to the game. The passive weapon
---should be declared the same as other weapons but should have the additional
---Passive field set to a string of the weapon name plus the extension 
---(_A, _B, _AB) if applicable. The GetSkillEffect method that is generally used
---for weapons will only be used to construct the tool tip animation. The method
---passed to this function will be called each time the passed hook is fired if
---a mech has the weapon equiped and it is powered on. The method passed as the
---passive effect can use all the fields of the weapon via the self field and 
---will be passed the arguements of whatever hook is specified. Additionally, 
---Pawn will be set to be the pawn who owns the weapon with the passive effect 
---similar to how it is done in GetSkillEffect() If the hook is omitted it 
---defaults to addPostEnvironmentHook. This should support all hooks in the
+--A function that adds the passive effect to the game. Generally these will 
+--be for passive weapons only but could in theory be non passive weapons 
+--as well. Passive weapons should be declared the same as other weapons. The 
+--GetSkillEffect method that is generally used for weapons is only used to 
+--construct the tool tip for passive only weapons. The GetPassiveSkillEffect(...)
+--function of the passed in weapon will be called each time the specified hook(s) 
+--are fired if a mech has the weapon equiped and it is powered on. The 
+--GetPassiveSkillEffect function can use all the fields of the weapon via 
+--"self" and will be passed the arguements of whatever hook is specified. 
+--Additionally, "Pawn" will be set to be the pawn who owns the weapon with 
+--the passive effect similar to how it is done in GetSkillEffect(). The 
+--name of the hook that was fired is stored in "self.HookName" if different 
+--logic is required for different hooks. If the hook is omitted it 
+--defaults to postEnvironmentHook. This should support all hooks in the
 --ModLoader and the ModUtil.
 function passiveWeapon:addPassiveEffect(weapon, hook, weaponIsNotPassiveOnly)
 	--ensure they are valid weapon/effect combo upfront to reduce user error	
@@ -155,10 +158,10 @@ local function autoSetWeaponsPassiveFields()
 	end
 end
 
---Function to generate the object to handle calling all passive effects registered 
---for a specific hook when the hook is fired which contains the function to be added
---to the hook. This should be called once per hook with possible passive effects
-function generatePassiveEffectHookFn(hook)
+--Generates the function that calls all passive effects registered for a specific 
+--hook when the hook is fired. This should be called once per hook with possible
+--passive effects
+function buildPassiveEffectHookFn(hook)
 	return function(...)
 		LOG("Evaluating "..#modApiExt_internal.passiveWeaponData.activeEffects[hook].." active(powered) passive effects for hook: "..hook)
 		local previousPawn = Pawn
@@ -171,6 +174,8 @@ function generatePassiveEffectHookFn(hook)
 	end
 end
 
+--The function that adds the required hooks to the game for passive weapons
+--This should only be called once for all instances of ModUtils!
 function passiveWeapon:addHooks()
 	--the hook that is fired after modUtils have loaded
 	self:addMostRecentResolvedHook(autoSetWeaponsPassiveFields)

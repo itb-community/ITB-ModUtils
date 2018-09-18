@@ -42,6 +42,7 @@
 		* [getTileTable](#boardgettiletable)
 		* [getTileHealth](#boardgettilehealth)
 		* [getTileMaxHealth](#boardgettilemaxhealth)
+		* [getAllMechsTables](#boardgetallmechstables)
 	* [Dialog](#dialog) - TODO
 	* [Pawn](#pawn)
 		* [setFire](#pawnsetfire)
@@ -82,6 +83,12 @@
 	* [Weapon](#weapon)
 		* [plusTarget](#weaponplustarget)
 		* [isTipImage](#weaponistipimage)
+		* [getAllExistingNamesForWeapon](#weapongetallexistingnamesforweapon)
+		* [getUpgradeSuffix](#weapongetupgradesuffix)
+		* [getWeaponNameWithUpgrade](#weapongetweaponnamewithupgrade)
+		* [isWeaponPowered](#weaponisweaponpowered)
+	* [PassiveEffect](#passiveeffect)
+		* [addPassiveEffect](#passiveeffectaddpassiveeffect)
 
 
 ## Global
@@ -450,6 +457,13 @@ Returns the current health of the specified tile, or value of `getTileMaxHealth`
 
 Returns the max health of the specified tile, or 2 if the tile has no max health specified. This function uses save data, and will fail when used in test mech scenario.
 
+### `board:getAllMechsTables`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `sourceTable` | table | The table containing the mech data. If omitted the function will determine the table to use. Generally should be omitted |
+
+Returns a table containing the data for all mechs in the passed in table or the game board if omitted.
 
 ## Dialog
 
@@ -787,3 +801,63 @@ Returns a `PointList` containing points creating a plus-shaped targeting area.
 When called inside of a `GetSkillEffect`, returns `true` if the weapon is being called from inside of a tip image. `false` otherwise.
 
 Always returns `false` when called outside of `GetSkillEffect`.
+
+
+### `weapon:getAllExistingNamesForWeapon`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `weaponBaseName` | String | The base name for the weapon (i.e. without any _A, _B, or _AB) |
+
+Returns a table containing all the full names of the passed weapon that are defined in the game files. If a particular weapon only has the _A updgrade then this will return only the base name and the basename with the "_A" suffix.
+
+
+### `weapon:getUpgradeSuffix`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `wtable` | Table | Table containing the weapon's data |
+
+Returns a string containing the suffix corresponding to the weapon's current powered on status. I.e. if only the second upgrade is powered, it will return "_B". If no upgrade is powered it will return "".
+
+
+### `weapon:getWeaponNameWithUpgrade`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `weaponTable` | Table | Table containing the weapon's data |
+
+Returns a string containing the weapon's full name with the upgrade suffix based on the weapon's currently powered upgrades
+
+
+### `weapon:isWeaponPowered`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `weaponTable` | Table | Table containing the weapon's data |
+
+Returns true if the weapon either is always active (requires no power) or is currently powered on.
+
+
+## PassiveEffect
+
+Functions useful for creating passive weapons
+
+
+### `passiveEffect:addPassiveEffect`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `weapon` | String | Base name of the weapon to add a passive effect to (i.e. without any upgrade suffixes) |
+| `hook` | String or table of Strings | The hooks that the GetPassiveSkillEffect() function should be triggered on. Defaults to "postEnvironmentHook" |
+| `weaponIsNotPassiveOnly` | boolean | "false" if the passed weapon should be forced to be passive (saves the modder some work). "true" if it should not be (allows for non-passive weapons to have passive effects). Defaults to "false" |
+
+Adds the passive effect to the game. 
+
+Generally these will be for passive weapons only but could in theory be non passive weapons as well. 
+
+Passive weapons should be declared the same as other weapons. The GetSkillEffect method that is generally used for weapons is only used to construct the tool tip for passive only weapons.
+
+The GetPassiveSkillEffect(...) function of the passed in weapon will be called each time the specified hook(s) are fired if a mech has the weapon equiped and it is powered on. The GetPassiveSkillEffect function can use all the fields of the weapon via "self" and will be passed the arguements of whatever hook is specified. Additionally, "Pawn" will be set to be the pawn who owns the weapon with the passive effect similar to how it is done in GetSkillEffect(). The name of the hook that was fired is stored in "self.HookName" if different logic is required for different hooks. 
+
+This should support all hooks in the ModLoader and the ModUtil.

@@ -163,7 +163,7 @@ end
 --passive effects
 function buildPassiveEffectHookFn(hook)
 	return function(...)
-		LOG("Evaluating "..#modApiExt_internal.passiveEffectData.activeEffects[hook].." active(powered) passive effects for hook: "..hook)
+		if addPassiveEffectDebug then LOG("Evaluating "..#modApiExt_internal.passiveEffectData.activeEffects[hook].." active(powered) passive effects for hook: "..hook) end
 		local previousPawn = Pawn
 		for _,effectWeaponTable in pairs(modApiExt_internal.passiveEffectData.activeEffects[hook]) do
 			Pawn = Board:GetPawn(effectWeaponTable.pawnId)

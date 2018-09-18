@@ -1,4 +1,4 @@
-local addPassiveEffectDebug = true --set this to true if you are having issues with running passive weapons to help determine what is going wrong
+local addPassiveEffectDebug = false --set this to true if you are having issues with running passive weapons to help determine what is going wrong
 local PW_EFFECT_FN_NAME = "GetPassiveSkillEffect" --shouldn't change this. Treat it as a constant. Changing in later version would cause incompatibility
 
 local passiveEffect = {}

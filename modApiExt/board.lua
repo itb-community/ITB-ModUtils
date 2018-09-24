@@ -80,10 +80,11 @@ function board:getRestorableTerrainData(point)
 end
 
 function board:restoreTerrain(point, terrainData)
-	Board:ClearSpace(point)
+	Board:SetTerrain(point, TERRAIN_WATER) -- takes care of fire
+	Board:SetSmoke(point, false, false)
+	Board:SetAcid(point, false)
+
 	Board:SetTerrain(point, terrainData.type)
-	-- No idea what the second boolean argument does here
-	-- maybe normal smoke vs sand smoke?
 	Board:SetSmoke(point, terrainData.smoke, false)
 	Board:SetAcid(point, terrainData.acid)
 	if terrainData.fire then

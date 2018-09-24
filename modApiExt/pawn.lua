@@ -54,6 +54,8 @@ function pawn:safeDamage(pawn, spaceDamage)
 		Board:AddPawn(pawn, safeSpace)
 	end
 
+	-- Set to water first to get rid of potential fire on the tile
+	Board:SetTerrain(safeSpace, TERRAIN_WATER)
 	-- change it to basic terrain so we don't trigger sounds if it's
 	-- sand or forest tile or other.
 	Board:SetTerrain(safeSpace, TERRAIN_ROAD)
@@ -61,9 +63,6 @@ function pawn:safeDamage(pawn, spaceDamage)
 	-- (even though technically they shouldn't, since the pawn doesn't
 	-- stand on the tile during missionUpdate step?)
 	Board:SetAcid(safeSpace, false)
-	-- Similar to above, remove smoke so's not to cancel vek attacks.
-	-- Not sure if it actually happens, but doing it just in case.
-	Board:SetSmoke(safeSpace, false, false)
 
 	pawn:SetSpace(safeSpace)
 

@@ -327,7 +327,7 @@ function SpaceScript(loc, script)
 	return d
 end
 
-local function modApiExtGetSkillEffect(self, p1, p2, parentSkill)
+local function modApiExtGetSkillEffect(self, p1, p2, parentSkill, ...)
 	-- Dereference to weapon object
 	if type(self) == "string" then
 		self = _G[self]
@@ -339,10 +339,10 @@ local function modApiExtGetSkillEffect(self, p1, p2, parentSkill)
 
 	local skillFx = nil
 	if isPrimaryCall then
-		skillFx = modApiExt_internal.oldSkills[self.__Id](self, p1, p2, getmetatable(self))
+		skillFx = modApiExt_internal.oldSkills[self.__Id](self, p1, p2, getmetatable(self), ...)
 	else
 		-- Defer to parent skill's GetSkillEffect.
-		skillFx = modApiExt_internal.oldSkills[parentSkill.__Id](self, p1, p2, getmetatable(parentSkill))
+		skillFx = modApiExt_internal.oldSkills[parentSkill.__Id](self, p1, p2, getmetatable(parentSkill), ...)
 	end
 
 	-- If it's a secondary call to the GetSkillEffect, then we don't

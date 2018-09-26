@@ -143,6 +143,15 @@ function board:getTileMaxHealth(point)
 	return tileTable.health_max or 2
 end
 
+--Returns the type of fire that is on the tile.
+--For "fire tiles" this returns 1
+--For "forest fire" this returns 2
+--For anything else this returns 0
+function board:getTileFireType(point)
+	local tileTable = self:getTileTable(point)
+	return tileTable.fire or 0
+end
+
 function board:isShield(point)
 	LOG("WIP - this function is not yet finished.")
 	local w = Board:GetSize().x

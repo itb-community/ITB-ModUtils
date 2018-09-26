@@ -134,13 +134,21 @@ end
 
 function board:getTileHealth(point)
 	local tileTable = self:getTileTable(point)
-	return tileTable.health_min or self:getTileMaxHealth(point)
+	if tileTable then
+		return tileTable.health_min or self:getTileMaxHealth(point)
+	end
+
+	return 0
 end
 
 function board:getTileMaxHealth(point)
 	local tileTable = self:getTileTable(point)
-	-- empty tiles appear to have max health of 2 by default
-	return tileTable.health_max or 2
+	if tileTable then
+		-- empty tiles appear to have max health of 2 by default
+		return tileTable.health_max or 2
+	end
+
+	return 0
 end
 
 function board:isShield(point)

@@ -120,7 +120,7 @@ function passiveEffect.determineIfPassivesAreActive(mission)
 	if addPassiveEffectDebug then LOG("Determining what Passive Effects are active(powered)...") end
 
 	--clear the previous list of active effects
-	modApiExt_internal.passiveEffectData.activeEffects = {}
+	passiveEffect.clearActivePassives(mission)
 	
 	--loop through the player mechs to see if they have one of the passive weapons equiped and powered
 	local mechsData = passiveEffect.board:getAllMechsTables()
@@ -145,6 +145,10 @@ function passiveEffect.determineIfPassivesAreActive(mission)
 	end
 end
 
+function passiveEffect.clearActivePassives(mission)
+	modApiExt_internal.passiveEffectData.activeEffects = {}
+end
+
 --Function that is called after the modUtils are loaded that will set the passive
 --field of any passive weapons automagically so the modder doesn't have to worry 
 --about remembering to do this
@@ -163,7 +167,7 @@ end
 --passive effects
 function buildPassiveEffectHookFn(hook)
 	return function(...)
-		if addPassiveEffectDebug then LOG("Evaluating "..#modApiExt_internal.passiveEffectData.activeEffects[hook].." active(powered) passive effects for hook: "..hook) end
+		if addPassiveEffectDebug then LOG("Evaluating active(powered) passive effects for hook: "..hook) end
 		local previousPawn = Pawn
 		if modApiExt_internal.passiveEffectData.activeEffects[hook] then
 			for _,effectWeaponTable in pairs(modApiExt_internal.passiveEffectData.activeEffects[hook]) do
@@ -184,6 +188,7 @@ function passiveEffect:addHooks()
 
 	modApi:addMissionStartHook(self.determineIfPassivesAreActive) --covers starting a new mission
 	modApi:addPostLoadGameHook(self.determineIfPassivesAreActive) --covers loading into (continuing) a mission
+	modApi:addMissionEndHook(self.clearActivePassives) --covers ending a mission (prevents tool tips from failing in overworld screen)
 	
 	--Create the needed hook objects and add the functions that handle executing
 	--the active passive effects

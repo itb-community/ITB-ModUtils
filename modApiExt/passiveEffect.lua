@@ -1,5 +1,5 @@
 local addPassiveEffectDebug = false --set this to true if you are having issues with running passive weapons to help determine what is going wrong
-local PW_EFFECT_FN_NAME = "GetPassiveSkillEffect" --shouldn't change this. Treat it as a constant. Changing in later version would cause incompatibility
+local PASSIVE_EFFECT_BASE_FN_NAME = "GetPassiveSkillEffect" --shouldn't change this. Treat it as a constant. Changing in later version would cause incompatibility
 
 local passiveEffect = {}
 
@@ -8,6 +8,10 @@ local passiveEffect = {}
 --can be addressed in this function as needed
 local function getAddFunctionForHook(hook)
 	return "add"..hook:gsub("^%l", string.upper)
+end
+
+local function getFunctionNameForHook(hook)
+	return PASSIVE_EFFECT_BASE_FN_NAME.."_"..hook:gsub("^%l", string.upper)
 end
 
 --A function that adds the passive effect to the game. Generally these will 
@@ -29,7 +33,6 @@ function passiveEffect:addPassiveEffect(weapon, hook, weaponIsNotPassiveOnly)
 	--ensure they are valid weapon/effect combo upfront to reduce user error	
 	assert(type(weapon) == "string")
 	assert(_G[weapon])
-	assert(_G[weapon][PW_EFFECT_FN_NAME])
 	
 	--if its a passive weapon, we will auto set the Passive field
 	if not weaponIsNotPassiveOnly then
@@ -44,15 +47,22 @@ function passiveEffect:addPassiveEffect(weapon, hook, weaponIsNotPassiveOnly)
 		end
 	else
 		hook = hook or "postEnvironmentHook" --default to Post environemnt since thats when most effects occur
-		
-		--ensure there is an add function for it
+				
+		--ensure there is an add function for it and ensure the first character is lower case. 
+		--This just makes things easier to have consistent format
 		assert(type(hook) == "string")
-		--ensure the first character is lower case. This just makes things easier to have consistent format
 		assert(hook:sub(1,1):lower() == hook:sub(1,1)) 
+		
+		--ensure the hook is defined for the function
+		local weaponFunctionName = getFunctionNameForHook(hook)
+		assert(_G[weapon][weaponFunctionName])
+		assert(type(_G[weapon][weaponFunctionName]) == "function")
+		
 		--ensure the add function exists
 		local addHook = getAddFunctionForHook(hook)
 		assert(self[addHook] or modApi[addHook])
 		assert(type(self[addHook]) == "function" or type(modApi[addHook]) == "function")
+		
 		
 		--get the list of potential effects associated with the hook or create it
 		local hookTable = modApiExt_internal.passiveEffectData.possibleEffects[hook]
@@ -91,7 +101,7 @@ function passiveEffect:checkAndAddIfPassive(weaponTable, owningPawnId)
 					
 					--get the weapon object and the effect function to use when the hook is fired
 					local wObj = _G[wName]
-					local wEffect = wObj[PW_EFFECT_FN_NAME]
+					local wEffect = wObj[getFunctionNameForHook(hook)]
 					
 					--get the list of active effects associated with the hook or create it
 					local hookTable = modApiExt_internal.passiveEffectData.activeEffects[hook]
@@ -172,7 +182,6 @@ function buildPassiveEffectHookFn(hook)
 		if modApiExt_internal.passiveEffectData.activeEffects[hook] then
 			for _,effectWeaponTable in pairs(modApiExt_internal.passiveEffectData.activeEffects[hook]) do
 				Pawn = Board:GetPawn(effectWeaponTable.pawnId)
-				effectWeaponTable.weapon.HookName = hook
 				effectWeaponTable.effect(effectWeaponTable.weapon, ...)
 			end
 		end

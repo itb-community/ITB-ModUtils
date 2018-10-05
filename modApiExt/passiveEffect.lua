@@ -177,15 +177,19 @@ end
 --passive effects
 function buildPassiveEffectHookFn(hook)
 	return function(...)
-		if addPassiveEffectDebug then LOG("Evaluating active(powered) passive effects for hook: "..hook) end
-		local previousPawn = Pawn
-		if modApiExt_internal.passiveEffectData.activeEffects[hook] then
-			for _,effectWeaponTable in pairs(modApiExt_internal.passiveEffectData.activeEffects[hook]) do
-				Pawn = Board:GetPawn(effectWeaponTable.pawnId)
-				effectWeaponTable.effect(effectWeaponTable.weapon, ...)
+		if not passiveEffect.weapon:isTipImage() then
+			if addPassiveEffectDebug then LOG("Evaluating active(powered) passive effects for hook: "..hook) end
+			local previousPawn = Pawn
+			if modApiExt_internal.passiveEffectData.activeEffects[hook] then
+				for _,effectWeaponTable in pairs(modApiExt_internal.passiveEffectData.activeEffects[hook]) do
+					Pawn = Board:GetPawn(effectWeaponTable.pawnId)
+					effectWeaponTable.effect(effectWeaponTable.weapon, ...)
+				end
 			end
+			Pawn = previousPawn
+		else
+			if addPassiveEffectDebug then LOG("Detected this is for a tool tip. Skipping active(powered) passive effects for hook: "..hook) end
 		end
-		Pawn = previousPawn
 	end
 end
 

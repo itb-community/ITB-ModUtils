@@ -190,7 +190,7 @@ function modApiExt:load(mod, options, version)
 				modApiExt_internal.fireMostRecentResolvedHooks()
 			end
 			
-
+			self.passiveEffect:autoSetWeaponsPassiveFields()
 			self.passiveEffect:addHooks()
 		end
 	end)

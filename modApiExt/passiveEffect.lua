@@ -159,10 +159,10 @@ function passiveEffect.clearActivePassives(mission)
 	modApiExt_internal.passiveEffectData.activeEffects = {}
 end
 
---Function that is called after the modUtils are loaded that will set the passive
+--Function that is called after the mods are loaded that will set the passive
 --field of any passive weapons automagically so the modder doesn't have to worry 
 --about remembering to do this
-local function autoSetWeaponsPassiveFields()
+function passiveEffect:autoSetWeaponsPassiveFields()
 	for weapon,_ in pairs(modApiExt_internal.passiveEffectData.autoPassivedWeapons) do
 		if addPassiveEffectDebug then LOG("Making weapon "..weapon.." passive...") end
 		for _, variety in pairs(passiveEffect.weapon:getAllExistingNamesForWeapon(weapon)) do
@@ -196,9 +196,6 @@ end
 --The function that adds the required hooks to the game for passive weapons
 --This should only be called once for all instances of ModUtils!
 function passiveEffect:addHooks()
-	--the hook that is fired after modUtils have loaded
-	self:addMostRecentResolvedHook(autoSetWeaponsPassiveFields)
-
 	modApi:addMissionStartHook(self.determineIfPassivesAreActive) --covers starting a new mission
 	modApi:addPostLoadGameHook(self.determineIfPassivesAreActive) --covers loading into (continuing) a mission
 	modApi:addMissionEndHook(self.clearActivePassives) --covers ending a mission (prevents tool tips from failing in overworld screen)

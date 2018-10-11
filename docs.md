@@ -44,6 +44,8 @@
 		* [getTileMaxHealth](#boardgettilemaxhealth)
 		* [getAllMechsTables](#boardgetallmechstables)
 	* [Dialog](#dialog) - TODO
+	* [PassiveEffect](#passiveeffect)
+		* [addPassiveEffect](#passiveeffectaddpassiveeffect)
 	* [Pawn](#pawn)
 		* [setFire](#pawnsetfire)
 		* [safeDamage](#pawnsafedamage)
@@ -87,8 +89,6 @@
 		* [getUpgradeSuffix](#weapongetupgradesuffix)
 		* [getWeaponNameWithUpgrade](#weapongetweaponnamewithupgrade)
 		* [isWeaponPowered](#weaponisweaponpowered)
-	* [PassiveEffect](#passiveeffect)
-		* [addPassiveEffect](#passiveeffectaddpassiveeffect)
 
 
 ## Global
@@ -472,6 +472,32 @@ System for dialogs with pawn cast rules, accessible via `modApiExt.dialog`.
 TODO
 
 
+## PassiveEffect
+
+Functions useful for creating passive weapons
+
+
+### `passiveEffect:addPassiveEffect`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `weapon` | String | Base name of the weapon to add a passive effect to (i.e. without any upgrade suffixes) |
+| `hook` | String or table of Strings | The hooks that the `GetPassiveSkillEffect()` function should be triggered on. Defaults to `postEnvironmentHook` |
+| `weaponIsNotPassiveOnly` | boolean | `false` if the passed weapon should be forced to be passive (saves the modder some headache). `true` if it should not be (allows for non-passive weapons to have passive effects). Defaults to `false` |
+
+Adds the passive effect to the game. 
+
+Generally these will be for passive weapons only but could in theory be non passive weapons as well. 
+
+Passive weapons should be declared the same as other weapons. The `GetSkillEffect` method that is generally used for weapons is only used to construct the tool tip for passive only weapons.
+
+Each hook passed into the function will call a different function in the passed weapon. The format for the function that is called for a given hook is `GetPassiveSkillEffect_<hookName>(...)`. For example, for a `postEnvironmentHook` the function called would be `GetPassiveSkillEffect_PostEnvironmentHook(...)`. Each passive effect function of the passed in weapon will be called each time the respective hook is fired if and only if a mech has the weapon equiped and it is powered on. 
+
+All the arguements for the hooks are passed into the `GetPassiveSkillEffect_<hookName>` function. The passive effect functions can also use all the fields of the weapon via "self". Additionally, "Pawn" will be set to be the pawn who owns the weapon with the passive effect similar to how it is done in `GetSkillEffect()`. If any data needs to persist, it should be stored in the `GAME` table.
+
+This function should support all hooks in the ModLoader and the ModUtil.
+
+
 ## Pawn
 
 Functions useful when manipulating pawns, accessible via `modApiExt.pawn`.
@@ -837,29 +863,3 @@ Returns a string containing the weapon's full name with the upgrade suffix based
 | `weaponTable` | Table | Table containing the weapon's data |
 
 Returns true if the weapon either is always active (requires no power) or is currently powered on.
-
-
-## PassiveEffect
-
-Functions useful for creating passive weapons
-
-
-### `passiveEffect:addPassiveEffect`
-
-| Argument name | Type | Description |
-|---------------|------|-------------|
-| `weapon` | String | Base name of the weapon to add a passive effect to (i.e. without any upgrade suffixes) |
-| `hook` | String or table of Strings | The hooks that the `GetPassiveSkillEffect()` function should be triggered on. Defaults to `postEnvironmentHook` |
-| `weaponIsNotPassiveOnly` | boolean | `false` if the passed weapon should be forced to be passive (saves the modder some headache). `true` if it should not be (allows for non-passive weapons to have passive effects). Defaults to `false` |
-
-Adds the passive effect to the game. 
-
-Generally these will be for passive weapons only but could in theory be non passive weapons as well. 
-
-Passive weapons should be declared the same as other weapons. The `GetSkillEffect` method that is generally used for weapons is only used to construct the tool tip for passive only weapons.
-
-Each hook passed into the function will call a different function in the passed weapon. The format for the function that is called for a given hook is `GetPassiveSkillEffect_<hookName>(...)`. For example, for a `postEnvironmentHook` the function called would be `GetPassiveSkillEffect_PostEnvironmentHook(...)`. Each passive effect function of the passed in weapon will be called each time the respective hook is fired if and only if a mech has the weapon equiped and it is powered on. 
-
-All the arguements for the hooks are passed into the `GetPassiveSkillEffect_<hookName>` function. The passive effect functions can also use all the fields of the weapon via "self". Additionally, "Pawn" will be set to be the pawn who owns the weapon with the passive effect similar to how it is done in `GetSkillEffect()`. If any data needs to persist, it should be stored in the `GAME` table.
-
-This should support all hooks in the ModLoader and the ModUtil.

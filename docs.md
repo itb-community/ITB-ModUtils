@@ -858,8 +858,8 @@ Generally these will be for passive weapons only but could in theory be non pass
 
 Passive weapons should be declared the same as other weapons. The GetSkillEffect method that is generally used for weapons is only used to construct the tool tip for passive only weapons.
 
-Each hook passed into the function will call a different function in the passed weapon. The format for the function that is called for a given hook is GetPassiveSkillEffect_<hookName>(...). For example, for a postEnvironmentHook the function called would be GetPassiveSkillEffect_PostEnvironmentHook(...).
+Each hook passed into the function will call a different function in the passed weapon. The format for the function that is called for a given hook is GetPassiveSkillEffect_\<hookName\>(...). For example, for a postEnvironmentHook the function called would be GetPassiveSkillEffect_PostEnvironmentHook(...).
 
-The GetPassiveSkillEffect_<hookName>(...) function of the passed in weapon will be called each time the specified hook is fired if and only if a mech has the weapon equiped and it is powered on. The GetPassiveSkillEffect_<hookName> functions can use all the fields of the weapon via "self". Additionally, "Pawn" will be set to be the pawn who owns the weapon with the passive effect similar to how it is done in GetSkillEffect(). If any data needs to persist, it should be stored in the GAME table.
+The GetPassiveSkillEffect_\<hookName\>(...) function of the passed in weapon will be called each time the specified hook is fired if and only if a mech has the weapon equiped and it is powered on. The GetPassiveSkillEffect_\<hookName\> functions can use all the fields of the weapon via "self". Additionally, "Pawn" will be set to be the pawn who owns the weapon with the passive effect similar to how it is done in GetSkillEffect(). If any data needs to persist, it should be stored in the GAME table.
 
 This should support all hooks in the ModLoader and the ModUtil.

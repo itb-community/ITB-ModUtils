@@ -43,7 +43,7 @@ function passiveEffect:addPassiveEffect(weapon, hook, weaponIsNotPassiveOnly)
 	--if they pass a table, add it for each hook
 	if type(hook) == "table" then
 		for _,singleHook in pairs(hook) do
-			self:addPassiveEffect(weapon, singleHook)
+			self:addPassiveEffect(weapon, singleHook, weaponIsNotPassiveOnly)
 		end
 	else
 		hook = hook or "postEnvironmentHook" --default to Post environemnt since thats when most effects occur

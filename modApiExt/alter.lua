@@ -199,8 +199,8 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 
 				if pd.dead and pd.curHealth ~= 0 then
 					pd.dead = false
-					self.dialog:triggerRuledDialog("MechRevived", { target = id })
-					modApiExt_internal.fireMechRevivedHooks(mission, pawn)
+					self.dialog:triggerRuledDialog("PawnRevived", { target = id })
+					modApiExt_internal.firePawnRevivedHooks(mission, pawn)
 				end
 
 				-- Treat pawns not registered in the onBoard table as on board.

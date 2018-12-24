@@ -90,10 +90,10 @@ function hooks:addPawnKilledHook(fn)
 	table.insert(self.pawnKilledHooks,fn)
 end
 
-hooks.mechRevivedHooks = {}
-function hooks:addMechRevivedHook(fn)
+hooks.pawnRevivedHooks = {}
+function hooks:addPawnRevivedHook(fn)
 	assert(type(fn) == "function")
-	table.insert(self.mechRevivedHooks,fn)
+	table.insert(self.pawnRevivedHooks,fn)
 end
 
 hooks.pawnIsFireHooks = {}

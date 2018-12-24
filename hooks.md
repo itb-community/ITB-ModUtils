@@ -13,6 +13,7 @@
 * [pawnDamagedHook](#pawndamagedhook)
 * [pawnHealedHook](#pawnhealedhook)
 * [pawnKilledHook](#pawnkilledhook)
+* [pawnRevivedHook](#pawnrevivedhook)
 * [pawnIsFireHook](#pawnisfirehook)
 * [pawnIsAcidHook](#pawnisacidhook)
 * [pawnIsFrozenHook](#pawnisfrozenhook)
@@ -331,10 +332,29 @@ Fired when a pawn's health is reduced to 0.
 Example:
 ```lua
 local hook = function(mission, pawn)
-	LOG(pawn:GetMechName() .. " was killed!)
+	LOG(pawn:GetMechName() .. " was killed!")
 end
 
 modApiExt:addPawnKilledHook(hook)
+```
+
+
+## `pawnRevivedHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `mission` | table | A table holding information about the current mission |
+| `pawn` | userdata | The pawn that was revived |
+
+Fired when a dead pawn's health is restored to a value greater than 0.
+
+Example:
+```lua
+local hook = function(mission, pawn)
+	LOG(pawn:GetMechName() .. " was revived!")
+end
+
+modApiExt:addPawnRevivedHook(hook)
 ```
 
 

@@ -311,6 +311,35 @@ function modApiExtHooks:findAndTrackPods()
 end
 
 --[[
+	Fix for SpaceScript function causing the game to update the tile
+	the damage occurs on. This causes some inconsistency with vanilla
+	game behaviour, most notably self-pushing, self-harming damage
+	instances (eg. Unstable Mech's weapon) setting forests on fire,
+	and the update causing the fire to spread to the mech before it
+	is pushed off the tile.
+--]]
+local function getClosestOffBoardLocation(loc)
+	local minPoint = nil
+	local minDistance = 100
+
+	for y = -1, 8 do
+		for x = -1, 8 do
+			if x == -1 or x == 8 or y == -1 or y == 8 then
+				local point = Point(x, y)
+				local d = loc:Manhattan(point)
+
+				if d < minDistance then
+					minPoint = point
+					minDistance = d
+				end
+			end
+		end
+	end
+
+	return minPoint
+end
+
+--[[
 	Fix for skill hooks override automatically granting 'Ramming Speed'
 	achievement. This achievement is granted if a skill effect's
 	DamageList (.effect field) contains a SpaceDamage instance whose
@@ -331,6 +360,12 @@ function SpaceScript(loc, script)
 	d.bHidePath = true
 
 	return d
+end
+
+local function spaceScriptInternal(pawnLoc, script)
+	local loc = getClosestOffBoardLocation(pawnLoc)
+	LOG("Space script internal: using " .. p2s(loc))
+	return SpaceScript(loc, script)
 end
 
 local function modApiExtGetSkillEffect(self, p1, p2, parentSkill, ...)
@@ -387,7 +422,7 @@ local function modApiExtGetSkillEffect(self, p1, p2, parentSkill, ...)
 		if not skillFx.effect:empty() then
 			local dlist = DamageList()
 
-			dlist:push_back(SpaceScript(
+			dlist:push_back(spaceScriptInternal(
 				p1,
 				"modApiExt_internal.fireSkillStartHooks("
 				.."modApiExt_internal.mission, Pawn,"
@@ -398,7 +433,7 @@ local function modApiExtGetSkillEffect(self, p1, p2, parentSkill, ...)
 				dlist:push_back(e)
 			end
 
-			dlist:push_back(SpaceScript(
+			dlist:push_back(spaceScriptInternal(
 				p1,
 				"modApiExt_internal.fireSkillEndHooks("
 				.."modApiExt_internal.mission, Pawn,"

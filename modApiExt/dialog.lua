@@ -120,7 +120,6 @@ function dialog:triggerRuledDialog(dialogEvent, protoCast, customOdds)
 
 	-- No dialogs registered for this event, so just ignore it.
 	if not modApiExt_internal.ruledDialogs[dialogEvent] then
-		LOG("Had no table defined for " .. dialogEvent .. ". Please tell kartoFlane.")
 		return false
 	end
 

@@ -193,14 +193,14 @@ function pawn:getWeaponData(ptable, field)
 end
 
 local function getUpgradeSuffix(wtable)
-	if
-		wtable.upgrade1 and wtable.upgrade1[1] > 0 and
-		wtable.upgrade2 and wtable.upgrade2[1] > 0
-	then
+	local hasUpgradeA = wtable.upgrade1 and wtable.upgrade1[1] and wtable.upgrade1[1] > 0
+	local hasUpgradeB = wtable.upgrade2 and wtable.upgrade2[1] and wtable.upgrade2[1] > 0
+
+	if hasUpgradeA and hasUpgradeB then
 		return "_AB"
-	elseif wtable.upgrade1 and wtable.upgrade1[1] > 0 then
+	elseif hasUpgradeA then
 		return "_A"
-	elseif wtable.upgrade2 and wtable.upgrade2[1] > 0 then
+	elseif hasUpgradeB then
 		return "_B"
 	end
 

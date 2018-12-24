@@ -318,7 +318,7 @@ end
 	and the update causing the fire to spread to the mech before it
 	is pushed off the tile.
 --]]
-local function getClosestOffBoardLocation(loc)
+function GetClosestOffBoardLocation(loc)
 	local minPoint = nil
 	local minDistance = 100
 
@@ -363,8 +363,7 @@ function SpaceScript(loc, script)
 end
 
 local function spaceScriptInternal(pawnLoc, script)
-	local loc = getClosestOffBoardLocation(pawnLoc)
-	LOG("Space script internal: using " .. p2s(loc))
+	local loc = GetClosestOffBoardLocation(pawnLoc)
 	return SpaceScript(loc, script)
 end
 

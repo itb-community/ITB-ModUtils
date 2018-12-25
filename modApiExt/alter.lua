@@ -339,16 +339,6 @@ function GetClosestOffBoardLocation(loc)
 	return minPoint
 end
 
---[[
-	Fix for skill hooks override automatically granting 'Ramming Speed'
-	achievement. This achievement is granted if a skill effect's
-	DamageList (.effect field) contains a SpaceDamage instance whose
-	.loc field is further away than 5 tiles from the target.
-
-	Since scripts added via AddScript() function have their .loc
-	automatically set to (-1, -1), we need to build the script instances
-	ourselves to properly set their location.
---]]
 function SpaceScript(loc, script)
 	local d = SpaceDamage(loc)
 	d.sScript = script
@@ -360,11 +350,6 @@ function SpaceScript(loc, script)
 	d.bHidePath = true
 
 	return d
-end
-
-local function spaceScriptInternal(pawnLoc, script)
-	local loc = GetClosestOffBoardLocation(pawnLoc)
-	return SpaceScript(loc, script)
 end
 
 local function modApiExtGetSkillEffect(self, p1, p2, parentSkill, ...)
@@ -419,27 +404,37 @@ local function modApiExtGetSkillEffect(self, p1, p2, parentSkill, ...)
 		)
 
 		if not skillFx.effect:empty() then
-			local dlist = DamageList()
+			local fx = SkillEffect()
+			local effects = extract_table(skillFx.effect)
 
-			dlist:push_back(spaceScriptInternal(
-				p1,
+			fx:AddScript(
 				"modApiExt_internal.fireSkillStartHooks("
 				.."modApiExt_internal.mission, Pawn,"
 				.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
-			))
+			)
 
-			for _, e in pairs(extract_table(skillFx.effect)) do
-				dlist:push_back(e)
+			for _, e in pairs(effects) do
+				fx.effect:push_back(e)
 			end
 
-			dlist:push_back(spaceScriptInternal(
-				p1,
+			fx:AddScript(
 				"modApiExt_internal.fireSkillEndHooks("
 				.."modApiExt_internal.mission, Pawn,"
 				.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
-			))
+			)
 
-			skillFx.effect = dlist
+			if
+				self == Prime_Punchmech    or
+				self == Prime_Punchmech_A  or
+				self == Prime_Punchmech_B  or
+				self == Prime_Punchmech_AB
+			then
+				-- Add a dummy damage instance to fix Ramming Speed
+				-- achievement being incorrectly granted
+				fx:AddDamage(SpaceDamage(GetProjectileEnd(p1, p2)))
+			end
+
+			skillFx.effect = fx.effect
 		end
 
 		if not skillFx.q_effect:empty() then

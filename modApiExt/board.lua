@@ -81,8 +81,6 @@ end
 
 function board:restoreTerrain(point, terrainData)
 	Board:SetTerrain(point, TERRAIN_WATER) -- takes care of fire
-	Board:SetSmoke(point, false, false)
-	Board:SetAcid(point, false)
 
 	Board:SetTerrain(point, terrainData.type)
 	Board:SetSmoke(point, terrainData.smoke, false)

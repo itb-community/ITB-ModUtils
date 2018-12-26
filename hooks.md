@@ -19,6 +19,8 @@
 * [pawnIsFrozenHook](#pawnisfrozenhook)
 * [pawnIsGrappledHook](#pawnisgrappledhook)
 * [pawnIsShieldedHook](#pawnisshieldedhook)
+* [vekMoveStartHook](#vekmovestarthook)
+* [vekMoveEndHook](#vekmoveendhook)
 * [buildingDestroyedHook](#buildingdestroyedhook)
 * [skillStartHook](#skillstarthook)
 * [skillEndHook](#skillendhook)
@@ -478,6 +480,48 @@ modApiExt:addPawnIsShieldedHook(hook)
 ```
 
 
+## `vekMoveStartHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `mission` | table | A table holding information about the current mission |
+| `pawn` | userdata | The pawn whose Shielded status has changed |
+
+Fired when a vek is selected during enemy turn and is about to start moving. Fires even if the vek decides to stay on the same tile.
+
+Unfortunately, there's no way to predict where the vek are going to move, therefore this hook does not provide information about the vek's destination tile.
+
+Example:
+```lua
+local hook = function(mission, pawn)
+	LOG(pawn:GetMechName() .. " is moving, starting position: " .. pawn:GetSpace():GetString())
+end
+
+modApiExt:addVekMoveStartHook(hook)
+```
+
+
+## `vekMoveEndHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `mission` | table | A table holding information about the current mission |
+| `pawn` | userdata | The pawn whose Shielded status has changed |
+| `startLoc` | Point | The tile the vek started moving from |
+| `endLoc` | Point | The tile the vek stopped moving on |
+
+Fired when a vek finishes moving and is about to queue up its attack. Fired even if the vek decides to stay on the same tile.
+
+Example:
+```lua
+local hook = function(mission, pawn, startLoc, endLoc)
+	LOG(pawn:GetMechName() .. " has finished moving from " .. startLoc:GetString() .. " to " .. endLoc:GetString())
+end
+
+modApiExt:addVekMoveEndHook(hook)
+```
+
+
 ## `buildingDestroyedHook`
 
 | Argument name | Type | Description |
@@ -490,7 +534,7 @@ Fired when a building is destroyed, and its tile is no longer blocked.
 Example:
 ```lua
 local hook = function(mission, buildingData)
-	LOG("Building at " .. buildingData.loc:GetString() .. " was destroyed!)
+	LOG("Building at " .. buildingData.loc:GetString() .. " was destroyed!")
 end
 
 modApiExt:addBuildingDestroyedHook(hook)

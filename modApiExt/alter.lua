@@ -172,6 +172,37 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 
 					pd.selected = false
 				end
+
+				if
+					Pawn and Pawn:GetId() == id and
+					Pawn:IsSelected() and not pd.selected and
+					Pawn:IsActive() and
+					Pawn:GetTeam() == TEAM_ENEMY and
+					Game:GetTeamTurn() == TEAM_ENEMY
+				then
+					-- Vek movement detection
+					if modApiExt_internal.scheduledMovePawns[id] == nil then
+						modApiExt_internal.scheduledMovePawns[id] = Pawn:GetSpace()
+
+						modApiExt_internal.fireVekMoveStartHooks(modApiExt_internal.mission, pawn)
+
+						modApi:conditionalHook(
+							function()
+								return modApiExt_internal.scheduledMovePawns[id] and
+								      (not Board:IsBusy() or not Pawn or Pawn:GetId() ~= id or not pd.selected)
+									
+							end,
+							function()
+								modApiExt_internal.fireVekMoveEndHooks(
+									modApiExt_internal.mission, pawn,
+									modApiExt_internal.scheduledMovePawns[id],
+									pawn:GetSpace()
+								)
+								modApiExt_internal.scheduledMovePawns[id] = nil
+							end
+						)
+					end
+				end
 			else
 				-- pawn was nil or invalid, remove this entry
 				GAME.trackedPawns[id] = nil

@@ -48,6 +48,18 @@ function hooks:addPawnMoveEndHook(fn)
 	table.insert(self.pawnMoveEndHooks,fn)
 end
 
+hooks.vekMoveStartHooks = {}
+function hooks:addVekMoveStartHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.vekMoveStartHooks,fn)
+end
+
+hooks.vekMoveEndHooks = {}
+function hooks:addVekMoveEndHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.vekMoveEndHooks,fn)
+end
+
 hooks.pawnPositionChangedHooks = {}
 function hooks:addPawnPositionChangedHook(fn)
 	assert(type(fn) == "function")

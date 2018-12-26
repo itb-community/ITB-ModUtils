@@ -81,6 +81,8 @@ function internal:initBroadcastHooks(tbl)
 
 	tbl.fireMoveStartHooks =         self:buildBroadcastFunc("pawnMoveStartHooks")
 	tbl.fireMoveEndHooks =           self:buildBroadcastFunc("pawnMoveEndHooks")
+	tbl.fireVekMoveStartHooks =      self:buildBroadcastFunc("vekMoveStartHooks")
+	tbl.fireVekMoveEndHooks =        self:buildBroadcastFunc("vekMoveEndHooks")
 
 	tbl.fireSkillStartHooks =        self:buildBroadcastFunc("skillStartHooks")
 	tbl.fireSkillEndHooks =          self:buildBroadcastFunc("skillEndHooks")
@@ -287,6 +289,7 @@ function internal:init(extObj)
 		-- table of pawn userdata, kept only at runtime to help
 		-- with pawn hooks
 		m.pawns = nil
+		m.scheduledMovePawns = {}
 
 		m.elapsedTime = nil
 

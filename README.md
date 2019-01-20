@@ -59,3 +59,17 @@ end
 Now in your mod, you can use the `myname_modApiExt` variable to access any ModUtils functions you may need.
 
 If you ever need to check whether the version you're running is the most recent one available to the player, or want to get the most recent version, you can use [`myname_modApiExt:isMostRecent()`](https://github.com/kartoFlane/ITB-ModUtils/blob/master/docs.md#modapiextismostrecent) and [`myname_modApiExt:getMostRecent()`](https://github.com/kartoFlane/ITB-ModUtils/blob/master/docs.md#modapiextgetmostrecent) respectively.
+
+
+## Using mid-release versions
+
+If you wish to use an in-development, not-yet-released version of modApiExt, you can clone this repository and use the contents of the `modApiExt` directory as-is in your mod.
+**However**, if you do that, you have to change the version string in modApiExt's `init.lua` to indicate that it is a mid-release version. This ensures that things keep working correctly, and that the most recent version of the library will be used.
+
+Basically, take the number of commits as seen on the repository's main page:
+
+<img src="repository-resources/commit_count.jpg"/>
+
+And append it to modApiExt's version after a dot (`.`), like so:
+
+<img src="repository-resources/midrelease_versioning.jpg"/>

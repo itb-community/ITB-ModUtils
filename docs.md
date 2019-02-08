@@ -313,7 +313,9 @@ Example:
 local function load(self, options, version)
 	your_modApiExt:load(self, options, version)
 	your_modApiExt:addMostRecentResolvedHook(function()
-		your_modApiExt = your_modApiExt:forkMostRecent(self, options, version)
+		if not your_modApiExt:isMostRecent() then
+			your_modApiExt = your_modApiExt:forkMostRecent(self, options, version)
+		end
 	end)
 
 	-- ...

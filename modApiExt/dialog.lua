@@ -170,7 +170,7 @@ function dialog:triggerRuledDialog(dialogEvent, protoCast, customOdds)
 		if
 			execute            and
 			eventInfo.Unique   and
-			list_contains(GAME.uniqueRuledDialogs, hash_o(eventInfo))
+			list_contains(GAME.uniqueRuledDialogs, approximateHash(eventInfo))
 		then
 			execute = false
 		end
@@ -210,7 +210,7 @@ function dialog:triggerRuledDialog(dialogEvent, protoCast, customOdds)
 		end
 
 		if eventInfo.Unique then
-			table.insert(GAME.uniqueRuledDialogs, hash_o(eventInfo))
+			table.insert(GAME.uniqueRuledDialogs, approximateHash(eventInfo))
 		end
 
 		-- Pick a random dialog set inside the ruled dialog

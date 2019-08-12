@@ -126,9 +126,6 @@ function screenPointToTile(screenPoint)
 	return nil
 end
 
----------------------------------------------------------------
--- Hashing functions
-
 function is_prime(n)
 	if (n > 2 and n % 2 == 0) or n == 1 then
 		return false
@@ -156,58 +153,35 @@ function next_prime(n)
 	return n
 end
 
-local function hash_table(tbl)
-	local hash = 79
-	local salt = 43
+local function stringify(o)
+	local t = type(o)
 
-	for k, v in pairs(tbl) do
-		hash = salt * hash + hash_o(k)
-		if v ~= tbl.__index then
-			hash = salt * hash + hash_o(v)
-		else
-			hash = salt * hash
-		end
+	-- We can't use the hash value that functions and userdata objects have
+	-- assigned by lua, since it's the memory address of that particular object,
+	-- not a real hash, and thus it differs even between objets that hold
+	-- the same data.
+	
+	if t == "table" then
+		return save_table(o)
+	elseif t == "userdaata" then
+		return "u8137"
+	elseif t == "function" then
+		return "f7993"
+	elseif t == "thread" then
+		return "t7681"
+	elseif t == "number" or t == "boolean" or t == "nil" then
+		return tostring(o)
 	end
-
-	return hash
+	
+	return o -- string
 end
 
-local function hash_string(str)
-	local hash = 127
-	local salt = 29
-
-	local l = string.len(str)
-	for i = 1, l do
-		hash = salt * hash + string.byte(str, i)
-	end
-
-	return hash
-end
-
-function hash_o(o)
-	local hash = 89
-	local salt = 31
-	local nullCode = 13
-
-	if type(o) == "table" then
-		hash = salt * hash + hash_table(o)
-	elseif type(o) == "userdata" then
-		hash = salt * hash + 8137
-	elseif type(o) == "function" then
-		hash = salt * hash + 7993
-	elseif type(o) == "thread" then
-		hash = salt * hash + 7681
-	elseif type(o) == "number" then
-		hash = salt * hash + o
-	elseif type(o) == "string" then
-		hash = salt * hash + hash_string(o)
-	elseif type(o) == "boolean" then
-		hash = salt * hash + (o and 23 or 17)
-	elseif type(o) == "nil" then
-		hash = salt * hash + nullCode
-	end
-
-	return hash
+function approximateHash(o)
+	-- A real hashing function like MD5 is far too slow in pure lua,
+	-- so we use an approximation: turn the object to string and remove newlines.
+	-- This is good enough for our needs, and fast enough to produce
+	-- noticeable hitches during gameplay.
+	return string.gsub(stringify(o), "\n", "")
 end
 
 ---------------------------------------------------------------

@@ -181,7 +181,11 @@ function approximateHash(o)
 	-- so we use an approximation: turn the object to string and remove newlines.
 	-- This is good enough for our needs, and fast enough to produce
 	-- noticeable hitches during gameplay.
-	return string.gsub(stringify(o), "\n", "")
+	-- Also need to escape quotation marks, otherwise we break the string
+	local result, _ = stringify(o)
+		:gsub("\n", "")
+		:gsub("\"", "\\\"")
+	return result
 end
 
 ---------------------------------------------------------------

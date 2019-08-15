@@ -179,12 +179,13 @@ end
 function approximateHash(o)
 	-- A real hashing function like MD5 is far too slow in pure lua,
 	-- so we use an approximation: turn the object to string and remove newlines.
-	-- This is good enough for our needs, and fast enough to produce
+	-- This is good enough for our needs, and fast enough not to produce
 	-- noticeable hitches during gameplay.
-	-- Also need to escape quotation marks, otherwise we break the string
+	-- Also need to convert double quotation marks to single, otherwise it's
+	-- possible for hashed object to break out of the string
 	local result, _ = stringify(o)
 		:gsub("\n", "")
-		:gsub("\"", "\\\"")
+		:gsub("\"", "'")
 	return result
 end
 

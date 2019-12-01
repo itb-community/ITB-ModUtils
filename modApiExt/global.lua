@@ -49,7 +49,7 @@ function mouseTile()
 	return screenPointToTile({ x = sdl.mouse.x(), y = sdl.mouse.y() })
 end
 
-function modApiExt_internal.getScreenRefs(screen, scale)
+function getScreenRefs(screen, scale)
 	scale = scale or GetBoardScale()
 	local uiScale = GetUiScale()
 
@@ -69,7 +69,20 @@ function modApiExt_internal.getScreenRefs(screen, scale)
 	local lineX = function(x) return x * th/tw end
 	local lineY = function(x) return -lineX(x) end
 
-	return tile00, lineX, lineY
+	return tile00, lineX, lineY, tw, th
+end
+
+local function isPointAboveLine(point, lineFn)
+	return point.y >= lineFn(point.x)
+end
+
+local function tileContains(tilex, tiley, tilew, tileh, point)
+	local np = {
+		x = point.x - tilew * (tilex - tiley),
+		y = point.y - tileh * (tilex + tiley)
+	}
+	return isPointAboveLine(np, lineX)
+		and isPointAboveLine(np, lineY)
 end
 
 --[[
@@ -82,29 +95,13 @@ function screenPointToTile(screenPoint)
 	local scale = GetBoardScale()
 	local uiScale = GetUiScale()
 
-	local tw = 28 * uiScale
-	local th = 21 * uiScale
-
-	local tile00, lineX, lineY = modApiExt_internal.getScreenRefs(screen, scale)
+	local tile00, lineX, lineY, tw, th = getScreenRefs(screen, scale)
 
 	-- Change screenPoint to be relative to the (0, 0) tile
 	-- and move to unscaled space.
 	local relPoint = {}
 	relPoint.x = (screenPoint.x - tile00.x) / scale
 	relPoint.y = (screenPoint.y - tile00.y) / scale
-
-	local isPointAboveLine = function(point, lineFn)
-		return point.y >= lineFn(point.x)
-	end
-
-	local tileContains = function(tilex, tiley, point)
-		local np = {
-			x = point.x - tw * (tilex - tiley),
-			y = point.y - th * (tilex + tiley)
-		}
-		return isPointAboveLine(np, lineX)
-			and isPointAboveLine(np, lineY)
-	end
 
 	-- Start at the end of the board and move backwards.
 	-- That way we only need to check 2 lines instead of 4 on each tile.
@@ -113,11 +110,12 @@ function screenPointToTile(screenPoint)
 	local bsize = Board:GetSize()
 	for tileY = bsize.y, 0, -1 do
 		for tileX = bsize.x, 0, -1 do
-			if tileContains(tileX, tileY, relPoint) then
+			if tileContains(tileX, tileY, tw, th, relPoint) then
 				if tileY == bsize.y or tileX == bsize.x then
 					-- outside of the board
 					return nil
 				end
+				
 				return Point(tileX, tileY)
 			end
 		end

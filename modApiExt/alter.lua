@@ -292,13 +292,19 @@ function modApiExtHooks:updateTiles()
 	if Board then
 		if not GAME.trackedPods then GAME.trackedPods = {} end
 
-		local mtile = mouseTile()
-		if modApiExt_internal.currentTile ~= mtile then
+		local mTile, mTileDir = mouseTileAndEdge()
+
+		if modApiExt_internal.currentTileDirection ~= mTileDir then
+			modApiExt_internal.fireTileDirectionChangedHooks(mission, mTile, mTileDir)
+			modApiExt_internal.currentTileDirection = mTileDir
+		end
+
+		if modApiExt_internal.currentTile ~= mTile then
 			if modApiExt_internal.currentTile then -- could be nil
 				modApiExt_internal.fireTileUnhighlightedHooks(mission, modApiExt_internal.currentTile)
 			end
 
-			modApiExt_internal.currentTile = mtile
+			modApiExt_internal.currentTile = mTile
 
 			if modApiExt_internal.currentTile then -- could be nil
 				modApiExt_internal.fireTileHighlightedHooks(mission, modApiExt_internal.currentTile)

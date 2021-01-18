@@ -411,20 +411,6 @@ local function modApiExtGetSkillEffect(self, p1, p2, parentSkill, ...)
 	-- want it to fire hooks (since the primary call already fired them).
 	-- For vanilla skills, the additional argument will be ignored.
 	if isPrimaryCall then
-		if not Board.gameBoard then
-			if Board:GetSize() == Point(6, 6) then
-				-- Hacky AF solution to detect when tip image is visible
-				local d = Board:GetPawn(Board:AddPawn("kf_ModApiExt_Dummy", Point(0, 0)))
-				d:SetCustomAnim("kf_ModApiExt_TipMarker")
-			else
-				-- It seems that sometimes Board.gameBoard is not set,
-				-- but I can't reproduce the bug.
-				-- For now use a board size check and log the message to try
-				-- to figure it out.
-				--LOG("Was in game board, but Board.gameBoard was not set! " .. tostring(modApiExt_internal.version))
-			end
-		end
-
 		if not Pawn then
 			-- PAWN is missing, this happens when loading into a game
 			-- in progress in combat. Attempt to fix this by getting the

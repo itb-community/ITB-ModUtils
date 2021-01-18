@@ -38,4 +38,11 @@ function compat:registerMoveHooks(modApiExt)
 	end)
 end
 
+function compat:registerTipImageHooks(modApiExt)
+	-- TODO: register mod loader hooks for tip images and use them to fire
+	-- modApiExt's hooks:
+	--   modApiExt_internal.fireTipImageHiddenHooks()
+	--   modApiExt_internal.fireTipImageShownHooks()
+end
+
 return compat

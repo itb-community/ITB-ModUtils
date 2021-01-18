@@ -1,24 +1,3 @@
-kf_ModApiExt_Dummy = {
-	Name = "",
-	Image = nil,
-	Health = 100,
-	MoveSpeed = 0,
-	Pushable = false,
-	Corpse = false,
-	IgnoreFire = true,
-	IgnoreSmoke = true,
-	IgnoreFlip = true,
-	Neutral = true,
-	Massive = true,
-	Corporate = false,
-	IsPortrait = false,
-	SpaceColor = false,
-	DefaultTeam = TEAM_PLAYER,
-}
-AddPawn("kf_ModApiExt_Dummy")
-
---------------------------------------------------------------------------
-
 local pawn = {}
 
 --[[

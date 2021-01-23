@@ -192,22 +192,6 @@ function modApiExt:load(mod, options, version)
 	end)
 
 	self.loaded = true
-
-	--[[
-	self:addSkillBuildHook(function(m, p, w, p1, p2, fx)
-		LOG("---", w)
-		local metadata = fx:GetMetadata()
-		if #metadata == 0 then
-			metadata = fx:GetQueuedMetadata()
-		end
-
-		for i,v in ipairs(metadata) do
-			if v then
-				LOG(i, save_table(v))
-			end
-		end
-	end)
-	--]]
 end
 
 modApiExt.modulesDir = GetParentPath(...)

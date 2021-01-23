@@ -95,7 +95,7 @@ function modApiExt:init(modulesDir)
 	self.version = require(self.modulesDir.."init").version
 	self.isProxy = false
 
-	local minv = "2.3.0"
+	local minv = "2.6.0"
 	if not modApi:isVersion(minv) then
 		error("modApiExt could not be loaded because version of the mod loader is out of date. "
 			..string.format("Installed version: %s, required: %s", modApi.version, minv))
@@ -179,7 +179,7 @@ function modApiExt:load(mod, options, version)
 				dofile(self.modulesDir.."global.lua")
 				self.hooks:overrideAllSkills()
 
-				self.compat:registerMoveHooks(self)
+				self.compat:loadMostRecent(self)
 			end
 
 			modApi:addVoiceEventHook(self.hooks.voiceEvent)
@@ -192,6 +192,22 @@ function modApiExt:load(mod, options, version)
 	end)
 
 	self.loaded = true
+
+	--[[
+	self:addSkillBuildHook(function(m, p, w, p1, p2, fx)
+		LOG("---", w)
+		local metadata = fx:GetMetadata()
+		if #metadata == 0 then
+			metadata = fx:GetQueuedMetadata()
+		end
+
+		for i,v in ipairs(metadata) do
+			if v then
+				LOG(i, save_table(v))
+			end
+		end
+	end)
+	--]]
 end
 
 modApiExt.modulesDir = GetParentPath(...)

@@ -23,6 +23,11 @@ end
 function compat:load(modApiExt, mod, options, version)
 end
 
+function compat:loadMostRecent(modApiExt)
+	self.compat:registerMoveHooks(modApiExt)
+	self:registerTipImageHooks()
+end
+
 function compat:registerMoveHooks(modApiExt)
 	modApiExt:addSkillStartHook(function(mission, pawn, skill, p1, p2)
 		if skill == "Move" then
@@ -38,11 +43,13 @@ function compat:registerMoveHooks(modApiExt)
 	end)
 end
 
-function compat:registerTipImageHooks(modApiExt)
-	-- TODO: register mod loader hooks for tip images and use them to fire
-	-- modApiExt's hooks:
-	--   modApiExt_internal.fireTipImageHiddenHooks()
-	--   modApiExt_internal.fireTipImageShownHooks()
+function compat:registerTipImageHooks()
+	modApi:addTipImageShownHook(function(skill)
+		modApiExt_internal.fireTipImageShownHooks()
+	end)
+	modApi:addTipImageHiddenHook(function(skill)
+		modApiExt_internal.fireTipImageHiddenHooks()
+	end)
 end
 
 return compat

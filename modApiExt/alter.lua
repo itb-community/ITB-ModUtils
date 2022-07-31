@@ -1,4 +1,5 @@
 local modApiExtHooks = {}
+local originalSkillsEnv = setmetatable({}, { __index = _G })
 
 function modApiExtHooks:setupTrackedData(pd, pawn)
 	-- check each field separately, so that if there's a newer version
@@ -389,127 +390,118 @@ function SpaceScript(loc, script)
 	return d
 end
 
-local function modApiExtGetSkillEffect(self, p1, p2, parentSkill, ...)
+local function modApiExtGetSkillEffect(self, p1, p2, ...)
 	-- Dereference to weapon object
 	if type(self) == "string" then
 		self = _G[self]
 	end
 
-	local isValidSkillTable = parentSkill and type(parentSkill) == "table" and
-	                          type(parentSkill.GetSkillEffect) == "function"
-	local isPrimaryCall = not isValidSkillTable
+	local prevEnv = getfenv(1)
+	local fn = originalSkillsEnv[self.__Id].GetSkillEffect
+	setfenv(1, originalSkillsEnv)
+	local skillFx = fn(self, p1, p2, ...)
+	setfenv(1, prevEnv)
 
-	local skillFx = nil
-	if isPrimaryCall then
-		skillFx = modApiExt_internal.oldSkills[self.__Id](self, p1, p2, getmetatable(self), ...)
-	else
-		-- Defer to parent skill's GetSkillEffect.
-		skillFx = modApiExt_internal.oldSkills[parentSkill.__Id](self, p1, p2, getmetatable(parentSkill), ...)
+	if not Pawn then
+		-- PAWN is missing, this happens when loading into a game
+		-- in progress in combat. Attempt to fix this by getting the
+		-- pawn at p1.
+		-- This seems to be used only for constructing weapon previews
+		-- for enemies, so even if this is wrong (it shouldn't), it
+		-- should be pretty harmless.
+		Pawn = Board:GetPawn(p1)
 	end
 
-	-- If it's a secondary call to the GetSkillEffect, then we don't
-	-- want it to fire hooks (since the primary call already fired them).
-	-- For vanilla skills, the additional argument will be ignored.
-	if isPrimaryCall then
-		if not Pawn then
-			-- PAWN is missing, this happens when loading into a game
-			-- in progress in combat. Attempt to fix this by getting the
-			-- pawn at p1.
-			-- This seems to be used only for constructing weapon previews
-			-- for enemies, so even if this is wrong (it shouldn't), it
-			-- should be pretty harmless.
-			Pawn = Board:GetPawn(p1)
-		end
+	modApiExt_internal.fireSkillBuildHooks(
+		modApiExt_internal.mission,
+		Pawn, self.__Id, p1, p2, skillFx
+	)
 
-		modApiExt_internal.fireSkillBuildHooks(
-			modApiExt_internal.mission,
-			Pawn, self.__Id, p1, p2, skillFx
+	if not skillFx.effect:empty() then
+		local fx = SkillEffect()
+		local effects = extract_table(skillFx.effect)
+
+		fx:AddScript(
+			"modApiExt_internal.fireSkillStartHooks("
+			.."modApiExt_internal.mission, Pawn,"
+			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
 		)
 
-		if not skillFx.effect:empty() then
-			local fx = SkillEffect()
-			local effects = extract_table(skillFx.effect)
-
-			fx:AddScript(
-				"modApiExt_internal.fireSkillStartHooks("
-				.."modApiExt_internal.mission, Pawn,"
-				.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
-			)
-
-			for _, e in pairs(effects) do
-				fx.effect:push_back(e)
-			end
-
-			fx:AddScript(
-				"modApiExt_internal.fireSkillEndHooks("
-				.."modApiExt_internal.mission, Pawn,"
-				.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
-			)
-
-			if
-				self == Prime_Punchmech    or
-				self == Prime_Punchmech_A  or
-				self == Prime_Punchmech_B  or
-				self == Prime_Punchmech_AB
-			then
-				-- Add a dummy damage instance to fix Ramming Speed
-				-- achievement being incorrectly granted
-				fx:AddDamage(SpaceDamage(GetProjectileEnd(p1, p2)))
-			end
-
-			skillFx.effect = fx.effect
+		for _, e in pairs(effects) do
+			fx.effect:push_back(e)
 		end
 
-		if not skillFx.q_effect:empty() then
-			local fx = SkillEffect()
-			local effects = extract_table(skillFx.q_effect)
+		fx:AddScript(
+			"modApiExt_internal.fireSkillEndHooks("
+			.."modApiExt_internal.mission, Pawn,"
+			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
+		)
 
-			fx:AddScript(
-				"modApiExt_internal.fireQueuedSkillStartHooks("
-				.."modApiExt_internal.mission, Pawn,"
-				.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
-			)
-
-			for _, e in pairs(effects) do
-				fx.effect:push_back(e)
-			end
-
-			fx:AddScript(
-				"modApiExt_internal.fireQueuedSkillEndHooks("
-				.."modApiExt_internal.mission, Pawn,"
-				.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
-			)
-
-			skillFx.q_effect = fx.effect
+		if
+			self == Prime_Punchmech    or
+			self == Prime_Punchmech_A  or
+			self == Prime_Punchmech_B  or
+			self == Prime_Punchmech_AB
+		then
+			-- Add a dummy damage instance to fix Ramming Speed
+			-- achievement being incorrectly granted
+			fx:AddDamage(SpaceDamage(GetProjectileEnd(p1, p2)))
 		end
+
+		skillFx.effect = fx.effect
+	end
+
+	if not skillFx.q_effect:empty() then
+		local fx = SkillEffect()
+		local effects = extract_table(skillFx.q_effect)
+
+		fx:AddScript(
+			"modApiExt_internal.fireQueuedSkillStartHooks("
+			.."modApiExt_internal.mission, Pawn,"
+			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
+		)
+
+		for _, e in pairs(effects) do
+			fx.effect:push_back(e)
+		end
+
+		fx:AddScript(
+			"modApiExt_internal.fireQueuedSkillEndHooks("
+			.."modApiExt_internal.mission, Pawn,"
+			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
+		)
+
+		skillFx.q_effect = fx.effect
 	end
 
 	return skillFx
-end
-
-function modApiExtHooks:overrideSkill(id, skill)
-	assert(skill.GetSkillEffect)
-	assert(_G[id] == skill) -- no fun allowed
-
-	if modApiExt_internal.oldSkills[id] then
-		error(id .. " is already overridden!")
-	end
-
-	modApiExt_internal.oldSkills[id] = skill.GetSkillEffect
-
-	-- Make it possible to identify skills with no ambiguity
-	skill.__Id = id
-	skill.GetSkillEffect = modApiExtGetSkillEffect
 end
 
 function modApiExtHooks:overrideAllSkills()
 	if not modApiExt_internal.oldSkills then
 		modApiExt_internal.oldSkills = {}
 
+		-- do this in two passes, so that for weapon upgrades we don't
+		-- accidentally set their original skill to our override, if we're
+		-- unlucky with iteration order.
 		for k, v in pairs(_G) do
 			if type(v) == "table" and v.GetSkillEffect then
-				self:overrideSkill(k, v)
+				v.__Id = k
+				originalSkillsEnv[k] = setmetatable(
+					{ GetSkillEffect = v.GetSkillEffect },
+					{ __index = skill }
+				)
 			end
+		end
+		for k, v in pairs(_G) do
+			if type(v) == "table" and v.GetSkillEffect then
+				v.GetSkillEffect = modApiExtGetSkillEffect
+			end
+		end
+
+		-- ensure that some non-standard skills that set globals can still work
+		originalSkillsEnv.__newindex = function(table, key, value)
+			_G[key] = value
 		end
 	end
 end

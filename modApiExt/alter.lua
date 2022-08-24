@@ -489,7 +489,7 @@ function modApiExtHooks:overrideAllSkills()
 				v.__Id = k
 				originalSkillsEnv[k] = setmetatable(
 					{ GetSkillEffect = v.GetSkillEffect },
-					{ __index = skill }
+					{ __index = v }
 				)
 			end
 		end

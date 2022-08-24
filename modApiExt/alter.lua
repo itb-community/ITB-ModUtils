@@ -502,6 +502,7 @@ function modApiExtHooks:overrideAllSkills()
 				v.__Id = k
 				v.__GetSkillEffect = rawget(v, "GetSkillEffect")
 				skillIndex[k] = setmetatable(
+					{},
 					{ __index = skillIndexingFn }
 				)
 			end

@@ -1,5 +1,5 @@
 local modApiExtHooks = {}
-local originalSkillsEnv = setmetatable({}, { __index = _G })
+local skillIndex = setmetatable({}, { __index = _G })
 
 function modApiExtHooks:setupTrackedData(pd, pawn)
 	-- check each field separately, so that if there's a newer version
@@ -397,8 +397,8 @@ local function modApiExtGetSkillEffect(self, p1, p2, ...)
 	end
 
 	local prevEnv = getfenv(1)
-	local fn = originalSkillsEnv[self.__Id].GetSkillEffect
-	setfenv(1, originalSkillsEnv)
+	local fn = skillIndex[self.__Id].GetSkillEffect
+	setfenv(1, skillIndex)
 	local skillFx = fn(self, p1, p2, ...)
 	setfenv(1, prevEnv)
 
@@ -477,6 +477,10 @@ local function modApiExtGetSkillEffect(self, p1, p2, ...)
 	return skillFx
 end
 
+local function isSkill(v)
+	return type(v) == "table" and v.GetSkillEffect ~= nil
+end
+
 function modApiExtHooks:overrideAllSkills()
 	if not modApiExt_internal.oldSkills then
 		modApiExt_internal.oldSkills = {}
@@ -485,22 +489,23 @@ function modApiExtHooks:overrideAllSkills()
 		-- accidentally set their original skill to our override, if we're
 		-- unlucky with iteration order.
 		for k, v in pairs(_G) do
-			if type(v) == "table" and v.GetSkillEffect then
+			if isSkill(v) then
 				v.__Id = k
-				originalSkillsEnv[k] = setmetatable(
-					{ GetSkillEffect = v.GetSkillEffect },
+				v.__GetSkillEffect = rawget(v, "GetSkillEffect")
+				skillIndex[k] = setmetatable(
+					{ GetSkillEffect = v.__GetSkillEffect },
 					{ __index = v }
 				)
 			end
 		end
 		for k, v in pairs(_G) do
-			if type(v) == "table" and v.GetSkillEffect then
+			if isSkill(v) then
 				v.GetSkillEffect = modApiExtGetSkillEffect
 			end
 		end
 
 		-- ensure that some non-standard skills that set globals can still work
-		originalSkillsEnv.__newindex = function(table, key, value)
+		skillIndex.__newindex = function(table, key, value)
 			_G[key] = value
 		end
 	end

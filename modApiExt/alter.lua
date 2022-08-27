@@ -481,13 +481,12 @@ local function isSkill(v)
 	return type(v) == "table" and v.GetSkillEffect ~= nil
 end
 
-local function skillIndexingFn(self, key)
-	if key == "GetSkillEffect" and self.__Id then
-		local t = skillIndex[self.__Id] or self
-		return t.__GetSkillEffect
+local function skillIndexingFn(tbl, key)
+	local skill = _G[tbl.id]
+	if key == "GetSkillEffect" then
+		return skill.__GetSkillEffect
 	end
-
-	return self[key]
+	return skill[key] 
 end
 
 function modApiExtHooks:overrideAllSkills()
@@ -502,7 +501,7 @@ function modApiExtHooks:overrideAllSkills()
 				v.__Id = k
 				v.__GetSkillEffect = rawget(v, "GetSkillEffect")
 				skillIndex[k] = setmetatable(
-					{},
+					{ id = k },
 					{ __index = skillIndexingFn }
 				)
 			end

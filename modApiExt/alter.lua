@@ -398,9 +398,9 @@ local function modApiExtGetSkillEffect(self, p1, p2, ...)
 
 	local prevEnv = getfenv(1)
 	local fn = skillIndex[self.__Id].GetSkillEffect
-	setfenv(1, skillIndex)
+	setfenv(fn, skillIndex)
 	local skillFx = fn(self, p1, p2, ...)
-	setfenv(1, prevEnv)
+	setfenv(fn, prevEnv)
 
 	if not Pawn then
 		-- PAWN is missing, this happens when loading into a game

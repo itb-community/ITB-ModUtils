@@ -480,15 +480,15 @@ local function isSkill(v)
 end
 
 local function isSkillProxy(v)
-	if type(v) == "table" and v.id ~= nil then
+	if type(v) == "table" and v.__skill ~= nil then
 		local mt = getmetatable(v)
-		return mt ~= nil and mt.__index = skillProxyIndexFn
+		return mt ~= nil and mt.__index == skillProxyIndexFn
 	end
 	return false
 end
 
 local function skillProxyIndexFn(tbl, key)
-	local realSkill = modApiExt_internal.oldSkills[tbl.id]
+	local realSkill = tbl.__skill
 	if key == "GetSkillEffect" then
 		if modApiExt_internal.nestedCall_GetSkillEffect then
 			return realSkill.GetSkillEffect
@@ -500,8 +500,7 @@ local function skillProxyIndexFn(tbl, key)
 end
 
 local function skillProxyNewIndexFn(tbl, key, value)
-	local realSkill = modApiExt_internal.oldSkills[tbl.id]
-	realSkill[key] = value
+	tbl.__skill[key] = value
 end
 
 function modApiExt_internal.createSkillProxy(skillTable)
@@ -509,7 +508,9 @@ function modApiExt_internal.createSkillProxy(skillTable)
 	modApiExt_internal.oldSkills[skillTable.__Id] = skillTable
 
 	local skillProxy = setmetatable(
-		{ id = skillTable.__Id },
+		{
+			__skill = skillTable,
+		},
 		{
 			__index = skillProxyIndexFn,
 			__newindex = skillProxyNewIndexFn

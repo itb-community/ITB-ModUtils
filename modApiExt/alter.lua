@@ -395,10 +395,10 @@ local function modApiExtGetSkillEffect(self, p1, p2, ...)
 		self = _G[self]
 	end
 
-	modApiExt_internal.nestedSkillEffectCall = true
+	modApiExt_internal.nestedCall_GetSkillEffect = true
 	local fn = _G[self.__Id].GetSkillEffect
 	local skillFx = fn(self, p1, p2, ...)
-	modApiExt_internal.nestedSkillEffectCall = false
+	modApiExt_internal.nestedCall_GetSkillEffect = false
 
 	if not Pawn then
 		-- PAWN is missing, this happens when loading into a game
@@ -490,7 +490,7 @@ end
 local function skillProxyIndexFn(tbl, key)
 	local realSkill = modApiExt_internal.oldSkills[tbl.id]
 	if key == "GetSkillEffect" then
-		if modApiExt_internal.nestedSkillEffectCall then
+		if modApiExt_internal.nestedCall_GetSkillEffect then
 			return realSkill.GetSkillEffect
 		else
 			return modApiExtGetSkillEffect
@@ -523,7 +523,7 @@ function modApiExtHooks:overrideAllSkills()
 	if not modApiExt_internal.oldSkills then
 		modApiExt_internal.oldSkills = {}
 		modApiExt_internal.skillIndex = setmetatable({}, { __index = _G })
-		modApiExt_internal.nestedSkillEffectCall = false
+		modApiExt_internal.nestedCall_GetSkillEffect = false
 
 		-- do this in two passes, so that for weapon upgrades we don't
 		-- accidentally set their original skill to our override, if we're

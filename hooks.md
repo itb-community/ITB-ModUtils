@@ -548,8 +548,8 @@ modApiExt:addBuildingDestroyedHook(hook)
 | `mission` | table | A table holding information about the current mission |
 | `pawn` | userdata | The pawn using the skill |
 | `weaponId` | string | Id of the skill being used |
-| `p1` | Point | `p1` argument to `GetWeaponSkill`; position of the pawn using the skill |
-| `p2` | Point | `p2` argument to `GetWeaponSkill`; the targeted point on which to use the skill |
+| `p1` | Point | `p1` argument to `GetSkillEffect`; position of the pawn using the skill |
+| `p2` | Point | `p2` argument to `GetSkillEffect`; the targeted point on which to use the skill |
 
 Fired when the game begins executing a weapon's `SkillEffect`, ie. before any of the skill's effects are executed (charge, push, damage, whatever).
 
@@ -570,8 +570,8 @@ modApiExt:addSkillStartHook(hook)
 | `mission` | table | A table holding information about the current mission |
 | `pawn` | userdata | The pawn using the skill |
 | `weaponId` | string | Id of the skill being used |
-| `p1` | Point | `p1` argument to `GetWeaponSkill`; position of the pawn using the skill |
-| `p2` | Point | `p2` argument to `GetWeaponSkill`; the targeted point on which to use the skill |
+| `p1` | Point | `p1` argument to `GetSkillEffect`; position of the pawn using the skill |
+| `p2` | Point | `p2` argument to `GetSkillEffect`; the targeted point on which to use the skill |
 
 Fired when the game finishes executing a weapon's `SkillEffect`, ie. after all of the skill's effects are executed (charge, push, damage, whatever).
 
@@ -592,8 +592,8 @@ modApiExt:addSkillEndHook(hook)
 | `mission` | table | A table holding information about the current mission |
 | `pawn` | userdata | The pawn using the skill |
 | `weaponId` | string | Id of the skill being used |
-| `p1` | Point | `p1` argument to `GetWeaponSkill`; position of the pawn using the skill |
-| `p2` | Point | `p2` argument to `GetWeaponSkill`; the targeted point on which to use the skill |
+| `p1` | Point | `p1` argument to `GetSkillEffect`; position of the pawn using the skill |
+| `p2` | Point | `p2` argument to `GetSkillEffect`; the targeted point on which to use the skill |
 
 Same as `skillStartHook`, but for the queued part of `SkillEffect`.
 
@@ -614,8 +614,8 @@ modApiExt:addQueuedSkillStartHook(hook)
 | `mission` | table | A table holding information about the current mission |
 | `pawn` | userdata | The pawn using the skill |
 | `weaponId` | string | Id of the skill being used |
-| `p1` | Point | `p1` argument to `GetWeaponSkill`; position of the pawn using the skill |
-| `p2` | Point | `p2` argument to `GetWeaponSkill`; the targeted point on which to use the skill |
+| `p1` | Point | `p1` argument to `GetSkillEffect`; position of the pawn using the skill |
+| `p2` | Point | `p2` argument to `GetSkillEffect`; the targeted point on which to use the skill |
 
 Same as `skillEndHook`, but for the queued part of `SkillEffect`.
 
@@ -636,8 +636,8 @@ modApiExt:addQueuedSkillEndHook(hook)
 | `mission` | table | A table holding information about the current mission |
 | `pawn` | userdata | The pawn using the skill |
 | `weaponId` | string | Id of the skill being used |
-| `p1` | Point | `p1` argument to `GetWeaponSkill`; position of the pawn using the skill |
-| `p2` | Point | `p2` argument to `GetWeaponSkill`; the targeted point on which to use the skill |
+| `p1` | Point | `p1` argument to `GetSkillEffect`; position of the pawn using the skill |
+| `p2` | Point | `p2` argument to `GetSkillEffect`; the targeted point on which to use the skill |
 | `skillEffect` | userdata | Reference to the `SkillEffect` instance returned by the weapon's `GetSkillEffect` function. |
 
 Fired right after the weapon's `GetSkillEffect` is called, but before its result is passed back to the game. You can modify `skillEffect` in this hook to eg. give the weapon additional effects.

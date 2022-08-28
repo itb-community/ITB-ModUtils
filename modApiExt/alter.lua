@@ -1,5 +1,4 @@
 local modApiExtHooks = {}
-local skillIndex = setmetatable({}, { __index = _G })
 
 function modApiExtHooks:setupTrackedData(pd, pawn)
 	-- check each field separately, so that if there's a newer version
@@ -396,11 +395,10 @@ local function modApiExtGetSkillEffect(self, p1, p2, ...)
 		self = _G[self]
 	end
 
-	local prevEnv = getfenv(1)
-	local fn = skillIndex[self.__Id].GetSkillEffect
-	setfenv(fn, skillIndex)
+	modApiExt_internal.nestedSkillEffectCall = true
+	local fn = _G[self.__Id].GetSkillEffect
 	local skillFx = fn(self, p1, p2, ...)
-	setfenv(fn, prevEnv)
+	modApiExt_internal.nestedSkillEffectCall = false
 
 	if not Pawn then
 		-- PAWN is missing, this happens when loading into a game
@@ -481,17 +479,42 @@ local function isSkill(v)
 	return type(v) == "table" and v.GetSkillEffect ~= nil
 end
 
-local function skillIndexingFn(tbl, key)
-	local skill = _G[tbl.id]
+local function skillProxyIndexFn(tbl, key)
+	local realSkill = modApiExt_internal.oldSkills[tbl.id]
 	if key == "GetSkillEffect" then
-		return skill.__GetSkillEffect
+		if modApiExt_internal.nestedSkillEffectCall then
+			return realSkill.GetSkillEffect
+		else
+			return modApiExtGetSkillEffect
+		end
 	end
-	return skill[key] 
+	return realSkill[key]
+end
+
+local function skillProxyNewIndexFn(tbl, key, value)
+	local realSkill = modApiExt_internal.oldSkills[tbl.id]
+	realSkill[key] = value
+end
+
+local function replaceSkillWithProxy(skillTable)
+	modApiExt_internal.oldSkills[skillTable.__Id] = skillTable
+
+	local skillProxy = setmetatable(
+		{ id = skillTable.__Id },
+		{
+			__index = skillProxyIndexFn,
+			__newindex = skillProxyNewIndexFn
+		}
+	)
+	modApiExt_internal.skillIndex[skillTable.__Id] = skillProxy
+	_G[skillTable.__Id] = skillProxy
 end
 
 function modApiExtHooks:overrideAllSkills()
 	if not modApiExt_internal.oldSkills then
 		modApiExt_internal.oldSkills = {}
+		modApiExt_internal.skillIndex = setmetatable({}, { __index = _G })
+		modApiExt_internal.nestedSkillEffectCall = false
 
 		-- do this in two passes, so that for weapon upgrades we don't
 		-- accidentally set their original skill to our override, if we're
@@ -499,25 +522,9 @@ function modApiExtHooks:overrideAllSkills()
 		for k, v in pairs(_G) do
 			if isSkill(v) then
 				v.__Id = k
-				v.__GetSkillEffect = rawget(v, "GetSkillEffect")
-				skillIndex[k] = setmetatable(
-					{ id = k },
-					{ __index = skillIndexingFn }
-				)
-				-- Make sure to change env of original functions so that they don't
-				-- accidentally invoke modApiExt's override and cause an infinite loop
-				setfenv(v.GetSkillEffect, skillIndex)
-			end
-		end
-		for k, v in pairs(_G) do
-			if isSkill(v) then
-				v.GetSkillEffect = modApiExtGetSkillEffect
-			end
-		end
 
-		-- ensure that some non-standard skills that set globals can still work
-		skillIndex.__newindex = function(table, key, value)
-			_G[key] = value
+				replaceSkillWithProxy(v)
+			end
 		end
 	end
 end

@@ -479,6 +479,14 @@ local function isSkill(v)
 	return type(v) == "table" and v.GetSkillEffect ~= nil
 end
 
+local function isSkillProxy(v)
+	if type(v) == "table" and v.id ~= nil then
+		local mt = getmetatable(v)
+		return mt ~= nil and mt.__index = skillProxyIndexFn
+	end
+	return false
+end
+
 local function skillProxyIndexFn(tbl, key)
 	local realSkill = modApiExt_internal.oldSkills[tbl.id]
 	if key == "GetSkillEffect" then
@@ -496,7 +504,8 @@ local function skillProxyNewIndexFn(tbl, key, value)
 	realSkill[key] = value
 end
 
-local function replaceSkillWithProxy(skillTable)
+modApiExt_internal.createSkillProxy(skillTable)
+	assert(skillTable.__Id ~= nil, "The skillTable must have an `__Id` field that is equal to its identifier in _G")
 	modApiExt_internal.oldSkills[skillTable.__Id] = skillTable
 
 	local skillProxy = setmetatable(
@@ -507,7 +516,7 @@ local function replaceSkillWithProxy(skillTable)
 		}
 	)
 	modApiExt_internal.skillIndex[skillTable.__Id] = skillProxy
-	_G[skillTable.__Id] = skillProxy
+	return skillProxy
 end
 
 function modApiExtHooks:overrideAllSkills()
@@ -523,9 +532,25 @@ function modApiExtHooks:overrideAllSkills()
 			if isSkill(v) then
 				v.__Id = k
 
-				replaceSkillWithProxy(v)
+				_G[k] = modApiExt_internal.createSkillProxy(v)
 			end
 		end
+
+		-- TODO: this metatable should probably be managed by the modloader,
+		-- since otherwise if multiple mods try to override the _G metatable,
+		-- they will be incompatible with each other.
+		setmetatable(_G, {
+			-- Cover the case where someone adds a new skill after the gmae has already loaded,
+			-- or replaces an existing one.
+			__newindex = function(t, key, value)
+				if isSkill(value) and not isSkillProxy(value) then
+					value.__Id = key
+					rawset(t, key, modApiExt_internal.createSkillProxy(value))
+				else
+					rawset(t, key, value)
+				end
+			end
+		})
 	end
 end
 

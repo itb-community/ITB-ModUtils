@@ -504,6 +504,9 @@ function modApiExtHooks:overrideAllSkills()
 					{ id = k },
 					{ __index = skillIndexingFn }
 				)
+				-- Make sure to change env of original functions so that they don't
+				-- accidentally invoke modApiExt's override and cause an infinite loop
+				setfenv(v.GetSkillEffect, skillIndex)
 			end
 		end
 		for k, v in pairs(_G) do

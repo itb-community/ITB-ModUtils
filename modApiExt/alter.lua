@@ -504,7 +504,7 @@ local function skillProxyNewIndexFn(tbl, key, value)
 	realSkill[key] = value
 end
 
-modApiExt_internal.createSkillProxy(skillTable)
+function modApiExt_internal.createSkillProxy(skillTable)
 	assert(skillTable.__Id ~= nil, "The skillTable must have an `__Id` field that is equal to its identifier in _G")
 	modApiExt_internal.oldSkills[skillTable.__Id] = skillTable
 

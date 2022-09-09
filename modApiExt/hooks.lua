@@ -198,6 +198,48 @@ function hooks:addSkillBuildHook(fn)
 	table.insert(self.skillBuildHooks,fn)
 end
 
+hooks.finalEffectStartHooks = {}
+function hooks:addFinalEffectStartHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.finalEffectStartHooks,fn)
+end
+
+hooks.finalEffectEndHooks = {}
+function hooks:addFinalEffectEndHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.finalEffectEndHooks,fn)
+end
+
+hooks.queuedFinalEffectStartHooks = {}
+function hooks:addQueuedFinalEffectStartHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.queuedFinalEffectStartHooks,fn)
+end
+
+hooks.queuedFinalEffectEndHooks = {}
+function hooks:addQueuedFinalEffectEndHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.queuedFinalEffectEndHooks,fn)
+end
+
+hooks.finalEffectBuildHooks = {}
+function hooks:addFinalEffectBuildHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.finalEffectBuildHooks,fn)
+end
+
+hooks.targetAreaBuildHooks = {}
+function hooks:addTargetAreaBuildHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.targetAreaBuildHooks,fn)
+end
+
+hooks.secondTargetAreaBuildHooks = {}
+function hooks:addSecondTargetAreaBuildHook(fn)
+	assert(type(fn) == "function")
+	table.insert(self.secondTargetAreaBuildHooks,fn)
+end
+
 hooks.tipImageShownHooks = {}
 function hooks:addTipImageShownHook(fn)
 	assert(type(fn) == "function")

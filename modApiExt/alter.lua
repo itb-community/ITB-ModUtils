@@ -668,9 +668,9 @@ function modApiExt_internal.createSkillProxy(skillTable)
 			-- Duplicate skill functions from the original skill table
 			-- for use cases that need to check if the skill overrides
 			-- a particular function from its parent.
-			__GetSkillEffect = rawget(skillTable, "GetSkillEffect")
-			__GetFinalEffect = rawget(skillTable, "GetFinalEffect")
-			__GetTargetArea = rawget(skillTable, "GetTargetArea")
+			__GetSkillEffect = rawget(skillTable, "GetSkillEffect"),
+			__GetFinalEffect = rawget(skillTable, "GetFinalEffect"),
+			__GetTargetArea = rawget(skillTable, "GetTargetArea"),
 			__GetSecondTargetArea = rawget(skillTable, "GetSecondTargetArea")
 		},
 		{

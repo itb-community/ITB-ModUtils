@@ -483,7 +483,7 @@ local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
 
 	modApiExt_internal.nestedCall_GetFinalEffect = true
 	local fn = _G[self.__Id].GetFinalEffect
-	local skillFx = fn(self, p1, p2, ...)
+	local skillFx = fn(self, p1, p2, p3, ...)
 	modApiExt_internal.nestedCall_GetFinalEffect = false
 
 	if not Pawn then

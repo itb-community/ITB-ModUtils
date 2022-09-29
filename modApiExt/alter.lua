@@ -568,7 +568,7 @@ local function modApiExtGetTargetArea(self, p, ...)
 		-- This seems to be used only for constructing weapon previews
 		-- for enemies, so even if this is wrong (it shouldn't), it
 		-- should be pretty harmless.
-		Pawn = Board:GetPawn(p1)
+		Pawn = Board:GetPawn(p)
 	end
 
 	modApiExt_internal.fireTargetAreaBuildHooks(

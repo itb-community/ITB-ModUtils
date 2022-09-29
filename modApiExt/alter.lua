@@ -496,7 +496,7 @@ local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
 		Pawn = Board:GetPawn(p1)
 	end
 
-	modApiExt_internal.fireSkillFinalEffectBuildHooks(
+	modApiExt_internal.fireFinalEffectBuildHooks(
 		modApiExt_internal.mission,
 		Pawn, self.__Id, p1, p2, p3, skillFx
 	)
@@ -506,7 +506,7 @@ local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
 		local effects = extract_table(skillFx.effect)
 
 		fx:AddScript(
-			"modApiExt_internal.fireSkillFinalEffectStartHooks("
+			"modApiExt_internal.fireFinalEffectStartHooks("
 			.."modApiExt_internal.mission, Pawn,"
 			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..","..p3:GetString()..")"
 		)
@@ -516,7 +516,7 @@ local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
 		end
 
 		fx:AddScript(
-			"modApiExt_internal.fireSkillFinalEffectEndHooks("
+			"modApiExt_internal.fireFinalEffectEndHooks("
 			.."modApiExt_internal.mission, Pawn,"
 			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..","..p3:GetString()..")"
 		)
@@ -529,7 +529,7 @@ local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
 		local effects = extract_table(skillFx.q_effect)
 
 		fx:AddScript(
-			"modApiExt_internal.fireQueuedSkillFinalEffectStartHooks("
+			"modApiExt_internal.fireQueuedFinalEffectStartHooks("
 			.."modApiExt_internal.mission, Pawn,"
 			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..","..p3:GetString()..")"
 		)
@@ -539,7 +539,7 @@ local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
 		end
 
 		fx:AddScript(
-			"modApiExt_internal.fireQueuedSkillFinalEffectEndHooks("
+			"modApiExt_internal.fireQueuedFinalEffectEndHooks("
 			.."modApiExt_internal.mission, Pawn,"
 			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..","..p3:GetString()..")"
 		)

@@ -389,128 +389,173 @@ function SpaceScript(loc, script)
 	return d
 end
 
-local function modApiExtGetSkillEffect(self, p1, p2, parentSkill, ...)
+local function modApiExtGetSkillEffect(self, p1, p2, ...)
 	-- Dereference to weapon object
 	if type(self) == "string" then
 		self = _G[self]
 	end
 
-	local isValidSkillTable = parentSkill and type(parentSkill) == "table" and
-	                          type(parentSkill.GetSkillEffect) == "function"
-	local isPrimaryCall = not isValidSkillTable
+	modApiExt_internal.nestedCall_GetSkillEffect = true
+	local fn = _G[self.__Id].GetSkillEffect
+	local skillFx = fn(self, p1, p2, ...)
+	modApiExt_internal.nestedCall_GetSkillEffect = false
 
-	local skillFx = nil
-	if isPrimaryCall then
-		skillFx = modApiExt_internal.oldSkills[self.__Id](self, p1, p2, getmetatable(self), ...)
-	else
-		-- Defer to parent skill's GetSkillEffect.
-		skillFx = modApiExt_internal.oldSkills[parentSkill.__Id](self, p1, p2, getmetatable(parentSkill), ...)
+	if not Pawn then
+		-- PAWN is missing, this happens when loading into a game
+		-- in progress in combat. Attempt to fix this by getting the
+		-- pawn at p1.
+		-- This seems to be used only for constructing weapon previews
+		-- for enemies, so even if this is wrong (it shouldn't), it
+		-- should be pretty harmless.
+		Pawn = Board:GetPawn(p1)
 	end
 
-	-- If it's a secondary call to the GetSkillEffect, then we don't
-	-- want it to fire hooks (since the primary call already fired them).
-	-- For vanilla skills, the additional argument will be ignored.
-	if isPrimaryCall then
-		if not Pawn then
-			-- PAWN is missing, this happens when loading into a game
-			-- in progress in combat. Attempt to fix this by getting the
-			-- pawn at p1.
-			-- This seems to be used only for constructing weapon previews
-			-- for enemies, so even if this is wrong (it shouldn't), it
-			-- should be pretty harmless.
-			Pawn = Board:GetPawn(p1)
-		end
+	modApiExt_internal.fireSkillBuildHooks(
+		modApiExt_internal.mission,
+		Pawn, self.__Id, p1, p2, skillFx
+	)
 
-		modApiExt_internal.fireSkillBuildHooks(
-			modApiExt_internal.mission,
-			Pawn, self.__Id, p1, p2, skillFx
+	if not skillFx.effect:empty() then
+		local fx = SkillEffect()
+		local effects = extract_table(skillFx.effect)
+
+		fx:AddScript(
+			"modApiExt_internal.fireSkillStartHooks("
+			.."modApiExt_internal.mission, Pawn,"
+			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
 		)
 
-		if not skillFx.effect:empty() then
-			local fx = SkillEffect()
-			local effects = extract_table(skillFx.effect)
-
-			fx:AddScript(
-				"modApiExt_internal.fireSkillStartHooks("
-				.."modApiExt_internal.mission, Pawn,"
-				.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
-			)
-
-			for _, e in pairs(effects) do
-				fx.effect:push_back(e)
-			end
-
-			fx:AddScript(
-				"modApiExt_internal.fireSkillEndHooks("
-				.."modApiExt_internal.mission, Pawn,"
-				.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
-			)
-
-			if
-				self == Prime_Punchmech    or
-				self == Prime_Punchmech_A  or
-				self == Prime_Punchmech_B  or
-				self == Prime_Punchmech_AB
-			then
-				-- Add a dummy damage instance to fix Ramming Speed
-				-- achievement being incorrectly granted
-				fx:AddDamage(SpaceDamage(GetProjectileEnd(p1, p2)))
-			end
-
-			skillFx.effect = fx.effect
+		for _, e in pairs(effects) do
+			fx.effect:push_back(e)
 		end
 
-		if not skillFx.q_effect:empty() then
-			local fx = SkillEffect()
-			local effects = extract_table(skillFx.q_effect)
+		fx:AddScript(
+			"modApiExt_internal.fireSkillEndHooks("
+			.."modApiExt_internal.mission, Pawn,"
+			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
+		)
 
-			fx:AddScript(
-				"modApiExt_internal.fireQueuedSkillStartHooks("
-				.."modApiExt_internal.mission, Pawn,"
-				.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
-			)
-
-			for _, e in pairs(effects) do
-				fx.effect:push_back(e)
-			end
-
-			fx:AddScript(
-				"modApiExt_internal.fireQueuedSkillEndHooks("
-				.."modApiExt_internal.mission, Pawn,"
-				.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
-			)
-
-			skillFx.q_effect = fx.effect
+		if
+			self == Prime_Punchmech    or
+			self == Prime_Punchmech_A  or
+			self == Prime_Punchmech_B  or
+			self == Prime_Punchmech_AB
+		then
+			-- Add a dummy damage instance to fix Ramming Speed
+			-- achievement being incorrectly granted
+			fx:AddDamage(SpaceDamage(GetProjectileEnd(p1, p2)))
 		end
+
+		skillFx.effect = fx.effect
+	end
+
+	if not skillFx.q_effect:empty() then
+		local fx = SkillEffect()
+		local effects = extract_table(skillFx.q_effect)
+
+		fx:AddScript(
+			"modApiExt_internal.fireQueuedSkillStartHooks("
+			.."modApiExt_internal.mission, Pawn,"
+			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
+		)
+
+		for _, e in pairs(effects) do
+			fx.effect:push_back(e)
+		end
+
+		fx:AddScript(
+			"modApiExt_internal.fireQueuedSkillEndHooks("
+			.."modApiExt_internal.mission, Pawn,"
+			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
+		)
+
+		skillFx.q_effect = fx.effect
 	end
 
 	return skillFx
 end
 
-function modApiExtHooks:overrideSkill(id, skill)
-	assert(skill.GetSkillEffect)
-	assert(_G[id] == skill) -- no fun allowed
+local function isSkill(v)
+	return type(v) == "table" and v.GetSkillEffect ~= nil
+end
 
-	if modApiExt_internal.oldSkills[id] then
-		error(id .. " is already overridden!")
+local function isSkillProxy(v)
+	if type(v) == "table" and v.__skill ~= nil then
+		local mt = getmetatable(v)
+		return mt ~= nil and mt.__index == skillProxyIndexFn
 	end
+	return false
+end
 
-	modApiExt_internal.oldSkills[id] = skill.GetSkillEffect
+local function skillProxyIndexFn(tbl, key)
+	local realSkill = tbl.__skill
+	if key == "GetSkillEffect" then
+		if modApiExt_internal.nestedCall_GetSkillEffect then
+			return realSkill.GetSkillEffect
+		else
+			return modApiExtGetSkillEffect
+		end
+	end
+	return realSkill[key]
+end
 
-	-- Make it possible to identify skills with no ambiguity
-	skill.__Id = id
-	skill.GetSkillEffect = modApiExtGetSkillEffect
+local function skillProxyNewIndexFn(tbl, key, value)
+	tbl.__skill[key] = value
+end
+
+function modApiExt_internal.createSkillProxy(skillTable)
+	assert(skillTable.__Id ~= nil, "The skillTable must have an `__Id` field that is equal to its identifier in _G")
+	modApiExt_internal.oldSkills[skillTable.__Id] = skillTable
+
+	local skillProxy = setmetatable(
+		{
+			__skill = skillTable,
+			-- Duplicate skill functions from the original skill table
+			-- for use cases that need to check if the skill overrides
+			-- a particular function from its parent.
+			__GetSkillEffect = rawget(skillTable, "GetSkillEffect")
+		},
+		{
+			__index = skillProxyIndexFn,
+			__newindex = skillProxyNewIndexFn
+		}
+	)
+	modApiExt_internal.skillIndex[skillTable.__Id] = skillProxy
+	return skillProxy
 end
 
 function modApiExtHooks:overrideAllSkills()
 	if not modApiExt_internal.oldSkills then
 		modApiExt_internal.oldSkills = {}
+		modApiExt_internal.skillIndex = setmetatable({}, { __index = _G })
+		modApiExt_internal.nestedCall_GetSkillEffect = false
 
+		-- do this in two passes, so that for weapon upgrades we don't
+		-- accidentally set their original skill to our override, if we're
+		-- unlucky with iteration order.
 		for k, v in pairs(_G) do
-			if type(v) == "table" and v.GetSkillEffect then
-				self:overrideSkill(k, v)
+			if isSkill(v) then
+				v.__Id = k
+
+				_G[k] = modApiExt_internal.createSkillProxy(v)
 			end
 		end
+
+		-- TODO: this metatable should probably be managed by the modloader,
+		-- since otherwise if multiple mods try to override the _G metatable,
+		-- they will be incompatible with each other.
+		setmetatable(_G, {
+			-- Cover the case where someone adds a new skill after the gmae has already loaded,
+			-- or replaces an existing one.
+			__newindex = function(t, key, value)
+				if isSkill(value) and not isSkillProxy(value) then
+					value.__Id = key
+					rawset(t, key, modApiExt_internal.createSkillProxy(value))
+				else
+					rawset(t, key, value)
+				end
+			end
+		})
 	end
 end
 

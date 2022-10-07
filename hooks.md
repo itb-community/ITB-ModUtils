@@ -27,6 +27,13 @@
 * [queuedSkillStartHook](#queuedskillstarthook)
 * [queuedSkillEndHook](#queuedskillendhook)
 * [skillBuildHook](#skillbuildhook)
+* [finalEffectStartHook](#finalEffectStartHook)
+* [finalEffectEndHook](#finalEffectEndHook)
+* [queuedFinalEffectStartHook](#queuedFinalEffectStartHook)
+* [queuedFinalEffectEndHook](#queuedFinalEffectEndHook)
+* [finalEffectBuildHook](#finalEffectBuildHook)
+* [targetAreaBuildHook](#targetAreaBuildHook)
+* [secondTargetAreaBuildHook](#secondTargetAreaBuildHook)
 * [tipImageShownHook](#tipimageshownhook)
 * [tipImageHiddenHook](#tipimagehiddenhook)
 * [podDetectedHook](#poddetectedhook)
@@ -548,8 +555,8 @@ modApiExt:addBuildingDestroyedHook(hook)
 | `mission` | table | A table holding information about the current mission |
 | `pawn` | userdata | The pawn using the skill |
 | `weaponId` | string | Id of the skill being used |
-| `p1` | Point | `p1` argument to `GetWeaponSkill`; position of the pawn using the skill |
-| `p2` | Point | `p2` argument to `GetWeaponSkill`; the targeted point on which to use the skill |
+| `p1` | Point | `p1` argument to `GetSkillEffect`; position of the pawn using the skill |
+| `p2` | Point | `p2` argument to `GetSkillEffect`; the targeted point on which to use the skill |
 
 Fired when the game begins executing a weapon's `SkillEffect`, ie. before any of the skill's effects are executed (charge, push, damage, whatever).
 
@@ -570,8 +577,8 @@ modApiExt:addSkillStartHook(hook)
 | `mission` | table | A table holding information about the current mission |
 | `pawn` | userdata | The pawn using the skill |
 | `weaponId` | string | Id of the skill being used |
-| `p1` | Point | `p1` argument to `GetWeaponSkill`; position of the pawn using the skill |
-| `p2` | Point | `p2` argument to `GetWeaponSkill`; the targeted point on which to use the skill |
+| `p1` | Point | `p1` argument to `GetSkillEffect`; position of the pawn using the skill |
+| `p2` | Point | `p2` argument to `GetSkillEffect`; the targeted point on which to use the skill |
 
 Fired when the game finishes executing a weapon's `SkillEffect`, ie. after all of the skill's effects are executed (charge, push, damage, whatever).
 
@@ -592,8 +599,8 @@ modApiExt:addSkillEndHook(hook)
 | `mission` | table | A table holding information about the current mission |
 | `pawn` | userdata | The pawn using the skill |
 | `weaponId` | string | Id of the skill being used |
-| `p1` | Point | `p1` argument to `GetWeaponSkill`; position of the pawn using the skill |
-| `p2` | Point | `p2` argument to `GetWeaponSkill`; the targeted point on which to use the skill |
+| `p1` | Point | `p1` argument to `GetSkillEffect`; position of the pawn using the skill |
+| `p2` | Point | `p2` argument to `GetSkillEffect`; the targeted point on which to use the skill |
 
 Same as `skillStartHook`, but for the queued part of `SkillEffect`.
 
@@ -614,8 +621,8 @@ modApiExt:addQueuedSkillStartHook(hook)
 | `mission` | table | A table holding information about the current mission |
 | `pawn` | userdata | The pawn using the skill |
 | `weaponId` | string | Id of the skill being used |
-| `p1` | Point | `p1` argument to `GetWeaponSkill`; position of the pawn using the skill |
-| `p2` | Point | `p2` argument to `GetWeaponSkill`; the targeted point on which to use the skill |
+| `p1` | Point | `p1` argument to `GetSkillEffect`; position of the pawn using the skill |
+| `p2` | Point | `p2` argument to `GetSkillEffect`; the targeted point on which to use the skill |
 
 Same as `skillEndHook`, but for the queued part of `SkillEffect`.
 
@@ -636,8 +643,8 @@ modApiExt:addQueuedSkillEndHook(hook)
 | `mission` | table | A table holding information about the current mission |
 | `pawn` | userdata | The pawn using the skill |
 | `weaponId` | string | Id of the skill being used |
-| `p1` | Point | `p1` argument to `GetWeaponSkill`; position of the pawn using the skill |
-| `p2` | Point | `p2` argument to `GetWeaponSkill`; the targeted point on which to use the skill |
+| `p1` | Point | `p1` argument to `GetSkillEffect`; position of the pawn using the skill |
+| `p2` | Point | `p2` argument to `GetSkillEffect`; the targeted point on which to use the skill |
 | `skillEffect` | userdata | Reference to the `SkillEffect` instance returned by the weapon's `GetSkillEffect` function. |
 
 Fired right after the weapon's `GetSkillEffect` is called, but before its result is passed back to the game. You can modify `skillEffect` in this hook to eg. give the weapon additional effects.
@@ -654,6 +661,194 @@ local hook = function(mission, pawn, weaponId, p1, p2, skillEffect)
 end
 
 modApiExt:addSkillBuildHook(hook)
+```
+
+
+## `finalEffectStartHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `mission` | table | A table holding information about the current mission |
+| `pawn` | userdata | The pawn using the skill |
+| `weaponId` | string | Id of the skill being used |
+| `p1` | Point | `p1` argument to `GetFinalEffect`; position of the pawn using the skill |
+| `p2` | Point | `p2` argument to `GetFinalEffect`; the starting point on which to use the skill |
+| `p3` | Point | `p3` argument to `GetFinalEffect`; the ending point on which to use the skill |
+
+Fired when the game begins executing a weapon's finalized `SkillEffect`, ie. before any of the skill's effects are executed (charge, push, damage, whatever).
+
+Example:
+```lua
+local hook = function(mission, pawn, weaponId, p1, p2, p3)
+	LOG(string.format("%s is using %s at %s and %s!", pawn:GetMechName(), weaponId, p2:GetString(), p3:GetString()))
+end
+
+modApiExt:addFinalEffectStartHook(hook)
+```
+
+
+## `finalEffectEndHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `mission` | table | A table holding information about the current mission |
+| `pawn` | userdata | The pawn using the skill |
+| `weaponId` | string | Id of the skill being used |
+| `p1` | Point | `p1` argument to `GetFinalEffect`; position of the pawn using the skill |
+| `p2` | Point | `p2` argument to `GetFinalEffect`; the starting point on which to use the skill |
+| `p3` | Point | `p3` argument to `GetFinalEffect`; the ending point on which to use the skill |
+
+Fired when the game finishes executing a weapon's finalized `SkillEffect`, ie. after all of the skill's effects are executed (charge, push, damage, whatever).
+
+Example:
+```lua
+local hook = function(mission, pawn, weaponId, p1, p2, p3)
+	LOG(string.format("%s has finished using %s at %s and %s!", pawn:GetMechName(), weaponId, p2:GetString(), p3:GetString()))
+end
+
+modApiExt:addFinalEffectEndHook(hook)
+```
+
+
+## `queuedFinalEffectStartHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `mission` | table | A table holding information about the current mission |
+| `pawn` | userdata | The pawn using the skill |
+| `weaponId` | string | Id of the skill being used |
+| `p1` | Point | `p1` argument to `GetFinalEffect`; position of the pawn using the skill |
+| `p2` | Point | `p2` argument to `GetFinalEffect`; the starting point on which to use the skill |
+| `p3` | Point | `p3` argument to `GetFinalEffect`; the ending point on which to use the skill |
+
+Same as `finalEffectStartHook`, but for the queued part of finalized `SkillEffect`.
+
+Example:
+```lua
+local hook = function(mission, pawn, weaponId, p1, p2, p3)
+	LOG(string.format("%s is using %s at %s and %s!", pawn:GetMechName(), weaponId, p2:GetString(), p3:GetString()))
+end
+
+modApiExt:addQueuedFinalEffectStartHook(hook)
+```
+
+
+## `queuedFinalEffectEndHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `mission` | table | A table holding information about the current mission |
+| `pawn` | userdata | The pawn using the skill |
+| `weaponId` | string | Id of the skill being used |
+| `p1` | Point | `p1` argument to `GetFinalEffect`; position of the pawn using the skill |
+| `p2` | Point | `p2` argument to `GetFinalEffect`; the starting point on which to use the skill |
+| `p3` | Point | `p3` argument to `GetFinalEffect`; the ending point on which to use the skill |
+
+Same as `finalEffectEndHook`, but for the queued part of finalized `SkillEffect`.
+
+Example:
+```lua
+local hook = function(mission, pawn, weaponId, p1, p2, p3)
+	LOG(string.format("%s has finished using %s at %s and %s!", pawn:GetMechName(), weaponId, p2:GetString(), p3:GetString()))
+end
+
+modApiExt:addQueuedFinalEffectEndHook(hook)
+```
+
+
+## `finalEffectBuildHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `mission` | table | A table holding information about the current mission |
+| `pawn` | userdata | The pawn using the skill |
+| `weaponId` | string | Id of the skill being used |
+| `p1` | Point | `p1` argument to `GetFinalEffect`; position of the pawn using the skill |
+| `p2` | Point | `p2` argument to `GetFinalEffect`; the starting point on which to use the skill |
+| `p3` | Point | `p3` argument to `GetFinalEffect`; the ending point on which to use the skill |
+| `skillEffect` | userdata | Reference to the `SkillEffect` instance returned by the weapon's `GetFinalEffect` function. |
+
+Fired right after the weapon's `GetFinalEffect` is called, but before its result is passed back to the game. You can modify `skillEffect` in this hook to eg. give the weapon additional effects.
+
+Example:
+```lua
+local hook = function(mission, pawn, weaponId, p1, p2, p3, skillEffect)
+	-- Have every Brute-class weapon set its main target on fire, 'cause why not
+	if _G[weaponId].Class == "Brute" then
+		local d = SpaceDamage(p2, 0)
+		d.iFire = EFFECT_CREATE
+		skillEffect:AddDamage(d)
+	end
+end
+
+modApiExt:addFinalEffectBuildHook(hook)
+```
+
+
+## `targetAreaBuildHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `mission` | table | A table holding information about the current mission |
+| `pawn` | userdata | The pawn using the skill |
+| `weaponId` | string | Id of the skill being used |
+| `p1` | Point | `p1` argument to `GetTargetArea`; position of the pawn using the skill |
+| `targetArea` | userdata | Reference to the `PointList` instance returned by the weapon's `GetTargetArea` function. |
+
+Fired right after the weapon's `GetTargetArea` is called, but before its result is passed back to the game. You can modify `targetArea` in this hook to modify the tiles the weapon can target.
+
+Example:
+```lua
+local hook = function(mission, pawn, weaponId, p1, targetArea)
+	-- Have every Ranged-class weapon only able to target orthogonal tiles 2 points away from the pawn using the weapon
+	if _G[weaponId].Class == "Ranged" then
+		targetArea:empty()
+		for dir = DIR_START, DIR_END do
+			local point = Point(p1 + DIR_VECTORS[dir] * 2)
+			if not Board:IsValid(point) then
+				break
+			end
+
+			targetArea:push_back(point)
+		end
+	end
+end
+
+modApiExt:addTargetAreaBuildHook(hook)
+```
+
+
+## `secondTargetAreaBuildHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `mission` | table | A table holding information about the current mission |
+| `pawn` | userdata | The pawn using the skill |
+| `weaponId` | string | Id of the skill being used |
+| `p1` | Point | `p1` argument to `GetSecondTargetArea`; position of the pawn using the skill |
+| `p2` | Point | `p2` argument to `GetSecondTargetArea`; the starting point selected in `GetTargetArea` |
+| `targetArea` | userdata | Reference to the `PointList` instance returned by the weapon's `GetSecondTargetArea` function. |
+
+Fired right after the weapon's `GetSecondTargetArea` is called, but before its result is passed back to the game. You can modify `targetArea` in this hook to modify the tiles the weapon can target.
+
+Example:
+```lua
+local hook = function(mission, pawn, weaponId, p1, p2, targetArea)
+	-- Have every Ranged-class weapon only able to target orthogonal tiles 2 points away from the target point
+	if _G[weaponId].Class == "Ranged" then
+		targetArea:empty()
+		for dir = DIR_START, DIR_END do
+			local point = Point(p2 + DIR_VECTORS[dir] * 2)
+			if not Board:IsValid(point) then
+				break
+			end
+
+			targetArea:push_back(point)
+		end
+	end
+end
+
+modApiExt:addSecondTargetAreaBuildHook(hook)
 ```
 
 

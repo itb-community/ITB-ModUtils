@@ -475,6 +475,140 @@ local function modApiExtGetSkillEffect(self, p1, p2, ...)
 	return skillFx
 end
 
+local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
+	-- Dereference to weapon object
+	if type(self) == "string" then
+		self = _G[self]
+	end
+
+	modApiExt_internal.nestedCall_GetFinalEffect = true
+	local fn = _G[self.__Id].GetFinalEffect
+	local skillFx = fn(self, p1, p2, p3, ...)
+	modApiExt_internal.nestedCall_GetFinalEffect = false
+
+	if not Pawn then
+		-- PAWN is missing, this happens when loading into a game
+		-- in progress in combat. Attempt to fix this by getting the
+		-- pawn at p1.
+		-- This seems to be used only for constructing weapon previews
+		-- for enemies, so even if this is wrong (it shouldn't), it
+		-- should be pretty harmless.
+		Pawn = Board:GetPawn(p1)
+	end
+
+	modApiExt_internal.fireFinalEffectBuildHooks(
+		modApiExt_internal.mission,
+		Pawn, self.__Id, p1, p2, p3, skillFx
+	)
+
+	if not skillFx.effect:empty() then
+		local fx = SkillEffect()
+		local effects = extract_table(skillFx.effect)
+
+		fx:AddScript(
+			"modApiExt_internal.fireFinalEffectStartHooks("
+			.."modApiExt_internal.mission, Pawn,"
+			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..","..p3:GetString()..")"
+		)
+
+		for _, e in pairs(effects) do
+			fx.effect:push_back(e)
+		end
+
+		fx:AddScript(
+			"modApiExt_internal.fireFinalEffectEndHooks("
+			.."modApiExt_internal.mission, Pawn,"
+			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..","..p3:GetString()..")"
+		)
+
+		skillFx.effect = fx.effect
+	end
+
+	if not skillFx.q_effect:empty() then
+		local fx = SkillEffect()
+		local effects = extract_table(skillFx.q_effect)
+
+		fx:AddScript(
+			"modApiExt_internal.fireQueuedFinalEffectStartHooks("
+			.."modApiExt_internal.mission, Pawn,"
+			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..","..p3:GetString()..")"
+		)
+
+		for _, e in pairs(effects) do
+			fx.effect:push_back(e)
+		end
+
+		fx:AddScript(
+			"modApiExt_internal.fireQueuedFinalEffectEndHooks("
+			.."modApiExt_internal.mission, Pawn,"
+			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..","..p3:GetString()..")"
+		)
+
+		skillFx.q_effect = fx.effect
+	end
+
+	return skillFx
+end
+
+local function modApiExtGetTargetArea(self, p, ...)
+	-- Dereference to weapon object
+	if type(self) == "string" then
+		self = _G[self]
+	end
+
+	modApiExt_internal.nestedCall_GetTargetArea = true
+	local fn = _G[self.__Id].GetTargetArea
+	local targetArea = fn(self, p, ...)
+	modApiExt_internal.nestedCall_GetTargetArea = false
+
+	if not Pawn then
+		-- PAWN is missing, this happens when loading into a game
+		-- in progress in combat. Attempt to fix this by getting the
+		-- pawn at p1.
+		-- This seems to be used only for constructing weapon previews
+		-- for enemies, so even if this is wrong (it shouldn't), it
+		-- should be pretty harmless.
+		Pawn = Board:GetPawn(p)
+	end
+
+	modApiExt_internal.fireTargetAreaBuildHooks(
+		modApiExt_internal.mission,
+		Pawn, self.__Id, p, targetArea
+	)
+
+	return targetArea
+end
+
+local function modApiExtGetSecondTargetArea(self, p1, p2, ...)
+	-- Dereference to weapon object
+	if type(self) == "string" then
+		self = _G[self]
+	end
+
+	modApiExt_internal.nestedCall_GetSecondTargetArea = true
+	local fn = _G[self.__Id].GetSecondTargetArea
+	local targetArea = fn(self, p1, p2, ...)
+	modApiExt_internal.nestedCall_GetSecondTargetArea = false
+
+	if not Pawn then
+		-- PAWN is missing, this happens when loading into a game
+		-- in progress in combat. Attempt to fix this by getting the
+		-- pawn at p1.
+		-- This seems to be used only for constructing weapon previews
+		-- for enemies, so even if this is wrong (it shouldn't), it
+		-- should be pretty harmless.
+		Pawn = Board:GetPawn(p1)
+	end
+
+	modApiExt_internal.fireSecondTargetAreaBuildHooks(
+		modApiExt_internal.mission,
+		Pawn, self.__Id, p1, p2, targetArea
+	)
+
+	return targetArea
+end
+
+
 local function isSkill(v)
 	return type(v) == "table" and v.GetSkillEffect ~= nil
 end
@@ -496,6 +630,27 @@ local function skillProxyIndexFn(tbl, key)
 			return modApiExtGetSkillEffect
 		end
 	end
+	if key == "GetFinalEffect" then
+		if modApiExt_internal.nestedCall_GetFinalEffect then
+			return realSkill.GetFinalEffect
+		else
+			return modApiExtGetFinalEffect
+		end
+	end
+	if key == "GetTargetArea" then
+		if modApiExt_internal.nestedCall_GetTargetArea then
+			return realSkill.GetTargetArea
+		else
+			return modApiExtGetTargetArea
+		end
+	end
+	if key == "GetSecondTargetArea" then
+		if modApiExt_internal.nestedCall_GetSecondTargetArea then
+			return realSkill.GetSecondTargetArea
+		else
+			return modApiExtGetSecondTargetArea
+		end
+	end
 	return realSkill[key]
 end
 
@@ -513,7 +668,10 @@ function modApiExt_internal.createSkillProxy(skillTable)
 			-- Duplicate skill functions from the original skill table
 			-- for use cases that need to check if the skill overrides
 			-- a particular function from its parent.
-			__GetSkillEffect = rawget(skillTable, "GetSkillEffect")
+			__GetSkillEffect = rawget(skillTable, "GetSkillEffect"),
+			__GetFinalEffect = rawget(skillTable, "GetFinalEffect"),
+			__GetTargetArea = rawget(skillTable, "GetTargetArea"),
+			__GetSecondTargetArea = rawget(skillTable, "GetSecondTargetArea")
 		},
 		{
 			__index = skillProxyIndexFn,
@@ -529,6 +687,9 @@ function modApiExtHooks:overrideAllSkills()
 		modApiExt_internal.oldSkills = {}
 		modApiExt_internal.skillIndex = setmetatable({}, { __index = _G })
 		modApiExt_internal.nestedCall_GetSkillEffect = false
+		modApiExt_internal.nestedCall_GetFinalEffect = false
+		modApiExt_internal.nestedCall_GetTargetArea = false
+		modApiExt_internal.nestedCall_GetSecondTargetArea = false
 
 		-- do this in two passes, so that for weapon upgrades we don't
 		-- accidentally set their original skill to our override, if we're

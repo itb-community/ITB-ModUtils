@@ -100,11 +100,7 @@ function modApiExt:init(modulesDir)
 	table.insert(modApiExt_internal.extObjects, self)
 
 	require(self.modulesDir.."global")
-
-	local hooks = require(self.modulesDir.."hooks")
-	for k, v in pairs(hooks) do
-		self[k] = v
-	end
+	require(self.modulesDir.."hooks"):addTo(self)
 
 	self.vector =   self:loadModule(self.modulesDir.."vector")
 	self.string =   self:loadModule(self.modulesDir.."string")
@@ -128,6 +124,14 @@ function modApiExt:load(mod, options, version)
 
 	-- clear out previously registered hooks, since we're reloading.
 	self:clearHooks()
+
+	-- add a hook to dispatch events of same name
+	for eventId, event in pairs(self.events) do
+		local addHook = "add"..eventId:match("on(.+)").."Hook"
+		self[addHook](self, function(...)
+			event:dispatch(...)
+		end)
+	end
 
 	self.hooks = self:loadModule(self.modulesDir.."alter")
 

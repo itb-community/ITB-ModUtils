@@ -11,9 +11,10 @@ return {
 	id = "modApiExt",
 	name = "modApiExt",
 	version = "1.2",
-	modApiVersion = "2.7.3",
+	modApiVersion = "2.8.0",
 	gameVersion = "1.2.83",
 	isExtension = true,
+	enabled = false,
 	init = init,
 	load = load
 }

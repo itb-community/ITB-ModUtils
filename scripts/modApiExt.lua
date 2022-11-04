@@ -92,7 +92,14 @@ end
 function modApiExt:init(modulesDir)
 	self.__index = self
 	self.modulesDir = modulesDir or self.modulesDir
+	self.version = require(self.modulesDir.."init").version
 	self.isProxy = false
+
+	local minv = "2.8.0"
+	if not modApi:isVersion(minv) then
+		error("modApiExt could not be loaded because version of the mod loader is out of date. "
+			..string.format("Installed version: %s, required: %s", modApi.version, minv))
+	end
 
 	self.compat = self:loadModule(self.modulesDir.."compat"):init(self)
 

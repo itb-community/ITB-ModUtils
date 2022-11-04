@@ -1,10 +1,10 @@
 
 local function init(self)
-	modApiExt = require(self.resourcePath.."modApiExt/modApiExt"):init()
+	modapiext = require(self.resourcePath.."modApiExt/modApiExt"):init()
 end
 
 local function load(self, options, version)
-	modApiExt:load(self, options, version)
+	modapiext:load(self, options, version)
 end
 
 return {

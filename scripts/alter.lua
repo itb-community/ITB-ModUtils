@@ -395,20 +395,19 @@ local function modApiExtGetSkillEffect(self, p1, p2, ...)
 		self = _G[self]
 	end
 
+	-- The game calls functions for queued attacks without updating `Pawn`
+	-- in several instances
+	-- - when continuing a saved mission
+	-- - when calculating Vek movement
+	-- - when the player moves their units
+	-- Fix this by updating `Pawn` when entering/exiting this function.
+	local Pawn_prev = Pawn
+	SetPawn(Board:GetPawn(p1))
+
 	modApiExt_internal.nestedCall_GetSkillEffect = true
 	local fn = _G[self.__Id].GetSkillEffect
 	local skillFx = fn(self, p1, p2, ...)
 	modApiExt_internal.nestedCall_GetSkillEffect = false
-
-	if not Pawn then
-		-- PAWN is missing, this happens when loading into a game
-		-- in progress in combat. Attempt to fix this by getting the
-		-- pawn at p1.
-		-- This seems to be used only for constructing weapon previews
-		-- for enemies, so even if this is wrong (it shouldn't), it
-		-- should be pretty harmless.
-		Pawn = Board:GetPawn(p1)
-	end
 
 	modApiExt_internal.fireSkillBuildHooks(
 		modApiExt_internal.mission,
@@ -472,6 +471,9 @@ local function modApiExtGetSkillEffect(self, p1, p2, ...)
 		skillFx.q_effect = fx.effect
 	end
 
+	-- Set `Pawn` back to what it was before we entered.
+	SetPawn(Pawn_prev)
+
 	return skillFx
 end
 
@@ -481,20 +483,19 @@ local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
 		self = _G[self]
 	end
 
+	-- The game calls functions for queued attacks without updating `Pawn`
+	-- in several instances
+	-- - when continuing a saved mission
+	-- - when calculating Vek movement
+	-- - when the player moves their units
+	-- Fix this by updating `Pawn` when entering/exiting this function.
+	local Pawn_prev = Pawn
+	SetPawn(Board:GetPawn(p1))
+
 	modApiExt_internal.nestedCall_GetFinalEffect = true
 	local fn = _G[self.__Id].GetFinalEffect
 	local skillFx = fn(self, p1, p2, p3, ...)
 	modApiExt_internal.nestedCall_GetFinalEffect = false
-
-	if not Pawn then
-		-- PAWN is missing, this happens when loading into a game
-		-- in progress in combat. Attempt to fix this by getting the
-		-- pawn at p1.
-		-- This seems to be used only for constructing weapon previews
-		-- for enemies, so even if this is wrong (it shouldn't), it
-		-- should be pretty harmless.
-		Pawn = Board:GetPawn(p1)
-	end
 
 	modApiExt_internal.fireFinalEffectBuildHooks(
 		modApiExt_internal.mission,
@@ -547,6 +548,9 @@ local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
 		skillFx.q_effect = fx.effect
 	end
 
+	-- Set `Pawn` back to what it was before we entered.
+	SetPawn(Pawn_prev)
+
 	return skillFx
 end
 
@@ -556,25 +560,27 @@ local function modApiExtGetTargetArea(self, p, ...)
 		self = _G[self]
 	end
 
+	-- The game calls functions for queued attacks without updating `Pawn`
+	-- in several instances
+	-- - when continuing a saved mission
+	-- - when calculating Vek movement
+	-- - when the player moves their units
+	-- Fix this by updating `Pawn` when entering/exiting this function.
+	local Pawn_prev = Pawn
+	SetPawn(Board:GetPawn(p))
+
 	modApiExt_internal.nestedCall_GetTargetArea = true
 	local fn = _G[self.__Id].GetTargetArea
 	local targetArea = fn(self, p, ...)
 	modApiExt_internal.nestedCall_GetTargetArea = false
 
-	if not Pawn then
-		-- PAWN is missing, this happens when loading into a game
-		-- in progress in combat. Attempt to fix this by getting the
-		-- pawn at p1.
-		-- This seems to be used only for constructing weapon previews
-		-- for enemies, so even if this is wrong (it shouldn't), it
-		-- should be pretty harmless.
-		Pawn = Board:GetPawn(p)
-	end
-
 	modApiExt_internal.fireTargetAreaBuildHooks(
 		modApiExt_internal.mission,
 		Pawn, self.__Id, p, targetArea
 	)
+
+	-- Set `Pawn` back to what it was before we entered.
+	SetPawn(Pawn_prev)
 
 	return targetArea
 end
@@ -585,25 +591,27 @@ local function modApiExtGetSecondTargetArea(self, p1, p2, ...)
 		self = _G[self]
 	end
 
+	-- The game calls functions for queued attacks without updating `Pawn`
+	-- in several instances
+	-- - when continuing a saved mission
+	-- - when calculating Vek movement
+	-- - when the player moves their units
+	-- Fix this by updating `Pawn` when entering/exiting this function.
+	local Pawn_prev = Pawn
+	SetPawn(Board:GetPawn(p1))
+
 	modApiExt_internal.nestedCall_GetSecondTargetArea = true
 	local fn = _G[self.__Id].GetSecondTargetArea
 	local targetArea = fn(self, p1, p2, ...)
 	modApiExt_internal.nestedCall_GetSecondTargetArea = false
 
-	if not Pawn then
-		-- PAWN is missing, this happens when loading into a game
-		-- in progress in combat. Attempt to fix this by getting the
-		-- pawn at p1.
-		-- This seems to be used only for constructing weapon previews
-		-- for enemies, so even if this is wrong (it shouldn't), it
-		-- should be pretty harmless.
-		Pawn = Board:GetPawn(p1)
-	end
-
 	modApiExt_internal.fireSecondTargetAreaBuildHooks(
 		modApiExt_internal.mission,
 		Pawn, self.__Id, p1, p2, targetArea
 	)
+
+	-- Set `Pawn` back to what it was before we entered.
+	SetPawn(Pawn_prev)
 
 	return targetArea
 end

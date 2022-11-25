@@ -802,7 +802,9 @@ Example:
 local hook = function(mission, pawn, weaponId, p1, targetArea)
 	-- Have every Ranged-class weapon only able to target orthogonal tiles 2 points away from the pawn using the weapon
 	if _G[weaponId].Class == "Ranged" then
-		targetArea:empty()
+		while not targetArea:empty() do
+		    targetArea:erase(0)
+		end
 		for dir = DIR_START, DIR_END do
 			local point = Point(p1 + DIR_VECTORS[dir] * 2)
 			if not Board:IsValid(point) then
@@ -836,7 +838,9 @@ Example:
 local hook = function(mission, pawn, weaponId, p1, p2, targetArea)
 	-- Have every Ranged-class weapon only able to target orthogonal tiles 2 points away from the target point
 	if _G[weaponId].Class == "Ranged" then
-		targetArea:empty()
+		while not targetArea:empty() do
+		    targetArea:erase(0)
+		end
 		for dir = DIR_START, DIR_END do
 			local point = Point(p2 + DIR_VECTORS[dir] * 2)
 			if not Board:IsValid(point) then

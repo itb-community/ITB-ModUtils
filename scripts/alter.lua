@@ -395,14 +395,8 @@ local function modApiExtGetSkillEffect(self, p1, p2, ...)
 		self = _G[self]
 	end
 
-	-- The game calls functions for queued attacks without updating `Pawn`
-	-- in several instances
-	-- - when continuing a saved mission
-	-- - when calculating Vek movement
-	-- - when the player moves their units
-	-- Fix this by updating `Pawn` when entering/exiting this function.
-	local Pawn_prev = Pawn
-	SetPawn(Board:GetPawn(p1))
+	local pawn = Board:GetPawn(p1)
+	local pawnId = pawn and pawn:GetId() or -1
 
 	modApiExt_internal.nestedCall_GetSkillEffect = true
 	local fn = _G[self.__Id].GetSkillEffect
@@ -411,28 +405,26 @@ local function modApiExtGetSkillEffect(self, p1, p2, ...)
 
 	modApiExt_internal.fireSkillBuildHooks(
 		modApiExt_internal.mission,
-		Pawn, self.__Id, p1, p2, skillFx
+		pawn, self.__Id, p1, p2, skillFx
 	)
 
 	if not skillFx.effect:empty() then
 		local fx = SkillEffect()
 		local effects = extract_table(skillFx.effect)
 
-		fx:AddScript(
-			"modApiExt_internal.fireSkillStartHooks("
-			.."modApiExt_internal.mission, Pawn,"
-			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
-		)
+		fx:AddScript(string.format(
+			"modApiExt_internal.fireSkillStartHooks(modApiExt_internal.mission, Board:GetPawn(%s), %s, %s, %s)",
+			pawnId, self.__Id, p1:GetString(), p2:GetString()
+		))
 
 		for _, e in pairs(effects) do
 			fx.effect:push_back(e)
 		end
 
-		fx:AddScript(
-			"modApiExt_internal.fireSkillEndHooks("
-			.."modApiExt_internal.mission, Pawn,"
-			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
-		)
+		fx:AddScript(string.format(
+			"modApiExt_internal.fireSkillEndHooks(modApiExt_internal.mission, Board:GetPawn(%s), %s, %s, %s)",
+			pawnId, self.__Id, p1:GetString(), p2:GetString()
+		))
 
 		if
 			self == Prime_Punchmech    or
@@ -453,9 +445,8 @@ local function modApiExtGetSkillEffect(self, p1, p2, ...)
 		local effects = extract_table(skillFx.q_effect)
 
 		fx:AddScript(
-			"modApiExt_internal.fireQueuedSkillStartHooks("
-			.."modApiExt_internal.mission, Pawn,"
-			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
+			"modApiExt_internal.fireQueuedSkillStartHooks(modApiExt_internal.mission, Board:GetPawn(%s), %s, %s, %s)",
+			pawnId, self.__Id, p1:GetString(), p2:GetString()
 		)
 
 		for _, e in pairs(effects) do
@@ -463,16 +454,12 @@ local function modApiExtGetSkillEffect(self, p1, p2, ...)
 		end
 
 		fx:AddScript(
-			"modApiExt_internal.fireQueuedSkillEndHooks("
-			.."modApiExt_internal.mission, Pawn,"
-			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..")"
+			"modApiExt_internal.fireQueuedSkillEndHooks(modApiExt_internal.mission, Board:GetPawn(%s), %s, %s, %s)",
+			pawnId, self.__Id, p1:GetString(), p2:GetString()
 		)
 
 		skillFx.q_effect = fx.effect
 	end
-
-	-- Set `Pawn` back to what it was before we entered.
-	SetPawn(Pawn_prev)
 
 	return skillFx
 end
@@ -483,14 +470,8 @@ local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
 		self = _G[self]
 	end
 
-	-- The game calls functions for queued attacks without updating `Pawn`
-	-- in several instances
-	-- - when continuing a saved mission
-	-- - when calculating Vek movement
-	-- - when the player moves their units
-	-- Fix this by updating `Pawn` when entering/exiting this function.
-	local Pawn_prev = Pawn
-	SetPawn(Board:GetPawn(p1))
+	local pawn = Board:GetPawn(p1)
+	local pawnId = pawn and pawn:GetId() or -1
 
 	modApiExt_internal.nestedCall_GetFinalEffect = true
 	local fn = _G[self.__Id].GetFinalEffect
@@ -499,7 +480,7 @@ local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
 
 	modApiExt_internal.fireFinalEffectBuildHooks(
 		modApiExt_internal.mission,
-		Pawn, self.__Id, p1, p2, p3, skillFx
+		pawn, self.__Id, p1, p2, p3, skillFx
 	)
 
 	if not skillFx.effect:empty() then
@@ -507,9 +488,8 @@ local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
 		local effects = extract_table(skillFx.effect)
 
 		fx:AddScript(
-			"modApiExt_internal.fireFinalEffectStartHooks("
-			.."modApiExt_internal.mission, Pawn,"
-			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..","..p3:GetString()..")"
+			"modApiExt_internal.fireFinalEffectStartHooks(modApiExt_internal.mission, Board:GetPawn(%s), %s, %s, %s, %s)",
+			pawnId, self.__Id, p1:GetString(), p2:GetString(), p3:GetString()
 		)
 
 		for _, e in pairs(effects) do
@@ -517,9 +497,8 @@ local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
 		end
 
 		fx:AddScript(
-			"modApiExt_internal.fireFinalEffectEndHooks("
-			.."modApiExt_internal.mission, Pawn,"
-			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..","..p3:GetString()..")"
+			"modApiExt_internal.fireFinalEffectEndHooks(modApiExt_internal.mission, Board:GetPawn(%s), %s, %s, %s, %s)",
+			pawnId, self.__Id, p1:GetString(), p2:GetString(), p3:GetString()
 		)
 
 		skillFx.effect = fx.effect
@@ -530,9 +509,8 @@ local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
 		local effects = extract_table(skillFx.q_effect)
 
 		fx:AddScript(
-			"modApiExt_internal.fireQueuedFinalEffectStartHooks("
-			.."modApiExt_internal.mission, Pawn,"
-			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..","..p3:GetString()..")"
+			"modApiExt_internal.fireQueuedFinalEffectStartHooks(modApiExt_internal.mission, Board:GetPawn(%s), %s, %s, %s, %s)",
+			pawnId, self.__Id, p1:GetString(), p2:GetString(), p3:GetString()
 		)
 
 		for _, e in pairs(effects) do
@@ -540,16 +518,12 @@ local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
 		end
 
 		fx:AddScript(
-			"modApiExt_internal.fireQueuedFinalEffectEndHooks("
-			.."modApiExt_internal.mission, Pawn,"
-			.."\""..self.__Id.."\","..p1:GetString()..","..p2:GetString()..","..p3:GetString()..")"
+			"modApiExt_internal.fireQueuedFinalEffectEndHooks(modApiExt_internal.mission, Board:GetPawn(%s), %s, %s, %s, %s)",
+			pawnId, self.__Id, p1:GetString(), p2:GetString(), p3:GetString()
 		)
 
 		skillFx.q_effect = fx.effect
 	end
-
-	-- Set `Pawn` back to what it was before we entered.
-	SetPawn(Pawn_prev)
 
 	return skillFx
 end
@@ -560,15 +534,6 @@ local function modApiExtGetTargetArea(self, p, ...)
 		self = _G[self]
 	end
 
-	-- The game calls functions for queued attacks without updating `Pawn`
-	-- in several instances
-	-- - when continuing a saved mission
-	-- - when calculating Vek movement
-	-- - when the player moves their units
-	-- Fix this by updating `Pawn` when entering/exiting this function.
-	local Pawn_prev = Pawn
-	SetPawn(Board:GetPawn(p))
-
 	modApiExt_internal.nestedCall_GetTargetArea = true
 	local fn = _G[self.__Id].GetTargetArea
 	local targetArea = fn(self, p, ...)
@@ -576,11 +541,8 @@ local function modApiExtGetTargetArea(self, p, ...)
 
 	modApiExt_internal.fireTargetAreaBuildHooks(
 		modApiExt_internal.mission,
-		Pawn, self.__Id, p, targetArea
+		Board:GetPawn(p), self.__Id, p, targetArea
 	)
-
-	-- Set `Pawn` back to what it was before we entered.
-	SetPawn(Pawn_prev)
 
 	return targetArea
 end
@@ -591,15 +553,6 @@ local function modApiExtGetSecondTargetArea(self, p1, p2, ...)
 		self = _G[self]
 	end
 
-	-- The game calls functions for queued attacks without updating `Pawn`
-	-- in several instances
-	-- - when continuing a saved mission
-	-- - when calculating Vek movement
-	-- - when the player moves their units
-	-- Fix this by updating `Pawn` when entering/exiting this function.
-	local Pawn_prev = Pawn
-	SetPawn(Board:GetPawn(p1))
-
 	modApiExt_internal.nestedCall_GetSecondTargetArea = true
 	local fn = _G[self.__Id].GetSecondTargetArea
 	local targetArea = fn(self, p1, p2, ...)
@@ -607,11 +560,8 @@ local function modApiExtGetSecondTargetArea(self, p1, p2, ...)
 
 	modApiExt_internal.fireSecondTargetAreaBuildHooks(
 		modApiExt_internal.mission,
-		Pawn, self.__Id, p1, p2, targetArea
+		Board:GetPawn(p), self.__Id, p1, p2, targetArea
 	)
-
-	-- Set `Pawn` back to what it was before we entered.
-	SetPawn(Pawn_prev)
 
 	return targetArea
 end

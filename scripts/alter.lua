@@ -444,19 +444,19 @@ local function modApiExtGetSkillEffect(self, p1, p2, ...)
 		local fx = SkillEffect()
 		local effects = extract_table(skillFx.q_effect)
 
-		fx:AddScript(
+		fx:AddScript(string.format(
 			"modApiExt_internal.fireQueuedSkillStartHooks(modApiExt_internal.mission, Board:GetPawn(%s), %s, %s, %s)",
 			pawnId, self.__Id, p1:GetString(), p2:GetString()
-		)
+		))
 
 		for _, e in pairs(effects) do
 			fx.effect:push_back(e)
 		end
 
-		fx:AddScript(
+		fx:AddScript(string.format(
 			"modApiExt_internal.fireQueuedSkillEndHooks(modApiExt_internal.mission, Board:GetPawn(%s), %s, %s, %s)",
 			pawnId, self.__Id, p1:GetString(), p2:GetString()
-		)
+		))
 
 		skillFx.q_effect = fx.effect
 	end
@@ -487,19 +487,19 @@ local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
 		local fx = SkillEffect()
 		local effects = extract_table(skillFx.effect)
 
-		fx:AddScript(
+		fx:AddScript(string.format(
 			"modApiExt_internal.fireFinalEffectStartHooks(modApiExt_internal.mission, Board:GetPawn(%s), %s, %s, %s, %s)",
 			pawnId, self.__Id, p1:GetString(), p2:GetString(), p3:GetString()
-		)
+		))
 
 		for _, e in pairs(effects) do
 			fx.effect:push_back(e)
 		end
 
-		fx:AddScript(
+		fx:AddScript(string.format(
 			"modApiExt_internal.fireFinalEffectEndHooks(modApiExt_internal.mission, Board:GetPawn(%s), %s, %s, %s, %s)",
 			pawnId, self.__Id, p1:GetString(), p2:GetString(), p3:GetString()
-		)
+		))
 
 		skillFx.effect = fx.effect
 	end
@@ -508,19 +508,19 @@ local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
 		local fx = SkillEffect()
 		local effects = extract_table(skillFx.q_effect)
 
-		fx:AddScript(
+		fx:AddScript(string.format(
 			"modApiExt_internal.fireQueuedFinalEffectStartHooks(modApiExt_internal.mission, Board:GetPawn(%s), %s, %s, %s, %s)",
 			pawnId, self.__Id, p1:GetString(), p2:GetString(), p3:GetString()
-		)
+		))
 
 		for _, e in pairs(effects) do
 			fx.effect:push_back(e)
 		end
 
-		fx:AddScript(
+		fx:AddScript(string.format(
 			"modApiExt_internal.fireQueuedFinalEffectEndHooks(modApiExt_internal.mission, Board:GetPawn(%s), %s, %s, %s, %s)",
 			pawnId, self.__Id, p1:GetString(), p2:GetString(), p3:GetString()
-		)
+		))
 
 		skillFx.q_effect = fx.effect
 	end

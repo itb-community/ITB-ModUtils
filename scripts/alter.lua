@@ -560,7 +560,7 @@ local function modApiExtGetSecondTargetArea(self, p1, p2, ...)
 
 	modApiExt_internal.fireSecondTargetAreaBuildHooks(
 		modApiExt_internal.mission,
-		Board:GetPawn(p), self.__Id, p1, p2, targetArea
+		Board:GetPawn(p1), self.__Id, p1, p2, targetArea
 	)
 
 	return targetArea

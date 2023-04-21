@@ -395,6 +395,9 @@ local function modApiExtGetSkillEffect(self, p1, p2, ...)
 		self = _G[self]
 	end
 
+	p1 = p1 or Point(-1,-1)
+	p2 = p2 or Point(-1,-1)
+
 	local pawn = Board:GetPawn(p1)
 	local pawnId = pawn and pawn:GetId() or -1
 
@@ -470,6 +473,10 @@ local function modApiExtGetFinalEffect(self, p1, p2, p3, ...)
 		self = _G[self]
 	end
 
+	p1 = p1 or Point(-1,-1)
+	p2 = p2 or Point(-1,-1)
+	p3 = p3 or Point(-1,-1)
+	
 	local pawn = Board:GetPawn(p1)
 	local pawnId = pawn and pawn:GetId() or -1
 
@@ -534,6 +541,8 @@ local function modApiExtGetTargetArea(self, p, ...)
 		self = _G[self]
 	end
 
+	p = p or Point(-1,-1)
+
 	modApiExt_internal.nestedCall_GetTargetArea = true
 	local fn = _G[self.__Id].GetTargetArea
 	local targetArea = fn(self, p, ...)
@@ -553,6 +562,9 @@ local function modApiExtGetSecondTargetArea(self, p1, p2, ...)
 		self = _G[self]
 	end
 
+	p1 = p1 or Point(-1,-1)
+	p2 = p2 or Point(-1,-1)
+	
 	modApiExt_internal.nestedCall_GetSecondTargetArea = true
 	local fn = _G[self.__Id].GetSecondTargetArea
 	local targetArea = fn(self, p1, p2, ...)

@@ -389,10 +389,53 @@ function SpaceScript(loc, script)
 	return d
 end
 
+local tipImageMapping = {
+	Shield = function(loc)
+		if memedit then
+			-- Create a shield without animation
+			Board:SetShield(loc, true, true)
+		else
+			Board:AddShield(loc)
+		end
+	end,
+	Sand = function(loc)
+		Board:SetTerrain(loc, TERRAIN_SAND)
+	end,
+	Ice = function(loc)
+		Board:SetTerrain(loc, TERRAIN_ICE)
+	end,
+	Frozen = function(loc)
+		if memedit then
+			-- Create frozen without animation
+			Board:SetFrozen(loc, true, true)
+		else
+			Board:SetFrozen(loc, true)
+		end
+	end,
+	Snow = function(loc)
+		Board:SetCustomTile(loc, "snow.png")
+	end,
+}
+
+local function applyExtendedTipImage(self)
+	for feature, loc in pairs(self.TipImage) do
+		-- Remove trailing digits to allow for multiple features of the same type
+		local feature = feature:match("(.-)%d*$")
+		local createFeature = tipImageMapping[feature]
+		if createFeature ~= nil then
+			createFeature(loc)
+		end
+	end
+end
+
 local function modApiExtGetSkillEffect(self, p1, p2, ...)
 	-- Dereference to weapon object
 	if type(self) == "string" then
 		self = _G[self]
+	end
+
+	if Board:IsTipImage() then
+		applyExtendedTipImage(self)
 	end
 
 	p1 = p1 or Point(-1,-1)

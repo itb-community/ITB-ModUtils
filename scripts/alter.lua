@@ -389,7 +389,7 @@ function SpaceScript(loc, script)
 	return d
 end
 
-local tipImageMapping = {
+local tipImageCallbackMapping = {
 	Shield = function(loc)
 		if memedit then
 			-- Create a shield without animation
@@ -421,9 +421,14 @@ local function applyExtendedTipImage(self)
 	for feature, loc in pairs(self.TipImage) do
 		-- Remove trailing digits to allow for multiple features of the same type
 		local feature = feature:match("(.-)%d*$")
-		local createFeature = tipImageMapping[feature]
-		if createFeature ~= nil then
-			createFeature(loc)
+		local callback = tipImageCallbackMapping[feature]
+
+		if callback == nil and self.TipImageCallbacks ~= nil then
+			callback = self.TipImageCallbacks[feature]
+		end
+
+		if callback ~= nil then
+			callback(loc)
 		end
 	end
 end

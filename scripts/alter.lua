@@ -15,7 +15,7 @@ function modApiExtHooks:setupTrackedData(pd, pawn)
 	if pd.isFrozen == nil then     pd.isFrozen = pawn:IsFrozen() end
 	if pd.isGrappled == nil then   pd.isGrappled = pawn:IsGrappled() end
 	if pd.isShield == nil then     pd.isShield = pawn:IsShield() end
-  if pd.isBoost == nil then      pd.isBoost = pawn:IsBoosted() end
+	if pd.isBoost == nil then      pd.isBoost = pawn:IsBoosted() end
 end
 
 function modApiExtHooks:trackAndUpdatePawns(mission)
@@ -166,7 +166,7 @@ function modApiExtHooks:trackAndUpdatePawns(mission)
 					pd.isShield = isShield
 				end
 
-        local isBoost = pawn:IsBoosted()
+				local isBoost = pawn:IsBoosted()
 				if pd.isBoost ~= isBoost then
 					if isBoost then
 						self.dialog:triggerRuledDialog("PawnBoosted", { target = id })

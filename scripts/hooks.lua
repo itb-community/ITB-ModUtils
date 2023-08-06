@@ -24,6 +24,7 @@ local hooks = {
 	"pawnIsFrozen",
 	"pawnIsGrappled",
 	"pawnIsShielded",
+  "pawnIsBoosted",
 	"buildingDamaged",
 	"buildingResist",
 	"buildingDestroyed",

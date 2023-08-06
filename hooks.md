@@ -19,6 +19,7 @@
 * [pawnIsFrozenHook](#pawnisfrozenhook)
 * [pawnIsGrappledHook](#pawnisgrappledhook)
 * [pawnIsShieldedHook](#pawnisshieldedhook)
+* [pawnIsBoostedHook](#pawnisboostedhook)
 * [vekMoveStartHook](#vekmovestarthook)
 * [vekMoveEndHook](#vekmoveendhook)
 * [buildingDestroyedHook](#buildingdestroyedhook)
@@ -484,6 +485,30 @@ local hook = function(mission, pawn, isShield)
 end
 
 modApiExt:addPawnIsShieldedHook(hook)
+```
+
+
+## `pawnIsBoostedHook`
+
+| Argument name | Type | Description |
+|---------------|------|-------------|
+| `mission` | table | A table holding information about the current mission |
+| `pawn` | userdata | The pawn whose Boosted status has changed |
+| `isBoost` | boolean | `true` if the Boosted status was applied to the pawn, `false` if the status was removed |
+
+Fired when a pawn is affected by or loses Boosted status.
+
+Example:
+```lua
+local hook = function(mission, pawn, isBoost)
+	if isBoost then
+		LOG(pawn:GetMechName() .. " has been boosted.")
+	else
+		LOG(pawn:GetMechName() .. " is no longer boosted.")
+	end
+end
+
+modApiExt:addPawnIsBoostedHook(hook)
 ```
 
 

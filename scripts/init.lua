@@ -10,8 +10,8 @@ end
 return {
 	id = "modApiExt",
 	name = "modApiExt",
-	version = "1.21",
-	modApiVersion = "2.9.2",
+	version = "1.22",
+	modApiVersion = "2.9.3",
 	gameVersion = "1.2.88",
 	icon = "img/icon.png",
 	isExtension = true,

@@ -63,17 +63,17 @@ local function initTrackedTiles()
 		trackedTile.healthMax = BoardProxy:GetMaxHealth(point, 0)
 
 		trackedTile.highlighted = false
-		trackedTile.building = false
-		trackedTile.uniqueBuilding = false
-		trackedTile.uniqueBuildingName = nil
-		trackedTile.item = false
-		trackedTile.itemName = nil
-		trackedTile.shield = false
-		trackedTile.frozen = false
-		trackedTile.smoke = false
-		trackedTile.fire = false
-		trackedTile.acid = false
-		trackedTile.lava = false
+		trackedTile.building = Board:IsBuilding(point)
+		trackedTile.uniqueBuilding = trackedTile.building and Board:IsUniqueBuilding(point)
+		trackedTile.uniqueBuildingName = BoardProxy:GetUniqueBuilding(point, "")
+		trackedTile.item = Board:IsItem(point)
+		trackedTile.itemName = Board:GetItem(point)
+		trackedTile.shield = BoardProxy:IsShield(point, false)
+		trackedTile.frozen = Board:IsFrozen(point)
+		trackedTile.smoke = Board:IsSmoke(point)
+		trackedTile.fire = Board:IsFire(point)
+		trackedTile.acid = Board:IsAcid(point)
+		trackedTile.lava = Board:IsTerrain(point,TERRAIN_LAVA)
 	end
 
 	return trackedTiles

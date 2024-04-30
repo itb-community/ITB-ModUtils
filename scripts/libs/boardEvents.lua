@@ -127,7 +127,7 @@ function updateBoard(self)
 		if health ~= trackedTile.health then
 			BoardEvents.onTileHealthChanged:dispatch(point, trackedTile.health, health)
 
-			local damage = trackedTile.health - health
+			local damage = math.min(trackedTile.health, healthMax) - health
 			if damage > 0 then
 				BoardEvents.onTileDamaged:dispatch(point, damage)
 

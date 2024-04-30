@@ -1,9 +1,24 @@
 
--- Requires:
+-- Soft requirement, but will not error without:
 -- 	memedit
 
 
-local VERSION = "0.3.0"
+local function fallback(self, key, defaultValue)
+	return defaultValue
+end
+
+local BoardProxy = {}
+setmetatable(BoardProxy, {
+	__index = function(tbl, key)
+		if memedit then
+			return Board[key]
+		else
+			return fallback
+		end
+	end
+})
+
+local VERSION = "0.3.1"
 local EVENTS = {
 	"onAcidCreated",
 	"onAcidRemoved",
@@ -45,7 +60,7 @@ local function initTrackedTiles()
 
 		trackedTile.terrain = Board:GetTerrain(point)
 		trackedTile.health = Board:GetHealth(point)
-		trackedTile.healthMax = Board:GetMaxHealth(point)
+		trackedTile.healthMax = BoardProxy:GetMaxHealth(point, 0)
 
 		trackedTile.highlighted = false
 		trackedTile.building = false
@@ -79,20 +94,20 @@ function updateBoard(self)
 		local highlighted = Board:IsHighlighted(point)
 		local terrain = Board:GetTerrain(point)
 		local health = Board:GetHealth(point)
-		local healthMax = Board:GetMaxHealth(point)
+		local healthMax = BoardProxy:GetMaxHealth(point, 0)
 
 		local building = Board:IsBuilding(point)
 		local uniqueBuilding = building and Board:IsUniqueBuilding(point)
-		local uniqueBuildingName = Board:GetUniqueBuilding(point)
+		local uniqueBuildingName = BoardProxy:GetUniqueBuilding(point, "")
 		local item = Board:IsItem(point)
 		local itemName = Board:GetItem(point)
-		local shield = Board:IsShield(point)
+		local shield = BoardProxy:IsShield(point, false)
 		local frozen = Board:IsFrozen(point)
 		local smoke = Board:IsSmoke(point)
 		local fire = Board:IsFire(point)
 		local acid = Board:IsAcid(point)
 		local lava = Board:IsTerrain(point,TERRAIN_LAVA)
-		
+
 		if highlighted ~= trackedTile.highlighted then
 			local mission = GetCurrentMission()
 

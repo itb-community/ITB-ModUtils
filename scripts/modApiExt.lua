@@ -116,6 +116,10 @@ function modApiExt:init(modulesDir)
 	self.pawn =     self:loadModule(self.modulesDir.."pawn")
 	self.dialog =   self:loadModule(self.modulesDir.."dialog")
 
+	-- load additional scripts
+	require(self.modulesDir.."libs/boardEvents")
+	self.board.events = BoardEvents
+
 	return self
 end
 

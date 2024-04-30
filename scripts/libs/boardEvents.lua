@@ -40,10 +40,12 @@ local EVENTS = {
 	"onSmokeCreated",
 	"onSmokeRemoved",
 	"onTerrainChanged",
+	"onTileCracked",
 	"onTileDamaged",
 	"onTileHealthChanged",
 	"onTileHighlighted",
 	"onTileMaxHealthChanged",
+	"onTileUncracked",
 	"onTileUnhighlighted",
 	"onUniqueBuildingDestroyed",
 	"onUniqueBuildingChanged",
@@ -74,6 +76,7 @@ local function initTrackedTiles()
 		trackedTile.fire = Board:IsFire(point)
 		trackedTile.acid = Board:IsAcid(point)
 		trackedTile.lava = Board:IsTerrain(point,TERRAIN_LAVA)
+		trackedTile.cracked = Board:IsCracked(point)
 	end
 
 	return trackedTiles
@@ -107,6 +110,7 @@ function updateBoard(self)
 		local fire = Board:IsFire(point)
 		local acid = Board:IsAcid(point)
 		local lava = Board:IsTerrain(point,TERRAIN_LAVA)
+		local cracked = Board:IsCracked(point)
 
 		if highlighted ~= trackedTile.highlighted then
 			local mission = GetCurrentMission()
@@ -245,7 +249,7 @@ function updateBoard(self)
 
 			trackedTile.acid = acid
 		end
-		
+
 		if lava ~= trackedTile.lava then
 			if lava then
 				BoardEvents.onLavaCreated:dispatch(point)
@@ -255,7 +259,18 @@ function updateBoard(self)
 
 			trackedTile.lava = lava
 		end
-		
+
+		if cracked ~= trackedTile.cracked then
+			if Board:IsCrackable(point) then
+				if cracked then
+					BoardEvents.onTileCracked:dispatch(point)
+				else
+					BoardEvents.onTileUncracked:dispatch(point)
+				end
+			end
+
+			trackedTile.cracked = cracked
+		end
 	end
 end
 

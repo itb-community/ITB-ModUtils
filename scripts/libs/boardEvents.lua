@@ -11,7 +11,14 @@ local BoardProxy = {}
 setmetatable(BoardProxy, {
 	__index = function(tbl, key)
 		if memedit then
-			return Board[key]
+			local board_func = Board[key]
+			if type(board_func) == 'function' then
+				return function(_, ...)
+					return board_func(Board, ...)
+				end
+			else
+				return board_func
+			end
 		else
 			return fallback
 		end

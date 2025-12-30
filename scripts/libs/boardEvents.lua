@@ -2,7 +2,6 @@
 -- Soft requirement, but will not error without:
 -- 	memedit
 
-
 local function fallback(self, key, defaultValue)
 	return defaultValue
 end
@@ -25,7 +24,7 @@ setmetatable(BoardProxy, {
 	end
 })
 
-local VERSION = "0.4.0"
+local VERSION = "0.5.0"
 local EVENTS = {
 	"onAcidCreated",
 	"onAcidRemoved",
@@ -33,6 +32,10 @@ local EVENTS = {
 	"onBuildingDamaged",
 	"onBuildingDestroyed",
 	"onBuildingRemoved",
+	"onMountainCreated",
+	"onMountainDamaged",
+	"onMountainDestroyed",
+	"onMountainRemoved",
 	"onFireCreated",
 	"onFireRemoved",
 	"onFrozenCreated",
@@ -84,6 +87,7 @@ local function initTrackedTiles()
 		trackedTile.acid = Board:IsAcid(point)
 		trackedTile.lava = Board:IsTerrain(point,TERRAIN_LAVA)
 		trackedTile.cracked = Board:IsCracked(point)
+		trackedTile.mountain = false
 	end
 
 	return trackedTiles
@@ -118,7 +122,7 @@ function updateBoard(self)
 		local acid = Board:IsAcid(point)
 		local lava = Board:IsTerrain(point,TERRAIN_LAVA)
 		local cracked = Board:IsCracked(point)
-
+		local mountain = Board:IsTerrain(point,TERRAIN_MOUNTAIN)
 		if highlighted ~= trackedTile.highlighted then
 			local mission = GetCurrentMission()
 
@@ -149,6 +153,14 @@ function updateBoard(self)
 						end
 					end
 				end
+                
+				if trackedTile.terrain == TERRAIN_MOUNTAIN then
+					BoardEvents.onMountainDamaged:dispatch(point, damage)
+
+					if health == 0 then
+						BoardEvents.onMountainDestroyed:dispatch(point)
+					end
+				end
 			end
 
 			trackedTile.health = health
@@ -168,6 +180,16 @@ function updateBoard(self)
 			end
 
 			trackedTile.building = building
+		end
+        
+		if mountain ~= trackedTile.mountain then
+			if mountain then
+				BoardEvents.onMountainCreated:dispatch(point)
+			else
+				BoardEvents.onMountainRemoved:dispatch(point)
+			end
+
+			trackedTile.mountain = mountain
 		end
 
 		if uniqueBuilding ~= trackedTile.uniqueBuilding then

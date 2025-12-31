@@ -24,7 +24,7 @@ setmetatable(BoardProxy, {
 	end
 })
 
-local VERSION = "0.5.0"
+local VERSION = "0.5.1"
 local EVENTS = {
 	"onAcidCreated",
 	"onAcidRemoved",
@@ -93,7 +93,7 @@ local function initTrackedTiles()
 	return trackedTiles
 end
 
-function updateBoard(self)
+local function updateTheBoard(self)
 
 	local trackedTiles = self.trackedTiles
 
@@ -312,7 +312,7 @@ local function initEvents()
 end
 
 local function finalizeInit(self)
-	modApi.events.onMissionUpdate:subscribe(updateBoard)
+	modApi.events.onMissionUpdate:subscribe(updateTheBoard)
 end
 
 local function onModsInitialized()

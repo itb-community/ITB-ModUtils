@@ -93,7 +93,7 @@ local function initTrackedTiles()
 	return trackedTiles
 end
 
-local function updateTheBoard(self)
+local function updateBoard(self)
 
 	local trackedTiles = self.trackedTiles
 
@@ -312,7 +312,7 @@ local function initEvents()
 end
 
 local function finalizeInit(self)
-	modApi.events.onMissionUpdate:subscribe(updateTheBoard)
+	modApi.events.onMissionUpdate:subscribe(updateBoard)
 end
 
 local function onModsInitialized()

@@ -1,5 +1,16 @@
 local internal = {}
 
+function internal.handleFailure(errorOrResult, creator, caller)
+	errorOrResult = errorOrResult or "<unspecified error>"
+	local message = Event.buildErrorMessage("An event callback failed: ", errorOrResult, 
+			nil, creator, caller)
+	if Event.isStackOverflowError(errorOrResult) then
+		error(message)
+	else
+		LOG(message)
+	end
+end
+
 --[[
 	Creates a broadcast function for the specified hooks field, allowing
 	to trigger the hook callbacks on all registered modApiExt objects.
@@ -10,14 +21,15 @@ local internal = {}
 --]]
 function internal:buildBroadcastFunc(hooksField, argsFunc)
 	local errfunc = function(e)
-		return string.format(
-			"A '%s' callback has failed:\n%s",
-			hooksField, e
-		)
+		-- Capture and return the stack trace of the xpcall
+		-- 2 makes it start a frame higher so it doesn't include
+		-- this error handling fn
+		return debug.traceback(tostring(e), 2)
 	end
 
 	return function(...)
 		local args = {...}
+		local caller = debug.traceback("")
 
 		if #args == 0 then
 			-- We didn't receive arguments directly. Fall back to
@@ -28,19 +40,18 @@ function internal:buildBroadcastFunc(hooksField, argsFunc)
 
 		for i, extObj in ipairs(modApiExt_internal.extObjects) do
 			if extObj[hooksField] then
-				for j, hook in ipairs(extObj[hooksField]) do
+				for j, hookTbl in ipairs(extObj[hooksField]) do
 					-- invoke the hook in a xpcall, since errors in SkillEffect
 					-- scripts fail silently, making debugging a nightmare.
-					local ok, err = xpcall(
+					local ok, errorOrResult = xpcall(
 						args
-							and function() hook(unpack(args)) end
-							or  function() hook() end,
+							and function() hookTbl.fn(unpack(args)) end
+							or  function() hookTbl.fn() end,
 						errfunc
 					)
 
 					if not ok then
-						local owner = extObj.owner and extObj.owner.id or "<unknown>"
-						LOG("In mod id '" .. owner .. "', ", err)
+						internal.handleFailure(errorOrResult, hookTbl.creator, caller)
 					end
 				end
 			end

@@ -1,7 +1,15 @@
 local internal = {}
 
-function internal.handleFailure(errorOrResult, creator, caller)
+function internal.handleFailure(errorOrResult, owner, creator, caller)
 	errorOrResult = errorOrResult or "<unspecified error>"
+	if creator then
+		if owner then
+			-- creator will already have a newline
+			creator = "In mod id '"..owner.."'"..creator
+		end
+	else
+		creator = "In mod id '"..(owner and owner or "<unknown>").."'"
+	end
 	local message = Event.buildErrorMessage("An event callback failed: ", errorOrResult, 
 			nil, creator, caller)
 	if Event.isStackOverflowError(errorOrResult) then
@@ -43,17 +51,22 @@ function internal:buildBroadcastFunc(hooksField, argsFunc)
 			-- This prevents proxies from accidentally firing hooks they don't actually support
 			if rawget(extObj, hooksField) then
 				for j, hookTbl in ipairs(extObj[hooksField]) do
+					local hook = hookTbl
+					if type(hookTbl) == "table" then
+						hook = hookTbl.fn
+					end
 					-- invoke the hook in a xpcall, since errors in SkillEffect
 					-- scripts fail silently, making debugging a nightmare.
 					local ok, errorOrResult = xpcall(
 						args
-							and function() hookTbl.fn(unpack(args)) end
-							or  function() hookTbl.fn() end,
+							and function() hook(unpack(args)) end
+							or  function() hook() end,
 						errfunc
 					)
 
 					if not ok then
-						internal.handleFailure(errorOrResult, hookTbl.creator, caller)
+						local owner = extObj.owner and extObj.owner.id or nil
+						internal.handleFailure(errorOrResult, owner, hookTbl.creator, caller)
 					end
 				end
 			end

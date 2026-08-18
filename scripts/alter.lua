@@ -446,6 +446,32 @@ local function applyExtendedTipImage(self)
 	end
 end
 
+-- Hover previews can leave a stale pawn userdata on the captured handle.
+-- Re-resolve from p1 immediately before dispatch so listeners get the pawn
+-- that currently occupies that tile.
+local function installSkillBuildPawnFix()
+	if modApiExt_internal._skillBuildPawnFixInstalled then
+		return
+	end
+	modApiExt_internal._skillBuildPawnFixInstalled = true
+
+	local oldFire = modApiExt_internal.fireSkillBuildHooks
+	modApiExt_internal.fireSkillBuildHooks = function(mission, pawn, weaponId, p1, p2, skillFx)
+		if Board and p1 then
+			pawn = Board:GetPawn(p1) or pawn
+		end
+		return oldFire(mission, pawn, weaponId, p1, p2, skillFx)
+	end
+
+	local oldFinalFire = modApiExt_internal.fireFinalEffectBuildHooks
+	modApiExt_internal.fireFinalEffectBuildHooks = function(mission, pawn, weaponId, p1, p2, p3, skillFx)
+		if Board and p1 then
+			pawn = Board:GetPawn(p1) or pawn
+		end
+		return oldFinalFire(mission, pawn, weaponId, p1, p2, p3, skillFx)
+	end
+end
+
 local function modApiExtGetSkillEffect(self, p1, p2, ...)
 	-- Dereference to weapon object
 	if type(self) == "string" then
@@ -714,6 +740,8 @@ function modApiExt_internal.createSkillProxy(skillTable)
 end
 
 function modApiExtHooks:overrideAllSkills()
+	installSkillBuildPawnFix()
+
 	if not modApiExt_internal.oldSkills then
 		modApiExt_internal.oldSkills = {}
 		modApiExt_internal.skillIndex = setmetatable({}, { __index = _G })

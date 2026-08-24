@@ -27,7 +27,9 @@ function internal:buildBroadcastFunc(hooksField, argsFunc)
 		end
 
 		for i, extObj in ipairs(modApiExt_internal.extObjects) do
-			if extObj[hooksField] then
+			-- Only process hooks that are directly on this extObj, not inherited via metatable
+			-- This prevents proxies from accidentally firing hooks they don't actually support
+			if rawget(extObj, hooksField) then
 				for j, hook in ipairs(extObj[hooksField]) do
 					-- invoke the hook in a xpcall, since errors in SkillEffect
 					-- scripts fail silently, making debugging a nightmare.

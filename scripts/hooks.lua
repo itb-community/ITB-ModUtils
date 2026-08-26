@@ -66,12 +66,15 @@ function hooks:addTo(modApiExt)
 		local eventId = "on"..Name
 		local addHook = "add"..Name.."Hook"
 
-		events[eventId] = Event()
+		events[eventId] = Event({ eventName = eventId })
 
 		modApiExt[hookId] = {}
 		modApiExt[addHook] = function(self, fn)
 			assert(type(fn) == "function")
-			table.insert(self[hookId], fn)
+			table.insert(self[hookId], {
+				fn = fn,
+				creator = debug.traceback("", 3)
+			})
 		end
 
 		-- functions to fire the hooks are built in internal.lua

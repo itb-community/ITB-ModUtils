@@ -66,7 +66,9 @@ function internal:buildBroadcastFunc(hooksField, argsFunc)
 
 					if not ok then
 						local owner = extObj.owner and extObj.owner.id or nil
-						internal.handleFailure(errorOrResult, owner, hookTbl.creator, caller)
+						-- Legacy hooks are bare functions and new hooks are { fn, creator }.
+						local creator = type(hookTbl) == "table" and hookTbl.creator or nil
+						internal.handleFailure(errorOrResult, owner, creator, caller)
 					end
 				end
 			end

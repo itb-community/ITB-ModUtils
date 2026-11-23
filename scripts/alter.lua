@@ -301,7 +301,7 @@ function modApiExtHooks:trackAndUpdateBuildings(mission)
 	end
 end
 
-function modApiExtHooks:updateTiles()
+function modApiExtHooks:updateTiles(mission)
 	if Board then
 		if not GAME.trackedPods then GAME.trackedPods = {} end
 
@@ -821,7 +821,7 @@ modApiExtHooks.missionUpdate = function(mission)
 	GAME.elapsedTime = t
 	modApiExt_internal.elapsedTime = t
 
-	modApiExtHooks:updateTiles()
+	modApiExtHooks:updateTiles(mission)
 	modApiExtHooks:trackAndUpdateBuildings(mission)
 	modApiExtHooks:trackAndUpdatePawns(mission)
 end
